@@ -1,6 +1,6 @@
 # CSC-131-Zeus-Volunteers
 
-Zeus Volunteers will be a volunteering website that allows coomuinities to volunteer for events in there local area. THe site will allow organizers the create volunteer events of different types like cultural, medical, environmental, Neighborhood cleanups, and more.
+Zeus Volunteers will be a volunteering website that allows coomuinities to volunteer for events in there local area. The site will allow organizers the create volunteer events of different types like cultural, medical, environmental, neighborhood cleanups, and more.
 
 # Core Features
 
@@ -26,8 +26,7 @@ We will be using the MERN tech stack
 
 # File Structure
 
-This is the initial file sturcture for now. Things can change during development as we develop the website.
-
+This is the initial file sturcture for now.
 ```plaintext
 Zeus-Volunteers/
 │
