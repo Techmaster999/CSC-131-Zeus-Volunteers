@@ -1,0 +1,112 @@
+/* ===========================
+   STYLE.CSS
+   =========================== */
+
+@import url("styleguide.css");
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: var(--space-lg);
+}
+
+/* Header */
+header {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-xl);
+}
+
+/* Layout Grid */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "calendar events"
+    "quick notifications"
+    "reminders reminders";
+  gap: var(--space-xl);
+}
+
+/* Calendar Section */
+.calendar-section {
+  grid-area: calendar;
+}
+.calendar {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-md);
+}
+.calendar h3 {
+  margin-bottom: var(--space-md);
+}
+
+/* Upcoming Events */
+.events-section {
+  grid-area: events;
+}
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.event-item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+.event-item:last-child {
+  border-bottom: none;
+}
+
+/* Quick Notifications */
+.quick-section {
+  grid-area: quick;
+}
+.quick-section .card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Notifications Section */
+.notifications-section {
+  grid-area: notifications;
+}
+
+/* Reminder or Upcoming Activities */
+.reminders-section {
+  grid-area: reminders;
+}
+.reminder-item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.reminder-item:last-child {
+  border-bottom: none;
+}
+
+/* Input and Button */
+.input-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+.input-row input {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "calendar"
+      "events"
+      "quick"
+      "notifications"
+      "reminders";
+  }
+}
