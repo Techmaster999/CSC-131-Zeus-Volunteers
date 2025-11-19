@@ -3,7 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
-import Event from "../models/Events.model.js";
+import Event from "./src/models/Events.model.js";
 
 // 1) Load env once
 dotenv.config();
