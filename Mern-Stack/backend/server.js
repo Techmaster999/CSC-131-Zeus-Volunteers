@@ -9,7 +9,7 @@ console.log(process.env.MONGO_URI); // optional: sanity check
 await connectDB();                // ← connect AFTER env is loaded
 
 const app = express();
-app.get("/products", (req, res) => {
+app.get("/events", (req, res) => {
     res.send("Server is ready");
 });
 
