@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import Event from "./src/models/Events.model.js";
+import authRoutes from "./routes/auth.js";
 
 // 1) Load env once
 dotenv.config();
@@ -43,6 +44,9 @@ app.post("/api/events", async (req, res, next) => {
             next(err);
         }
 });
+
+// Auth routes
+app.use("/api/auth", authRoutes);
 
 // 6) (Optional) centralized error handler
 app.use((err, _req, res, _next) => {

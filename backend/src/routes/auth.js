@@ -1,23 +1,19 @@
 import express from "express";
 const router = express.Router();
 
-// Temporary mock login route (no database needed)
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  // Mock response
+  const fakeToken = "abc123xyz";
+
   res.json({
     message: "Login successful (mock)",
-    user: {
-      id: 1,
-      name: "Test User",
-      email: email,
-    },
+    user: { id: 1, name: "Test User", email },
+    token: fakeToken,
   });
 });
 
-// Test route
-router.get("/test", (req, res) => {
+router.get("/test", (_req, res) => {
   res.send("Auth route working");
 });
 
