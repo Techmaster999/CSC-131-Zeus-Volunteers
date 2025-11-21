@@ -1,4 +1,4 @@
-import User from "../models/user.js";
+import User from "../models/Accounts.model.js";
 import generateToken from "../utils/generateToken.js";
 
 // Register new user

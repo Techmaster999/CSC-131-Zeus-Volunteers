@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
+import User from "./models/Accounts.model.js";
 import authRoutes from "./routes/auth.js";
 
 // 1) Load env once
@@ -45,10 +46,38 @@ app.post("/api/events", async (req, res, next) => {
         }
 });
 
+app.get("/accountCreation", (_req, res) => {
+        res.send("Server is ready");
+});
+
+// 6) User account creation API
+app.post("/api/accountCreation", async (req, res, next) => {
+    try{
+        const { firstName, lastName, userName, email, password, country, state, city } = req.body;
+
+        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city) {
+            return res
+            .status(400)
+            .json({ success: false, message: "All fields are required" });
+        }
+
+        const newUser = new User({ firstName, lastName, username, email, password, country, state, city, role });
+        await newUser.save();
+
+        res
+            .status(201)
+            .json({ success: true, message: "Account created successfully", data: newUser });
+    }   catch (err) {
+            next(err);
+    }
+
+
+});
+
 // Auth routes
 app.use("/api/auth", authRoutes);
 
-// 6) (Optional) centralized error handler
+// 7) (Optional) centralized error handler
 app.use((err, _req, res, _next) => {
     console.error("Unhandled error:", err);
     res.status(500).json({ success: false, message: "Server Error" });
@@ -70,7 +99,7 @@ app.get("/", (req, res) => {
 });
 
 
-// 7) Start server
+// 8) Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`);
