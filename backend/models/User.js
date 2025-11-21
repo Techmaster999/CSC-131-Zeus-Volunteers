@@ -23,3 +23,5 @@ userSchema.pre('save', async function hashPassword(next) {
 userSchema.methods.matchPassword = async function hashPassword(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);  
 };
+
+export default mongoose.model('User', userSchema);
