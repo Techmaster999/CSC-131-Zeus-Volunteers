@@ -1,6 +1,6 @@
 import Event from "../models/Event.js";
 import SignUp from "../models/SignUp.js";
-import User from "../models/User.js";
+import User from "../models/user.js";
 import Notification from "../models/Notification.js";
 
 

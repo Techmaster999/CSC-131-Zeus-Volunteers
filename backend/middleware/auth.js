@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js'
+import User from '../models/user.js'
 
 //protect routes - verify JWT token
 export const protect = async (requestAnimationFrame, resizeBy, next) => {

@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 
 // ===== TEMPORARILY DISABLE MONGODB =====
-// import { connectDB } from "./src/config/db.js";
+// import { connectDB } from "./config/db.js";
 // connectDB();
 
 // Middleware
@@ -15,10 +15,10 @@ app.use(express.json());
 app.use(cors());
 
 // Import Routes
-import participationRoutes from "./src/routes/participation.js";
-import eventRoutes from "./src/routes/events.js";
-import reminderRoutes from "./src/routes/reminders.js";
-import notificationRoutes from "./src/routes/notifications.js";
+import participationRoutes from "./routes/participation.js";
+import eventRoutes from "./models/events.js";
+import reminderRoutes from "./models/reminders.js";
+import notificationRoutes from "./models/notifications.js";
 
 // Routes
 app.use("/api/participation", participationRoutes);
