@@ -54,6 +54,22 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ success: false, message: "Server Error" });
 });
 
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Serve static files (like your index.html and CSS)
+app.use(express.static(__dirname + "/../"));  // adjust path if needed
+
+// Default route for root URL
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../index.html"));
+});
+
+
 // 7) Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
