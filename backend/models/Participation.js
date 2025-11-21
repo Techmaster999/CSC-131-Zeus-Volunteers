@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const participationSchema = new mongoose.Schema({
     //MongoDb Schema goes here
-}, { timestamps:} )
+}, { timestamps: true} );
 
-TextDecoderStream
-
+export default mongoose.model('VolunteerActivity', participationSchema);
