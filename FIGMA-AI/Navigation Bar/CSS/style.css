@@ -1,0 +1,281 @@
+.box {
+  width: 1519px;
+  height: 555px;
+}
+
+.box .navigation-bar {
+  position: fixed;
+  top: -2154px;
+  left: -578px;
+  width: 1519px;
+  height: 555px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px dashed;
+  border-color: #9747ff;
+}
+
+.box .property-default {
+  display: flex;
+  margin-left: 20px;
+  width: 1479px;
+  height: 87px;
+  position: relative;
+  margin-top: 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: var(--variable-collection-tertiary-color);
+  overflow: hidden;
+}
+
+.box .logo {
+  display: flex;
+  flex-direction: column;
+  width: 364px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 6px;
+  position: relative;
+  margin-top: -3.00px;
+  margin-bottom: -3.00px;
+}
+
+.box .div {
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  height: 65px;
+}
+
+.box .zeus-volunteer-logo {
+  position: absolute;
+  width: 24.79%;
+  top: 0;
+  left: 0;
+  height: 65px;
+  aspect-ratio: 1.33;
+  object-fit: cover;
+}
+
+.box .text-wrapper {
+  position: absolute;
+  width: 78.98%;
+  height: 70.77%;
+  top: 16.92%;
+  left: 20.80%;
+  font-family: var(--h1-font-family);
+  font-weight: var(--h1-font-weight);
+  color: var(--variable-collection-secondary-color);
+  font-size: var(--h1-font-size);
+  letter-spacing: var(--h1-letter-spacing);
+  line-height: var(--h1-line-height);
+  font-style: var(--h1-font-style);
+}
+
+.box .menu-and-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 0px;
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: -14.50px;
+  margin-bottom: -14.50px;
+}
+
+.box .menu {
+  display: inline-flex;
+  height: 86px;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 25px 30px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.box .text-wrapper-2 {
+  position: relative;
+  width: fit-content;
+  font-family: var(--h4-font-family);
+  font-weight: var(--h4-font-weight);
+  color: #000000;
+  font-size: var(--h4-font-size);
+  text-align: center;
+  letter-spacing: var(--h4-letter-spacing);
+  line-height: var(--h4-line-height);
+  font-style: var(--h4-font-style);
+}
+
+.box .login-frame {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 175px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 10px;
+  position: relative;
+}
+
+.box .button {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  background-color: var(--variable-collection-second-primary-color);
+  border-radius: 50px;
+  box-shadow: 0px 4px 4px #00000040;
+  aspect-ratio: 3.13;
+}
+
+.box .button-2 {
+  position: absolute;
+  width: 100%;
+  height: 59.18%;
+  top: 18.37%;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--h4-font-family);
+  font-weight: var(--h4-font-weight);
+  color: #000000;
+  font-size: var(--h4-font-size);
+  text-align: center;
+  letter-spacing: var(--h4-letter-spacing);
+  line-height: var(--h4-line-height);
+  font-style: var(--h4-font-style);
+}
+
+.box .user-frame {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.box .user-icon {
+  position: relative;
+  top: calc(50.00% - 33px);
+  left: calc(50.00% - 36px);
+  width: 71px;
+  height: 66px;
+}
+
+.box .union {
+  position: absolute;
+  width: 83.33%;
+  height: 83.33%;
+  top: 8.33%;
+  left: 8.33%;
+}
+
+.box .div-2 {
+  display: flex;
+  margin-left: 20px;
+  width: 1479px;
+  height: 87px;
+  position: relative;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: var(--variable-collection-tertiary-color);
+  overflow: hidden;
+}
+
+.box .button-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 175px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 10px;
+  position: relative;
+}
+
+.box .div-wrapper {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 175px;
+  align-items: flex-start;
+  gap: 63px;
+  padding: 12px 10px;
+  position: relative;
+}
+
+.box .login-frame-2 {
+  display: flex;
+  flex-direction: column;
+  width: 175px;
+  align-items: flex-start;
+  gap: 63px;
+  padding: 12px 10px;
+  position: relative;
+}
+/* Original CSS should be injected here */
+
+.box .menu {
+  list-style: none;
+  margin: 0;
+  padding: 25px 30px;
+}
+
+.box .menu li {
+  display: inline;
+}
+
+.box .text-wrapper-2 {
+  display: inline-block;
+  margin: 0 15px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.box .text-wrapper-2:hover {
+  text-decoration: underline;
+}
+
+.box .text-wrapper-2:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+.box .button {
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.box .button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.box .button:active {
+  transform: translateY(0);
+}
+
+.box .button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+.box .button-2 {
+  pointer-events: none;
+}
+
+.box .user-icon {
+  cursor: pointer;
+}
+
+.box .user-icon:focus-within {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
