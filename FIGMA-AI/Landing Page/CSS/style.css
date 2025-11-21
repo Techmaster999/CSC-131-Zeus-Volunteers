@@ -1,3 +1,7 @@
+body {
+  font-family: "Space Grotesk", sans-serif;
+}
+
 .landing-page {
   display: flex;
   flex-direction: column;
@@ -296,7 +300,7 @@
   width: 444px;
   height: 445px;
   aspect-ratio: 1;
-  background-image: url(./img/landing-page-1.png);
+  background-image: url(../img/landing-page-1.png);
   background-size: cover;
   background-position: 50% 50%;
 }
@@ -678,7 +682,7 @@
   width: 444px;
   height: 445px;
   aspect-ratio: 1;
-  background-image: url(./img/landing-page-1.png);
+  background-image: url(../img/landing-page-1.png);
   background-size: cover;
   background-position: 50% 50%;
 }

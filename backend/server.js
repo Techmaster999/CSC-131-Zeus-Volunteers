@@ -61,12 +61,12 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Serve static files (like your index.html and CSS)
-app.use(express.static(__dirname + "/../"));  // adjust path if needed
+// Serve everything in FIGMA-AI at /static
+app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
 
-// Default route for root URL
+// Root route -> Landing Page HTML
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
+  res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
 });
 
 
