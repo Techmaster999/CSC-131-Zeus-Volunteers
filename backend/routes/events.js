@@ -3,9 +3,9 @@ import Event from "../models/Events.model.js";
 
 const router = express.Router();
 
-// --------------------------
+// ----------------------------------------------------
 // GET ALL EVENTS
-// --------------------------
+// ----------------------------------------------------
 router.get("/", async (req, res) => {
   try {
     const events = await Event.find();
@@ -16,15 +16,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-// --------------------------
+// ----------------------------------------------------
 // GET EVENT BY ID
-// --------------------------
+// ----------------------------------------------------
 router.get("/:id", async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
+
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
+
     res.json(event);
   } catch (err) {
     console.error("Error fetching event:", err);
@@ -32,9 +34,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// --------------------------
+// ----------------------------------------------------
 // CREATE NEW EVENT
-// --------------------------
+// ----------------------------------------------------
 router.post("/", async (req, res) => {
   try {
     const { eventName, organizer, date, time, details } = req.body;
@@ -60,9 +62,9 @@ router.post("/", async (req, res) => {
   }
 });
 
-// --------------------------
+// ----------------------------------------------------
 // DELETE EVENT
-// --------------------------
+// ----------------------------------------------------
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Event.findByIdAndDelete(req.params.id);
@@ -70,3 +72,35 @@ router.delete("/:id", async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: "Event not found" });
     }
+
+    res.json({ success: true, message: "Event deleted" });
+
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ----------------------------------------------------
+// UPDATE EVENT
+// ----------------------------------------------------
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.json(updatedEvent);
+  } catch (err) {
+    console.error("Error updating event:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+export default router;
