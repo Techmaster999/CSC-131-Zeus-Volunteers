@@ -2,126 +2,149 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Database + Models
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
 import User from "./models/Accounts.model.js";
-import authRoutes from "./routes/auth.js";
 import UserEvent from "./models/User_Events.models.js";
-import { getEventUsers } from "./controllers/eventController.js";
-import { getEventUsersAgg } from "./controllers/eventController.js";
-import morgan from "morgan";
-import { addUserToEvent } from "./controllers/eventController.js";
 
+// Routes + Controllers
+import authRoutes from "./routes/auth.js";
+import eventRoutes from "./routes/events.js";
+import {
+    getEventUsers,
+    getEventUsersAgg,
+    addUserToEvent
+} from "./controllers/eventController.js";
 
+// Fix __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// 1) Load env once
-dotenv.config();
+// Load .env
+dotenv.config({ path: path.join(__dirname, ".env") });
 
-// 2) Connect to DB once (after env is loaded)
+// Connect to DB
 await connectDB();
 
 const app = express();
 
-// console log of all calls to server
+// ----------------------------------------------------
+// MIDDLEWARE
+// ----------------------------------------------------
 app.use(morgan("dev"));
-
-// 3) Core middleware (no duplicates)
 app.use(express.json());
 app.use(cors());
 
-// 4) Health/check route
+// ----------------------------------------------------
+// TEST ROUTE
+// ----------------------------------------------------
 app.get("/events", (_req, res) => {
-        res.send("Server is ready");
+    res.send("Server is ready");
 });
 
-// 5) Events API
+// ----------------------------------------------------
+// EVENTS: CREATE NEW EVENT
+// ----------------------------------------------------
 app.post("/api/events", async (req, res, next) => {
     try {
         const { eventName, organizer, date, time, details } = req.body;
 
         if (!eventName || !organizer || !date || !time || !details) {
-            return res
-            .status(400)
-            .json({ success: false, message: "All fields are required" });
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
         }
 
         const newEvent = new Event({ eventName, organizer, date, time, details });
         await newEvent.save();
 
-        res
-            .status(201)
-            .json({ success: true, message: "Event created successfully", data: newEvent });
-    }   catch (err) {
-            next(err);
-        }
+        res.status(201).json({
+            success: true,
+            message: "Event created successfully",
+            data: newEvent,
+        });
+    } catch (err) {
+        next(err);
+    }
 });
 
-app.get("/accountCreation", (_req, res) => {
-        res.send("Server is ready");
-});
-
-// 6) User account creation API
+// ----------------------------------------------------
+// ACCOUNT CREATION
+// ----------------------------------------------------
 app.post("/api/accountCreation", async (req, res, next) => {
-    try{
-        const { 
+    try {
+        const {
             firstName,
-            lastName, 
-            userName, 
-            email, 
-            password, 
-            country, 
-            state, 
-            city, 
+            lastName,
+            userName,
+            email,
+            password,
+            country,
+            state,
+            city,
             role
         } = req.body;
 
         if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city) {
-            return res
-            .status(400)
-            .json({ success: false, message: "All fields are required" });
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
         }
 
-        const newUser = new User({ 
-            firstName, 
-            lastName, 
-            userName, 
-            email, 
-            password, 
-            country, 
-            state, 
-            city, 
+        const newUser = new User({
+            firstName,
+            lastName,
+            userName,
+            email,
+            password,
+            country,
+            state,
+            city,
             role
         });
+
         await newUser.save();
 
-        res
-            .status(201)
-            .json({ success: true, message: "Account created successfully", data: newUser });
-    }   catch (err) {
-            next(err);
+        res.status(201).json({
+            success: true,
+            message: "Account created successfully",
+            data: newUser,
+        });
+    } catch (err) {
+        next(err);
     }
-
-
 });
 
-// 7) User_Events routes 
-// Adds a user to an event
+// ----------------------------------------------------
+// USER–EVENT RELATIONSHIP ROUTES
+// ----------------------------------------------------
 
+// Add a user to an event
 app.post("/api/userevents", async (req, res, next) => {
     try {
         const { userId, eventId } = req.body;
-        
+
         if (!userId || !eventId) {
-            return res.status(400)
-            .json({ success: false, message: "User ID and Event ID are required" });
+            return res.status(400).json({
+                success: false,
+                message: "User ID and Event ID are required",
+            });
         }
 
-        const existingLink = await UserEvent.findOne({ userId, eventId });
-        if(existingLink){
-            return res.status(409) // conflict status code
-            .json({success: false, message: "User is already linked to this event" });
+        const existing = await UserEvent.findOne({ userId, eventId });
+        if (existing) {
+            return res.status(409).json({
+                success: false,
+                message: "User is already linked to this event",
+            });
         }
-
 
         const newLink = new UserEvent({ userId, eventId });
         await newLink.save();
@@ -129,17 +152,20 @@ app.post("/api/userevents", async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: "User linked to event successfully",
-            data: newLink
+            data: newLink,
         });
-    }
-    catch (err) {
+    } catch (err) {
         next(err);
     }
 });
+
+// Get users for an event
 app.get("/api/events/:eventId/users", getEventUsers);
-// new aggregation endpoint
+
+// Same but aggregated
 app.get("/api/events/:eventId/users-agg", getEventUsersAgg);
 
+// List all user-event links
 app.get("/api/userevents", async (req, res, next) => {
     try {
         const docs = await UserEvent.find().limit(50);
@@ -149,41 +175,47 @@ app.get("/api/userevents", async (req, res, next) => {
     }
 });
 
-
-
-
-
-// Auth routes
+// ----------------------------------------------------
+// MAIN ROUTES
+// ----------------------------------------------------
 app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
 
-// 8) (Optional) centralized error handler
+// ----------------------------------------------------
+// STATIC FRONTEND ROUTING
+// ----------------------------------------------------
+
+// Serve all FIGMA-AI files at /static
+app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
+
+// Landing Page
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
+});
+
+// Event Browsing Page
+app.use(
+    "/event-browsing",
+    express.static(path.join(__dirname, "../FIGMA-AI/Event Browsing Page"))
+);
+
+// Shortcut to event browsing
+app.get("/events", (req, res) => {
+    res.sendFile(path.join(__dirname, "../FIGMA-AI/Event Browsing Page/index.html"));
+});
+
+// ----------------------------------------------------
+// ERROR HANDLER
+// ----------------------------------------------------
 app.use((err, _req, res, _next) => {
     console.error("Unhandled error:", err);
     res.status(500).json({ success: false, message: "Server Error" });
 });
 
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Serve everything in FIGMA-AI at /static
-app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
-
-// Root route -> Landing Page HTML
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
-});
-
-
-
-
-
-// 9) Start server
+// ----------------------------------------------------
+// START SERVER
+// ----------------------------------------------------
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port http://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
-
