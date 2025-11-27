@@ -1,0 +1,56 @@
+/* TYPOGRAPHY */
+
+.landing-page h1,
+.header {
+  font: var(--h1-font);
+  color: #5b5959;
+}
+
+.text-wrapper-4 {
+  font: var(--h2-font);
+  color: var(--primary-blue);
+}
+
+.text-wrapper,
+.text-wrapper-3,
+.text-wrapper-2 {
+  font: var(--h4-font);
+}
+
+/* SPACING SYSTEM */
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 10px;
+}
+
+.navigation-bar,
+.footer {
+  height: 87px;
+  padding: 10px;
+  background: var(--tertiary-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-container,
+.text-container {
+  width: 100%;
+  text-align: center;
+}
+
+.landing-page-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 280px;
+  flex: 1;
+}
+
+.launch-button {
+  padding: 40px 70px;
+  border: 4px solid var(--primary-blue);
+}

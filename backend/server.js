@@ -174,6 +174,18 @@ app.get("/api/userevents", async (req, res, next) => {
         next(err);
     }
 });
+// ----------------------------------------------------
+// FIX: GET ALL EVENTS (for your calendar)
+// ----------------------------------------------------
+app.get("/api/events", async (req, res) => {
+    try {
+        const events = await Event.find();   // fetch all events from DB
+        res.json(events);
+    } catch (err) {
+        console.error("Error fetching events:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 // ----------------------------------------------------
 // MAIN ROUTES
