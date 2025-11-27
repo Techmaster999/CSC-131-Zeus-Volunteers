@@ -10,6 +10,7 @@ import UserEvent from "./models/User_Events.models.js";
 import { getEventUsers } from "./controllers/eventController.js";
 import { getEventUsersAgg } from "./controllers/eventController.js";
 import morgan from "morgan";
+import { reviewEvent } from "./controllers/eventController.js";
 import { addUserToEvent } from "./controllers/eventController.js";
 
 
@@ -45,7 +46,14 @@ app.post("/api/events", async (req, res, next) => {
             .json({ success: false, message: "All fields are required" });
         }
 
-        const newEvent = new Event({ eventName, organizer, date, time, details });
+        const newEvent = new Event({ 
+            eventName, 
+            organizer, 
+            date, 
+            time, 
+            details,
+            status: "pending" // default status until admin reviews
+        });
         await newEvent.save();
 
         res
@@ -145,6 +153,22 @@ app.get("/api/userevents", async (req, res, next) => {
         const docs = await UserEvent.find().limit(50);
         res.json({ success: true, count: docs.length, data: docs });
     } catch (err) {
+        next(err);
+    }
+});
+
+// Review event (approve/deny)
+app.put("/api/events/:eventId/review", reviewEvent);
+
+app.get("/api/reviewEvent", async(req, res, next) => {
+    if(req.user.role !== "admin") {
+        return res.status(403).json({ success: false, message: "Access denied" });
+    }
+    try {
+        const query = req.query.admin === "true" ? {} : {status : "approved"};
+        const events = await Event.find(query).populate("organizer", "firstName lastName userName");
+        res.json({ success: true, count: events.length, data: events });
+    } catch(err){
         next(err);
     }
 });
