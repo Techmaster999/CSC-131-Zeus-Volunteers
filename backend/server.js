@@ -27,6 +27,7 @@ app.use(morgan("dev"));
 
 // 3) Core middleware (no duplicates)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));  // <-- add this
 app.use(cors());
 
 // 4) Health/check route
@@ -72,10 +73,11 @@ app.post("/api/accountCreation", async (req, res, next) => {
             country, 
             state, 
             city, 
-            role
+            role,
+            phone
         } = req.body;
 
-        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city) {
+        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city || !role || !phone) {
             return res
             .status(400)
             .json({ success: false, message: "All fields are required" });
@@ -90,7 +92,8 @@ app.post("/api/accountCreation", async (req, res, next) => {
             country, 
             state, 
             city, 
-            role
+            role,
+            phone
         });
         await newUser.save();
 
