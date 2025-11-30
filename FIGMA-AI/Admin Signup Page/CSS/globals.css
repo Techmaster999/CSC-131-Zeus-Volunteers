@@ -15,8 +15,9 @@ button:focus-visible {
 a {
   text-decoration: none;
 }
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid #4a90e2 !important;
-  outline-offset: -2px !important;
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
 }

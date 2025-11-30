@@ -55,6 +55,10 @@ body {
 }
 
 .landing-page .text-wrapper {
+    white-space: nowrap;   /* stay on one line */
+  overflow: hidden;      /* don't spill outside the box */
+  text-overflow: ellipsis; /* optional: adds "..." if overflowed */
+  min-width: 0;          /* allow shrinking */
   position: absolute;
   width: 78.98%;
   height: 70.77%;
@@ -290,9 +294,11 @@ body {
 }
 
 .landing-page .arrow-up-right {
-  position: relative;
-  width: 48px;
-  height: 48px;
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px;
+  max-height: 24px;
+  flex-shrink: 0;
 }
 
 .landing-page .landing-page-image {
