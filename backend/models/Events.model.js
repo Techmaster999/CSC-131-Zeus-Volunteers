@@ -25,6 +25,21 @@ const EventSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    // New status field for approval or denial
+    status:{
+        type: String,
+        enum: ['pending', 'approved', 'denied'],
+        default: 'pending'
+    },
+    reviewedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',    // admin user who approved/denied
+        required: false
+    },
+    reviewNotes:{
+        type: String,
+        required: false
+    }
 }, { timestamps: true });
 
 const Event = mongoose.model('Event', EventSchema);

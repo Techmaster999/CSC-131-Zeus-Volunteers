@@ -11,6 +11,14 @@ import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
 import User from "./models/Accounts.model.js";
 import UserEvent from "./models/User_Events.models.js";
+<<<<<<< HEAD
+=======
+import { getEventUsers } from "./controllers/eventController.js";
+import { getEventUsersAgg } from "./controllers/eventController.js";
+import morgan from "morgan";
+import { reviewEvent } from "./controllers/eventController.js";
+import { addUserToEvent } from "./controllers/eventController.js";
+>>>>>>> main
 
 // Routes + Controllers
 import authRoutes from "./routes/auth.js";
@@ -38,6 +46,7 @@ const app = express();
 // ----------------------------------------------------
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));  // <-- add this
 app.use(cors());
 
 // ----------------------------------------------------
@@ -61,7 +70,14 @@ app.post("/api/events", async (req, res, next) => {
             });
         }
 
-        const newEvent = new Event({ eventName, organizer, date, time, details });
+        const newEvent = new Event({ 
+            eventName, 
+            organizer, 
+            date, 
+            time, 
+            details,
+            status: "pending" // default status until admin reviews
+        });
         await newEvent.save();
 
         res.status(201).json({
@@ -81,6 +97,7 @@ app.post("/api/accountCreation", async (req, res, next) => {
     try {
         const {
             firstName,
+<<<<<<< HEAD
             lastName,
             userName,
             email,
@@ -108,6 +125,36 @@ app.post("/api/accountCreation", async (req, res, next) => {
             state,
             city,
             role
+=======
+            lastName, 
+            userName, 
+            email, 
+            password, 
+            country, 
+            state, 
+            city, 
+            role,
+            phone
+        } = req.body;
+
+        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city || !role || !phone) {
+            return res
+            .status(400)
+            .json({ success: false, message: "All fields are required" });
+        }
+
+        const newUser = new User({ 
+            firstName, 
+            lastName, 
+            userName, 
+            email, 
+            password, 
+            country, 
+            state, 
+            city, 
+            role,
+            phone
+>>>>>>> main
         });
 
         await newUser.save();
@@ -187,9 +234,33 @@ app.get("/api/events", async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 // ----------------------------------------------------
 // MAIN ROUTES
 // ----------------------------------------------------
+=======
+// Review event (approve/deny)
+app.put("/api/events/:eventId/review", reviewEvent);
+
+app.get("/api/reviewEvent", async(req, res, next) => {
+    if(req.user.role !== "admin") {
+        return res.status(403).json({ success: false, message: "Access denied" });
+    }
+    try {
+        const query = req.query.admin === "true" ? {} : {status : "approved"};
+        const events = await Event.find(query).populate("organizer", "firstName lastName userName");
+        res.json({ success: true, count: events.length, data: events });
+    } catch(err){
+        next(err);
+    }
+});
+
+
+
+
+
+// Auth routes
+>>>>>>> main
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 
