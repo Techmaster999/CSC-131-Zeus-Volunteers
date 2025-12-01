@@ -11,23 +11,18 @@ import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
 import User from "./models/Accounts.model.js";
 import UserEvent from "./models/User_Events.models.js";
-<<<<<<< HEAD
-=======
-import { getEventUsers } from "./controllers/eventController.js";
-import { getEventUsersAgg } from "./controllers/eventController.js";
-import morgan from "morgan";
-import { reviewEvent } from "./controllers/eventController.js";
-import { addUserToEvent } from "./controllers/eventController.js";
->>>>>>> main
 
-// Routes + Controllers
-import authRoutes from "./routes/auth.js";
-import eventRoutes from "./routes/events.js";
+// Controllers
 import {
     getEventUsers,
     getEventUsersAgg,
-    addUserToEvent
+    addUserToEvent,
+    reviewEvent
 } from "./controllers/eventController.js";
+
+// Routes
+import authRoutes from "./routes/auth.js";
+import eventRoutes from "./routes/events.js";
 
 // Fix __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -46,18 +41,18 @@ const app = express();
 // ----------------------------------------------------
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));  // <-- add this
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // ----------------------------------------------------
-// TEST ROUTE
+// SIMPLE TEST ROUTE
 // ----------------------------------------------------
 app.get("/events", (_req, res) => {
     res.send("Server is ready");
 });
 
 // ----------------------------------------------------
-// EVENTS: CREATE NEW EVENT
+// EVENTS: CREATE EVENT
 // ----------------------------------------------------
 app.post("/api/events", async (req, res, next) => {
     try {
@@ -70,14 +65,15 @@ app.post("/api/events", async (req, res, next) => {
             });
         }
 
-        const newEvent = new Event({ 
-            eventName, 
-            organizer, 
-            date, 
-            time, 
+        const newEvent = new Event({
+            eventName,
+            organizer,
+            date,
+            time,
             details,
-            status: "pending" // default status until admin reviews
+            status: "pending"
         });
+
         await newEvent.save();
 
         res.status(201).json({
@@ -97,7 +93,6 @@ app.post("/api/accountCreation", async (req, res, next) => {
     try {
         const {
             firstName,
-<<<<<<< HEAD
             lastName,
             userName,
             email,
@@ -105,10 +100,22 @@ app.post("/api/accountCreation", async (req, res, next) => {
             country,
             state,
             city,
-            role
+            role,
+            phone
         } = req.body;
 
-        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city) {
+        if (
+            !firstName ||
+            !lastName ||
+            !userName ||
+            !email ||
+            !password ||
+            !country ||
+            !state ||
+            !city ||
+            !role ||
+            !phone
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
@@ -124,37 +131,8 @@ app.post("/api/accountCreation", async (req, res, next) => {
             country,
             state,
             city,
-            role
-=======
-            lastName, 
-            userName, 
-            email, 
-            password, 
-            country, 
-            state, 
-            city, 
             role,
             phone
-        } = req.body;
-
-        if (!firstName || !lastName || !userName || !email || !password || !country || !state || !city || !role || !phone) {
-            return res
-            .status(400)
-            .json({ success: false, message: "All fields are required" });
-        }
-
-        const newUser = new User({ 
-            firstName, 
-            lastName, 
-            userName, 
-            email, 
-            password, 
-            country, 
-            state, 
-            city, 
-            role,
-            phone
->>>>>>> main
         });
 
         await newUser.save();
@@ -172,8 +150,6 @@ app.post("/api/accountCreation", async (req, res, next) => {
 // ----------------------------------------------------
 // USER–EVENT RELATIONSHIP ROUTES
 // ----------------------------------------------------
-
-// Add a user to an event
 app.post("/api/userevents", async (req, res, next) => {
     try {
         const { userId, eventId } = req.body;
@@ -186,6 +162,7 @@ app.post("/api/userevents", async (req, res, next) => {
         }
 
         const existing = await UserEvent.findOne({ userId, eventId });
+
         if (existing) {
             return res.status(409).json({
                 success: false,
@@ -206,11 +183,14 @@ app.post("/api/userevents", async (req, res, next) => {
     }
 });
 
-// Get users for an event
+// Fetch users for an event
 app.get("/api/events/:eventId/users", getEventUsers);
 
-// Same but aggregated
+// Aggregated event users
 app.get("/api/events/:eventId/users-agg", getEventUsersAgg);
+
+// Review event (ADMIN)
+app.put("/api/events/:eventId/review", reviewEvent);
 
 // List all user-event links
 app.get("/api/userevents", async (req, res, next) => {
@@ -221,12 +201,13 @@ app.get("/api/userevents", async (req, res, next) => {
         next(err);
     }
 });
+
 // ----------------------------------------------------
-// FIX: GET ALL EVENTS (for your calendar)
+// GET ALL EVENTS (for calendar)
 // ----------------------------------------------------
 app.get("/api/events", async (req, res) => {
     try {
-        const events = await Event.find();   // fetch all events from DB
+        const events = await Event.find();
         res.json(events);
     } catch (err) {
         console.error("Error fetching events:", err);
@@ -234,58 +215,11 @@ app.get("/api/events", async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // ----------------------------------------------------
-// MAIN ROUTES
+// MAIN BACKEND ROUTES
 // ----------------------------------------------------
-=======
-// Review event (approve/deny)
-app.put("/api/events/:eventId/review", reviewEvent);
-
-app.get("/api/reviewEvent", async(req, res, next) => {
-    if(req.user.role !== "admin") {
-        return res.status(403).json({ success: false, message: "Access denied" });
-    }
-    try {
-        const query = req.query.admin === "true" ? {} : {status : "approved"};
-        const events = await Event.find(query).populate("organizer", "firstName lastName userName");
-        res.json({ success: true, count: events.length, data: events });
-    } catch(err){
-        next(err);
-    }
-});
-
-
-
-
-
-// Auth routes
->>>>>>> main
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
-
-// ----------------------------------------------------
-// STATIC FRONTEND ROUTING
-// ----------------------------------------------------
-
-// Serve all FIGMA-AI files at /static
-app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
-
-// Landing Page
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
-});
-
-// Event Browsing Page
-app.use(
-    "/event-browsing",
-    express.static(path.join(__dirname, "../FIGMA-AI/Event Browsing Page"))
-);
-
-// Shortcut to event browsing
-app.get("/events", (req, res) => {
-    res.sendFile(path.join(__dirname, "../FIGMA-AI/Event Browsing Page/index.html"));
-});
 
 // ----------------------------------------------------
 // ERROR HANDLER
@@ -299,6 +233,7 @@ app.use((err, _req, res, _next) => {
 // START SERVER
 // ----------------------------------------------------
 const PORT = process.env.PORT || 5001;
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
