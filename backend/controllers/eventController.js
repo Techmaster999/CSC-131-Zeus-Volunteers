@@ -211,3 +211,53 @@ export const addUserToEvent = async (req, res) => {
     }
     return res.status(500).json({ success: false, message: "Server Error" });
 }
+
+// approve or deny events 
+export const reviewEvent = async (req, res) => {
+    const { eventId } = req.params;
+    const { decision, adminId, notes } = req.body;
+
+    if(!["approved", "denied"].includes(decision)) {
+        return res.status(400).json({ success: false, message: "Decision must be 'approved' or 'denied'" });
+    }
+
+    if(!isValidObjectId(eventId) || !isValidObjectId(adminId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID or admin ID" });
+    }
+
+    try {
+        const event = await Event.findByIdAndUpdate(
+            eventId,
+            {
+                status: decision,
+                reviewedBy: adminId,
+                reviewNotes: notes || ""
+            },
+            { new: true }
+        );
+        if(!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        res.json({
+            success: true,
+            message: `Event ${decision} successfully`,
+            data: {
+                    _id: event._id, 
+                    eventName: event.eventName,
+                    Organizer: event.organizer,
+                    status: event.status,
+                    reviewedBy: event.reviewedBy,
+                    reviewNotes: event.reviewNotes
+                }
+            
+            
+        });
+    } catch (err) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: err.message || "Server Error"
+        })
+    }
+}
