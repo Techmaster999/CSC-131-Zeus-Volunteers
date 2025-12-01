@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar Page</title>
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet" />
+
+    <!-- Your CSS Files -->
+    <link rel="stylesheet" href="../CSS/shared.css" />
+    <link rel="stylesheet" href="styleguide.css" />
+    <link rel="stylesheet" href="global.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <div class="nav-left">
+        <span class="logo-circle">✔</span>
+        <span class="logo-text">Zeus Volunteers</span>
+    </div>
+    <div class="nav-right">
+        <a href="#">Home</a>
+        <a href="#">Events</a>
+        <a href="#">Calendar</a>
+        <a href="#">Contact</a>
+       <span class="profile-icon user-icon"></span>
+
+    </div>
+</nav>
+
+<!-- Page Header -->
+<header class="page-header">My Events & Calendar</header>
+
+<div class="dashboard">
+
+    <!-- CALENDAR -->
+    <section class="calendar-section">
+        <div class="card calendar-card">
+            <h3 class="card-title">Calendar</h3>
+            <div id="calendar"></div>
+        </div>
+    </section>
+
+    <!-- UPCOMING EVENTS -->
+    <section class="events-section">
+        <div class="card events-card">
+            <h3 class="card-title">Upcoming Events</h3>
+            <ul id="event-list" class="event-list">
+                <li class="event-item">Select a day to view events.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="notifications-section">
+        <div class="card notifications-card">
+            <h3 class="card-title">Notifications</h3>
+            <label class="label">Set reminder:</label>
+            <input type="checkbox">
+            <label class="label">Email reminder:</label>
+            <input type="checkbox">
+
+            <select class="dropdown">
+                <option>How far in advance...</option>
+            </select>
+
+            <select class="dropdown">
+                <option>Input Event...</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- PARTICIPATION HISTORY -->
+    <section class="history-section">
+        <div class="card history-card">
+            <h3 class="card-title">Participation History</h3>
+            <ul id="history-list" class="event-list">
+                <li class="event-item">Event Name — October 12, 2025</li>
+                <li class="event-item">Event Name — October 12, 2025</li>
+                <li class="event-item">Event Name — October 12, 2025</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- RECENT NOTIFICATIONS -->
+    <section class="recent-section">
+        <div class="card recent-card">
+            <h3 class="card-title">Recent Notifications</h3>
+            <ul class="event-list">
+                <li class="event-item">Event Name — October 12, 2025</li>
+                <li class="event-item">Event Name — October 12, 2025</li>
+                <li class="event-item">Event Name — October 12, 2025</li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-left">
+        <span class="logo-circle">✔</span> Zeus Volunteers
+    </div>
+    <div class="footer-right">© 2025</div>
+</footer>
+
+<!-- FullCalendar Script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+
+<!-- Calendar JS -->
+<script src="scripts/calendar.js"></script>
+
+</body>
+</html>
