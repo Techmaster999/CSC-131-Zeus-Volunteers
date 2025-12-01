@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <title>Zeus Volunteers - Event Browsing</title>
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="styleguide.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="event-browsing-page">
+      <header class="navigation-bar">
+        <div class="logo">
+          <a href="/" class="logo-link">
+            <img class="zeus-volunteer-logo" src="img/zeus-volunteer-logo-1-2.png" alt="Zeus Volunteers Logo" />
+            <span class="logo-text">Zeus Volunteers</span>
+          </a>
+        </div>
+        <div class="menu-and-login">
+          <nav class="navbar" aria-label="Main navigation">
+            <a href="/" class="nav-link nav-link-active">Home</a>
+            <a href="/events" class="nav-link nav-link-inactive">Events</a>
+            <a href="/calendar" class="nav-link nav-link-active">Calendar</a>
+            <a href="/contact" class="nav-link nav-link-active">Contact</a>
+          </nav>
+          <div class="login-frame">
+            <button class="button" type="button" aria-label="Logout">
+              <span class="button-text">Logout</span>
+            </button>
+          </div>
+          <div class="user-frame">
+            <button class="user-icon" type="button" aria-label="User profile">
+              <img class="union" src="img/union-1.svg" alt="" />
+            </button>
+          </div>
+        </div>
+      </header>
+      <main class="event-browsing">
+        <section class="sort-and-results-bar">
+          <div class="results-sort-container">
+            <p class="results-text">Showing 3 Results</p>
+            <img class="divider-line" src="img/line-158.svg" alt="" role="presentation" />
+            <label for="sort-dropdown" class="sort-label">Sort by:</label>
+            <div class="drop-down-fields">
+              <select id="sort-dropdown" class="dropdown-select" aria-label="Sort events by">
+                <option value="most-recent">Most Recent</option>
+                <option value="date">Date</option>
+                <option value="popularity">Popularity</option>
+              </select>
+              <div class="arrow-icons" aria-hidden="true">
+                <img class="arrow-up" src="img/image.svg" alt="" />
+                <img class="arrow-down" src="img/line-2-2.svg" alt="" />
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="event-browsing-search">
+          <h1 class="search-heading">Find Your Next Volunteer Opportunity</h1>
+          <form class="search-form" role="search">
+            <div class="text-field-faded">
+              <label for="keyword-search" class="visually-hidden">Search by keyword</label>
+              <input
+                type="text"
+                id="keyword-search"
+                class="search-input"
+                placeholder="Search By Keyword..."
+                aria-label="Search by keyword"
+              />
+            </div>
+            <div class="drop-down-fields-location">
+              <label for="location-dropdown" class="location-label">Location</label>
+              <select id="location-dropdown" class="dropdown-select-location" aria-label="Select location">
+                <option value="">Input Location...</option>
+                <option value="sacramento">Sacramento</option>
+                <option value="san-francisco">San Francisco</option>
+                <option value="los-angeles">Los Angeles</option>
+              </select>
+              <div class="arrow-icons-location" aria-hidden="true">
+                <img class="arrow-up-location" src="img/line-1.svg" alt="" />
+                <img class="arrow-down-location" src="img/line-2.svg" alt="" />
+              </div>
+            </div>
+          </form>
+        </section>
+        <section class="event-browsing-content">
+          <aside class="filter-sidebar" aria-label="Filter events">
+            <nav class="filter-list">
+              <h2 class="visually-hidden">Filter Options</h2>
+              <button class="filter-item" type="button" aria-expanded="false">
+                <img class="filter-icon" src="img/line-159.svg" alt="" aria-hidden="true" />
+                <span class="filter-text">Date</span>
+              </button>
+              <button class="filter-item" type="button" aria-expanded="false">
+                <img class="filter-icon" src="img/line-160.svg" alt="" aria-hidden="true" />
+                <span class="filter-text">Cause/Category</span>
+              </button>
+              <button class="filter-item" type="button" aria-expanded="false">
+                <img class="filter-icon" src="img/line-161.svg" alt="" aria-hidden="true" />
+                <span class="filter-text">Skills</span>
+              </button>
+              <button class="filter-item" type="button" aria-expanded="false">
+                <img class="filter-icon" src="img/line-162.svg" alt="" aria-hidden="true" />
+                <span class="filter-text">Distance</span>
+              </button>
+            </nav>
+          </aside>
+          <div class="event-list">
+            <div class="event-row">
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image" src="img/rectangle-3.png" alt="Community Clean up event" />
+                  <h3 class="event-title">Community Clean up</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: Cleanup Sacramento</p>
+                    <p class="event-date">10/25/2025 at 2:30pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/community-clean-up" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image" src="img/rectangle-5.png" alt="Community Dirty down event" />
+                  <h3 class="event-title">Community Dirty down</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: Cleanup Rivals</p>
+                    <p class="event-date">10/25/2025 at 2:35pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/community-dirty-down" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image" src="img/rectangle-4.png" alt="Tree Planting event" />
+                  <h3 class="event-title">Tree Planting</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: TeamTrees</p>
+                    <p class="event-date">10/21/2025 at 2:30pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/tree-planting" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+            </div>
+            <div class="event-row">
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image" src="img/rectangle.png" alt="Halloween Hangout event" />
+                  <h3 class="event-title">Halloween Hangout</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: Lonely Ghost</p>
+                    <p class="event-date">10/31/2025 at 2:30pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/halloween-hangout" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image-alt" src="img/image.png" alt="Zuess Pet Sitting event" />
+                  <h3 class="event-title">Zuess Pet Sitting</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: Sadam</p>
+                    <p class="event-date">11/15/2025 at 2:30pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/zuess-pet-sitting" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+              <article class="baseball-card">
+                <div class="baseball-cards">
+                  <img class="event-image" src="img/rectangle-2.png" alt="Paint a wall event" />
+                  <h3 class="event-title">Paint a wall</h3>
+                  <div class="event-card-info">
+                    <p class="event-org">Org: Paint Sacramento</p>
+                    <p class="event-date">10/27/2025 at 4:30pm</p>
+                    <p class="event-volunteers">Volunteers: 100/250</p>
+                    <a href="/event/paint-a-wall" class="view-details">View Details &gt;</a>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+        <nav class="next-page-container" aria-label="Pagination">
+          <a href="/events?page=2" class="next-page-link">Next Page</a>
+        </nav>
+      </main>
+      <footer class="footer">
+        <div class="logo">
+          <a href="/" class="logo-link">
+            <img class="zeus-volunteer-logo" src="/static/GLOBAL-IMG/clock-logo.svg" alt="Zeus Volunteers Logo" />
+            <span class="logo-text">Zeus Volunteers</span>
+          </a>
+        </div>
+        <div class="copyright-frame">
+          <span class="copyright-symbol">©</span>
+          <span class="copyright-year">2025</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
