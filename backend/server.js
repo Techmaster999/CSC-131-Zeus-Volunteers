@@ -1,6 +1,11 @@
 // server.js
-import express from "express";
+// .env import must be first
 import dotenv from "dotenv";
+// 1) Load env once
+dotenv.config();
+console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
+
+import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
@@ -12,11 +17,11 @@ import { getEventUsersAgg } from "./controllers/eventController.js";
 import morgan from "morgan";
 import { reviewEvent } from "./controllers/eventController.js";
 import { addUserToEvent } from "./controllers/eventController.js";
+import { requireAuth } from "./middleware/auth.js";
 
 
 
-// 1) Load env once
-dotenv.config();
+
 
 // 2) Connect to DB once (after env is loaded)
 await connectDB();
@@ -161,12 +166,20 @@ app.get("/api/userevents", async (req, res, next) => {
 });
 
 // Review event (approve/deny)
-app.put("/api/events/:eventId/review", reviewEvent);
+function requireAdmin(req, res, next) {
+    console.log("DEBUG req.user:", req.user);
 
-app.get("/api/reviewEvent", async(req, res, next) => {
-    if(req.user.role !== "admin") {
-        return res.status(403).json({ success: false, message: "Access denied" });
+    if(!req.user || req.user.role !== "admin"){
+        return res.status(403).json({ success: false, message: "Access denied, admin only" });
     }
+    next();
+}
+app.put("/api/events/:eventId/review", requireAuth, requireAdmin, reviewEvent);
+
+app.get("/api/reviewEvent", requireAuth, requireAdmin, async(req, res, next) => {
+    // if(req.user.role !== "admin") {
+    //     return res.status(403).json({ success: false, message: "Access denied" });
+    // }
     try {
         const query = req.query.admin === "true" ? {} : {status : "approved"};
         const events = await Event.find(query).populate("organizer", "firstName lastName userName");
