@@ -5,20 +5,18 @@ import dotenv from "dotenv";
 dotenv.config();
 console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
 
+// Database + Models
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
-import authRoutes from "./routes/auth.js"
-import eventRoutes from "./routes/events.js"
-
-// Database + Models
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
 import User from "./models/Accounts.model.js";
+import authRoutes from "./routes/auth.js";
 import UserEvent from "./models/User_Events.models.js";
+import eventRoutes from "./routes/events.js";
 import { getEventUsers } from "./controllers/eventController.js";
 import { getEventUsersAgg } from "./controllers/eventController.js";
 import { reviewEvent } from "./controllers/eventController.js";
