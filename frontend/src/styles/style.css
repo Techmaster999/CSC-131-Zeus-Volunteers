@@ -1,0 +1,219 @@
+/* GLOBAL RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #e8e8e8;
+  color: #222;
+}
+
+/* --------------------------------------------- */
+/* HEADER */
+/* --------------------------------------------- */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 40px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 32px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.nav-links a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #000;
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logout-btn {
+  padding: 7px 18px;
+  background: #446cff;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+.profile-icon {
+  width: 34px;
+}
+
+
+/* --------------------------------------------- */
+/* MAIN PAGE CONTAINER */
+/* --------------------------------------------- */
+
+.event-browsing-page {
+  max-width: 1300px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+/* --------------------------------------------- */
+/* FILTER BAR */
+/* --------------------------------------------- */
+
+.filter-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px 25px 40px;
+  align-items: center;
+}
+
+.sort-select {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+}
+
+/* --------------------------------------------- */
+/* SEARCH SECTION */
+/* --------------------------------------------- */
+
+.search-section {
+  display: flex;
+  gap: 40px;
+  padding: 0 40px 35px 40px;
+}
+
+.search-field label {
+  font-size: 14px;
+  color: #444;
+}
+
+.search-field input,
+.search-field select {
+  margin-top: 6px;
+  padding: 8px 12px;
+  width: 220px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------- */
+/* MAIN LAYOUT */
+/* --------------------------------------------- */
+
+.event-browsing-content {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 40px;
+}
+
+
+
+/* --------------------------------------------- */
+/* SIDEBAR */
+/* --------------------------------------------- */
+
+.sidebar ul {
+  list-style: none;
+  font-size: 14px;
+  line-height: 34px;
+  margin-top: 10px;
+  color: #444;
+}
+
+/* --------------------------------------------- */
+/* EVENT CARDS LAYOUT */
+/* --------------------------------------------- */
+
+.event-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 20px;
+}
+
+
+
+
+
+
+.event-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 350px;   /* uniform height */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+
+.event-img {
+  width: 100%;
+  height: 180px;      /* same height */
+  object-fit: cover;  /* crop instead of stretch */
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+
+.event-card h3 {
+  margin: 18px 0 10px 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.event-card p {
+  font-size: 13px;
+  color: #555;
+  line-height: 20px;
+}
+
+.event-card a {
+  margin-top: 10px;
+  display: inline-block;
+  font-size: 13px;
+  color: #000;
+  text-decoration: none;
+}
+
+/* --------------------------------------------- */
+/* FOOTER */
+/* --------------------------------------------- */
+
+.footer {
+  margin-top: 70px;
+  padding: 25px 40px;
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  border-top: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.fc-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+

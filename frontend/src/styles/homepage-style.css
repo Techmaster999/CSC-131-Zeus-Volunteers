@@ -1,0 +1,89 @@
+/* ============================
+   VOLUNTEER DASHBOARD PAGE
+=============================== */
+
+.volunteer-dashboard-page {
+  padding: 20px;
+}
+
+.dashboard-layout {
+  display: flex;
+  gap: 30px;
+}
+
+/* Profile Section */
+.dashboard-profile {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.dashboard-profile .avatar-large {
+  font-size: 140px;
+  color: var(--primary);
+}
+
+.dashboard-profile .profile-info p {
+  margin: 4px 0;
+  color: var(--text-medium);
+}
+
+/* Panels & Cards */
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.dashboard-panel {
+  background: #fff;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+}
+
+.dashboard-panel h3 {
+  margin-bottom: 15px;
+}
+
+/* Event Rows (upcoming + history) */
+.event-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.event-row:last-child {
+  border-bottom: none;
+}
+
+.event-row h4 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.event-row p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.event-date {
+  color: var(--text-medium);
+  font-size: 13px;
+}
+
+/* Featured Event */
+.featured-img {
+  width: 100%;
+  border-radius: 15px;
+  margin-bottom: 12px;
+}
+
+/* History Panel */
+.history-panel {
+  margin-bottom: 40px;
+}

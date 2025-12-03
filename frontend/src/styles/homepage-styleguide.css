@@ -1,0 +1,31 @@
+/* ============================
+   DESIGN TOKENS / VARIABLES
+=============================== */
+
+:root {
+  --primary: #4a73ff;
+  --text-dark: #222;
+  --text-medium: #555;
+  --text-light: #777;
+  --radius-lg: 18px;
+  --card-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+
+/* Buttons */
+.primary-btn {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 15px;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
