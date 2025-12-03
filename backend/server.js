@@ -10,6 +10,9 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
+import { dirname } from "path";
+import authRoutes from "./routes/auth.js"
+import eventRoutes from "./routes/events.js"
 
 // Database + Models
 import { connectDB } from "./config/db.js";
@@ -18,7 +21,6 @@ import User from "./models/Accounts.model.js";
 import UserEvent from "./models/User_Events.models.js";
 import { getEventUsers } from "./controllers/eventController.js";
 import { getEventUsersAgg } from "./controllers/eventController.js";
-import morgan from "morgan";
 import { reviewEvent } from "./controllers/eventController.js";
 import { addUserToEvent } from "./controllers/eventController.js";
 
@@ -43,9 +45,11 @@ app.use(cors());
 // ----------------------------------------------------
 // SIMPLE TEST ROUTE
 // ----------------------------------------------------
-app.get("/events", (_req, res) => {
-    res.send("Server is ready");
-});
+
+
+//app.get("/events", (_req, res) => {
+//    res.send("Server is ready");
+//});
 
 // ----------------------------------------------------
 // EVENTS: CREATE EVENT
@@ -231,6 +235,15 @@ app.use((err, _req, res, _next) => {
 // ----------------------------------------------------
 // START SERVER
 // ----------------------------------------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
+
+// Root route -> Landing Page HTML
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
+});
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
