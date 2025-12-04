@@ -261,3 +261,22 @@ export const reviewEvent = async (req, res) => {
         })
     }
 }
+
+// GET all events
+export const getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.find();
+
+    res.json({
+      success: true,
+      count: events.length,
+      data: events
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+};

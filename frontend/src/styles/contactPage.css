@@ -1,0 +1,68 @@
+/* ==== CONTACT PAGE ==== */
+
+.contact-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.contact-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.contact-section {
+  margin-top: 30px;
+}
+
+.contact-text {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-form label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.contact-input,
+.contact-textarea {
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.contact-textarea {
+  resize: none;
+  height: 140px;
+}
+
+.contact-btn {
+  background: #3b82f6;
+  color: white;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.contact-btn:hover {
+  background: #2563eb;
+}

@@ -1,0 +1,29 @@
+.event-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-3px);
+}
+
+.event-card-img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.event-card-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.event-card-org,
+.event-card-date,
+.event-card-volunteers {
+  font-size: 14px;
+  color: #555;
+}

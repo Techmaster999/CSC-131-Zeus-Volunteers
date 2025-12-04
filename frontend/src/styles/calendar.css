@@ -1,0 +1,201 @@
+/* ===========================
+   GLOBAL RESET & BASE SETUP
+   =========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f9fafb;
+  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+  color: #111827;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul { list-style: none; }
+
+/* ===========================
+   DESIGN TOKENS
+   =========================== */
+:root {
+  --color-primary: #4f46e5;
+  --color-primary-light: #6366f1;
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 10px rgba(0,0,0,0.1);
+
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+}
+
+/* ===========================
+   COMPONENTS
+   =========================== */
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-lg);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.btn {
+  display: inline-block;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.btn:hover { background-color: var(--color-primary-light); }
+
+/* ===========================
+   DASHBOARD LAYOUT
+   =========================== */
+.page-header {
+  background: white;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.dashboard {
+  max-width: 1350px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 0 32px;
+  grid-template-areas:
+    "calendar events"
+    "calendar events";
+}
+
+.calendar-section { grid-area: calendar; }
+.events-section { grid-area: events; }
+
+/* ===========================
+   EVENT LIST
+   =========================== */
+.event-list { padding: 0; margin: 0; }
+
+.event-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.event-item:last-child { border-bottom: none; }
+
+/* ===========================
+   LOGIN POPUP
+   =========================== */
+.calendar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.calendar-modal {
+  background: white;
+  padding: 30px;
+  width: 380px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-btn {
+  padding: 10px 18px;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+}
+
+.modal-btn.login { background: #4f46e5; }
+.modal-btn.back { background: #777; }
+
+/* ===========================
+   BLUR FIX (THE IMPORTANT PART)
+   =========================== */
+
+/* Only blur the CALENDAR CONTENT — nothing else */
+.calendar-content.blurred {
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* Never block FullCalendar clicks */
+.fc, .fc * {
+  pointer-events: auto !important;
+  z-index: 10;
+  position: relative;
+}
+
+/* Override any older .blurred rules in your project */
+.blurred {
+  filter: none !important;
+  pointer-events: auto !important;
+}
+
+
+/* 
+   FORCE SELECTED DATE TO SHOW VISUALLY 
+   This ALWAYS works because we apply the class manually.
+*/
+.fc-selected-date {
+  background: rgba(79, 70, 229, 0.25) !important;
+  border: 2px solid #4f46e5 !important;
+  transition: 0.15s ease-in-out;
+  transform: scale(1.05);
+  border-radius: 6px;
+}
+
+.fc-selected-date .fc-daygrid-day-number {
+  font-weight: 700;
+  color: #4f46e5 !important;
+}
+
+/* Make clicking obvious */
+.fc-daygrid-day {
+  cursor: pointer;
+}

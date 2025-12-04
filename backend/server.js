@@ -1,33 +1,43 @@
-// server.js
-// .env import must be first
+// ----------------------------------------------------
+// ENV SETUP (load first)
+// ----------------------------------------------------
 import dotenv from "dotenv";
-// 1) Load env once
 dotenv.config();
-// console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
+console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
 
-// Database + Models
+// ----------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
 import User from "./models/Accounts.model.js";
-import authRoutes from "./routes/auth.js";
 import UserEvent from "./models/User_Events.models.js";
+
+import authRoutes from "./routes/auth.js";
 import eventRoutes from "./routes/events.js";
-import { getEventUsers } from "./controllers/eventController.js";
-import { getEventUsersAgg } from "./controllers/eventController.js";
-import { reviewEvent } from "./controllers/eventController.js";
-import { addUserToEvent } from "./controllers/eventController.js";
 
+import {
+    getEventUsers,
+    getEventUsersAgg,
+    reviewEvent,
+    addUserToEvent
+} from "./controllers/eventController.js";
 
+// ----------------------------------------------------
+// FIX FOR __dirname IN ES MODULES
+// ----------------------------------------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// 1) Load env once
-dotenv.config();
-
-// Connect to DB
+// ----------------------------------------------------
+// CONNECT TO DATABASE
+// ----------------------------------------------------
 await connectDB();
 
 const app = express();
@@ -40,49 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// ----------------------------------------------------
-// SIMPLE TEST ROUTE
-// ----------------------------------------------------
 
-
-//app.get("/events", (_req, res) => {
-//    res.send("Server is ready");
-//});
-
-// ----------------------------------------------------
-// EVENTS: CREATE EVENT
-// ----------------------------------------------------
-app.post("/api/events", async (req, res, next) => {
-    try {
-        const { eventName, organizer, date, time, details } = req.body;
-
-        if (!eventName || !organizer || !date || !time || !details) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
-
-        const newEvent = new Event({
-            eventName,
-            organizer,
-            date,
-            time,
-            details,
-            status: "pending"
-        });
-
-        await newEvent.save();
-
-        res.status(201).json({
-            success: true,
-            message: "Event created successfully",
-            data: newEvent,
-        });
-    } catch (err) {
-        next(err);
-    }
-});
 
 // ----------------------------------------------------
 // ACCOUNT CREATION
@@ -200,22 +168,6 @@ app.get("/api/userevents", async (req, res, next) => {
     }
 });
 
-// Review event (approve/deny)
-app.put("/api/events/:eventId/review", reviewEvent);
-
-app.get("/api/reviewEvent", async(req, res, next) => {
-    if(req.user.role !== "admin") {
-        return res.status(403).json({ success: false, message: "Access denied" });
-    }
-    try {
-        const query = req.query.admin === "true" ? {} : {status : "approved"};
-        const events = await Event.find(query).populate("organizer", "firstName lastName userName");
-        res.json({ success: true, count: events.length, data: events });
-    } catch(err){
-        next(err);
-    }
-});
-
 // ----------------------------------------------------
 // MAIN BACKEND ROUTES
 // ----------------------------------------------------
@@ -223,7 +175,16 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 
 // ----------------------------------------------------
-// ERROR HANDLER
+// STATIC FILE SERVING
+// ----------------------------------------------------
+app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
+});
+
+// ----------------------------------------------------
+// GLOBAL ERROR HANDLER
 // ----------------------------------------------------
 app.use((err, _req, res, _next) => {
     console.error("Unhandled error:", err);
@@ -233,15 +194,6 @@ app.use((err, _req, res, _next) => {
 // ----------------------------------------------------
 // START SERVER
 // ----------------------------------------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-app.use("/static", express.static(path.join(__dirname, "../FIGMA-AI")));
-
-// Root route -> Landing Page HTML
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../FIGMA-AI/Landing Page/index.html"));
-});
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {

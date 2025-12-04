@@ -1,18 +1,51 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import "../styles/EventCard.css";
 
-function EventCard({ img, title, org, date, volunteers }) {
+function EventCard({ event }) {
+  const {
+    _id,
+    eventName,
+    organizer,
+    date,
+    time,
+    details,
+    imageUrl
+  } = event;
+
+  // Predefined rotating images
+  const rotatingImages = [
+    "/img/clean1.jpg",
+    "/img/clean2.jpg",
+    "/img/clean3.jpg",
+    "/img/clean4.jpg",
+    "/img/clean5.jpg",
+    "/img/clean6.jpg"
+  ];
+
+  // Deterministically pick one image based on ID
+  const index = Math.abs(_id.charCodeAt(0) % rotatingImages.length);
+  const finalImage = imageUrl || rotatingImages[index];
+
   return (
-    <article className="event-card">
-      <img src={img} className="event-img" alt={title} />
+    <Link to={`/events/${_id}`} className="event-card">
+      <img
+        src={finalImage}
+        alt={eventName}
+        className="event-card-img"
+      />
 
-      <h3>{title}</h3>
-      <p>Org: {org}</p>
-      <p>{date}</p>
-      <p>Volunteers: {volunteers}</p>
+      <h3>{eventName}</h3>
 
-     <a href="#">View Details &gt;</a>
+      <p><strong>Organizer:</strong> {organizer}</p>
 
-    </article>
+      <p><strong>Date:</strong> {new Date(date).toLocaleDateString()}</p>
+      <p><strong>Time:</strong> {time}</p>
+
+      <p className="details">
+        {details ? details.substring(0, 60) + "..." : "No details available"}
+      </p>
+    </Link>
   );
 }
 

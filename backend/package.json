@@ -2,7 +2,7 @@
   "name": "csc-131-zeus-volunteers",
   "version": "1.0.0",
   "description": "Zeus Volunteers will be a volunteering website that allows coomuinities to volunteer for events in there local area. The site will allow organizers the create volunteer events of different types like cultural, medical, environmental, neighborhood cleanups, and more.",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon backend/server.js",

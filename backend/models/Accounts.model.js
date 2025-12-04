@@ -20,9 +20,10 @@ const UserAccountSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    password: { // add hashing
+    password: {
         type: String,
-        required: true
+        required: true,
+        select: false   // ✅ THIS FIXES LOGIN
     },
     country:{
         type: String,
@@ -44,25 +45,19 @@ const UserAccountSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-// Hash password logic
-UserAccountSchema.pre('save', async function hashPassword(next) {
-    //Only hash if password is modified
-    if (!this.isModified('password')) {
-        return next();
-    }
+// Hash password before saving
+UserAccountSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
 
-    //generate a salt for the password
     const salt = await bcrypt.genSalt(10);
-    //adds the salt to the password
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
 
-//Compare entered password with hashed password
-UserAccountSchema.methods.matchPassword = async function hashPassword(enteredPassword) {
+// Compare plain password with hashed password
+UserAccountSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);  
 };
-
 
 const User = mongoose.model('User', UserAccountSchema);
 export default User;
