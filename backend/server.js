@@ -3,13 +3,13 @@
 import dotenv from "dotenv";
 // 1) Load env once
 dotenv.config();
-console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
+// console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET); // TEMP test
 
 // Database + Models
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import path from "path";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import Event from "./models/Events.model.js";
