@@ -1,44 +1,37 @@
 import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
-// CSS
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+
 import "../styles/calendar-global.css";
 import "../styles/calendar-style.css";
 import "../styles/calendar-styleguide.css";
 
-
-
-// FullCalendar
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-
 function CalendarPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [selectedEvents, setSelectedEvents] = useState([]);
 
-  // Load events from backend
   useEffect(() => {
     async function loadEvents() {
       try {
         const res = await fetch("http://localhost:5001/api/events");
         const data = await res.json();
 
-        const formatted = data.map((ev) => {
-          const isoDate = new Date(ev.date).toISOString().split("T")[0];
-
-          return {
-            title: ev.eventName,
-            date: isoDate,
-            description: ev.details,
-            organizer: ev.organizer,
-            time: ev.time,
-          };
-        });
+        const formatted = data.map((ev) => ({
+          id: ev._id,
+          title: ev.eventName,
+          date: new Date(ev.date).toISOString().split("T")[0],
+          description: ev.details,
+          organizer: ev.organizer,
+          time: ev.time,
+        }));
 
         setEvents(formatted);
-        console.log("EVENTS LOADED:", events);
-
       } catch (err) {
         console.error("Error loading events:", err);
       }
@@ -47,123 +40,81 @@ function CalendarPage() {
     loadEvents();
   }, []);
 
-  // When clicking a date
   function handleDateClick(info) {
-    const clickedDay = info.dateStr;
-    const todaysEvents = events.filter((ev) => ev.date === clickedDay);
+    const todaysEvents = events.filter((ev) => ev.date === info.dateStr);
     setSelectedEvents(todaysEvents);
   }
 
   return (
     <>
-      <Header />
+      <NavigationBar />
 
-      <header className="page-header">My Events & Calendar</header>
+      {/* Pop-up modal when NOT logged in */}
+      {!user && (
+        <div className="calendar-modal-overlay">
+          <div className="calendar-modal">
+            <h2>Please Sign In</h2>
+            <p>You must be signed in to view your personalized events.</p>
 
-      <div className="dashboard">
-
-        {/* CALENDAR */}
-        <section className="calendar-section">
-          <div className="card calendar-card">
-            <h3 className="card-title">Calendar</h3>
-
-            {/* FIX: Wrapper div to prevent FullCalendar React error */}
-            <div className="fc-wrapper">
-              <FullCalendar
-                plugins={[dayGridPlugin]}
-                initialView="dayGridMonth"
-                events={events}
-                dateClick={handleDateClick}
-                height={480}
-                headerToolbar={{
-                  left: "prev,next",
-                  center: "title",
-                  right: "",
-                }}
-              />
+            <div className="modal-buttons">
+              <Link to="/login" className="modal-btn login">Login</Link>
+              <Link to="/" className="modal-btn back">Return Home</Link>
             </div>
           </div>
-        </section>
+        </div>
+      )}
 
-        {/* UPCOMING EVENTS */}
-        <section className="events-section">
-          <div className="card events-card">
-            <h3 className="card-title">Upcoming Events</h3>
+      <div className={`calendar-content ${!user ? "blurred" : ""}`}>
+        <header className="page-header">My Events & Calendar</header>
 
-            <ul className="event-list">
-              {selectedEvents.length === 0 ? (
-                <li className="event-item">Select a day to view events.</li>
-              ) : (
-                selectedEvents.map((ev, index) => (
-                  <li key={index} className="event-item">
-                    <strong>{ev.title}</strong>
-                    <br />
-                    Organizer: {ev.organizer}
-                    <br />
-                    Time: {ev.time}
-                    <br />
-                    <small>{ev.description}</small>
-                    <br />
-                    <span>{ev.date}</span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </section>
+        <div className="dashboard">
+          <section className="calendar-section">
+            <div className="card calendar-card">
+              <h3 className="card-title">Calendar</h3>
 
-        {/* NOTIFICATIONS */}
-        <section className="notifications-section">
-          <div className="card notifications-card">
-            <h3 className="card-title">Notifications</h3>
+              <div className="fc-wrapper">
+                <FullCalendar
+                  plugins={[dayGridPlugin]}
+                  initialView="dayGridMonth"
+                  events={events}
+                  dateClick={handleDateClick}
+                  height={480}
+                />
+              </div>
+            </div>
+          </section>
 
-            <label>Set reminder:</label>
-            <input type="checkbox" />
+          <section className="events-section">
+            <div className="card events-card">
+              <h3 className="card-title">Upcoming Events</h3>
 
-            <label>Email reminder:</label>
-            <input type="checkbox" />
-
-            <select className="dropdown">
-              <option>How far in advance...</option>
-            </select>
-
-            <select className="dropdown">
-              <option>Input Event...</option>
-            </select>
-          </div>
-        </section>
-
-        {/* HISTORY */}
-        <section className="history-section">
-          <div className="card history-card">
-            <h3 className="card-title">Participation History</h3>
-
-            <ul className="event-list">
-              <li className="event-item">Event Name — October 12, 2025</li>
-              <li className="event-item">Event Name — October 12, 2025</li>
-              <li className="event-item">Event Name — October 12, 2025</li>
-            </ul>
-          </div>
-        </section>
-
-        {/* RECENT NOTIFICATIONS */}
-        <section className="recent-section">
-          <div className="card recent-card">
-            <h3 className="card-title">Recent Notifications</h3>
-
-            <ul className="event-list">
-              <li className="event-item">Event Name — October 12, 2025</li>
-              <li className="event-item">Event Name — October 12, 2025</li>
-              <li className="event-item">Event Name — October 12, 2025</li>
-            </ul>
-          </div>
-        </section>
+              <ul className="event-list">
+                {selectedEvents.length === 0 ? (
+                  <li className="event-item">Select a day to view events.</li>
+                ) : (
+                  selectedEvents.map((ev, i) => (
+                    <li key={i} className="event-item">
+                      <strong>{ev.title}</strong>
+                      <br />
+                      Organizer: {ev.organizer}
+                      <br />
+                      Time: {ev.time}
+                      <br />
+                      <small>{ev.description}</small>
+                      <br />
+                      <span>{ev.date}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          </section>
+        </div>
       </div>
 
       <Footer />
     </>
   );
 }
-
 
 export default CalendarPage;

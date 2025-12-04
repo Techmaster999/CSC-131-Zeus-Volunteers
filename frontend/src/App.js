@@ -1,31 +1,121 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 
-import HomePage from "./pages/HomePage";
 import LandingPage from "./pages/LandingPage";
-import EventBrowsingPage from "./pages/EventBrowsingPage";
-import CalendarPage from "./pages/CalendarPage";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage.jsx";
 import SignupPage from "./pages/SignupPage";
+import ContactPage from "./pages/ContactPage.jsx";
+
+
+import EventBrowsingPage from "./pages/EventBrowsingPage";
+import EventDetailPage from "./pages/EventDetailPage";
+import CalendarPage from "./pages/CalendarPage";
+
+import AdminDashboard from "./pages/AdminDashboard";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
+import VolunteerDashboard from "./pages/VolunteerDashboard";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+
+import EventCreationPage from "./pages/organizer/EventCreationPage";
+
+
+// import AnnouncementsPage from "./pages/AnnouncementsPage";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* LANDING PAGE */}
-        <Route path="/" element={<LandingPage />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
 
-        {/* HOME PAGE */}
-        <Route path="/home" element={<HomePage />} />
+          {/* PUBLIC PAGES */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
-        {/* EVENT BROWSING */}
-        <Route path="/events" element={<EventBrowsingPage />} />
 
-        {/* CALENDAR */}
-        <Route path="/calendar" element={<CalendarPage />} />
+          {/* PUBLIC (VIEW ONLY, NO ACTIONS) */}
+          <Route path="/events" element={<EventBrowsingPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          
 
-        {/* SIGN UP */}
-        <Route path="/signup" element={<SignupPage />} />
-      </Routes>
-    </BrowserRouter>
+          {/* ANY LOGGED-IN USER */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <CalendarPage />
+                </ProtectedRoute>
+              }
+            />
+
+          
+
+          {/* VOLUNTEER DASHBOARD */}
+          <Route
+            path="/volunteer"
+            element={
+              <RoleProtectedRoute allowedRoles={["volunteer"]}>
+                <VolunteerDashboard />
+              </RoleProtectedRoute>
+            }
+            
+          />
+
+          {/* ORGANIZER ROUTES */}
+          <Route
+            path="/organizer"
+            element={
+              <RoleProtectedRoute allowedRoles={["organizer"]}>
+                <OrganizerDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/events/create"
+            element={
+              <RoleProtectedRoute allowedRoles={["organizer"]}>
+                <EventCreationPage />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* <Route
+            path="/organizer/announcements"
+            element={
+              <RoleProtectedRoute allowedRoles={["organizer"]}>
+                <AnnouncementsPage />
+              </RoleProtectedRoute>
+            }
+          /> */}
+
+          {/* ADMIN */}
+          <Route
+            path="/admin"
+            element={
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <AdminDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

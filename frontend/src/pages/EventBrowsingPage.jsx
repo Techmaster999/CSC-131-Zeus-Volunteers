@@ -8,16 +8,15 @@ import "../styles/globals.css";
 import "../styles/style.css";
 import "../styles/styleguide.css";
 
-
 function EventBrowsingPage() {
   const eventData = [
-    { img: "/img/clean1.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
-    { img: "/img/clean2.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
-    { img: "/img/clean3.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 1, img: "/img/clean1.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 2, img: "/img/clean2.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 3, img: "/img/clean3.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
 
-    { img: "/img/clean4.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
-    { img: "/img/clean5.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
-    { img: "/img/clean6.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 4, img: "/img/clean4.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 5, img: "/img/clean5.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
+    { id: 6, img: "/img/clean6.jpg", title: "Community Clean up", org: "Cleanup Sacramento", date: "10/25/2025 at 2:30pm", volunteers: "100/250" },
   ];
 
   return (
@@ -54,16 +53,15 @@ function EventBrowsingPage() {
         </section>
 
        {/* MAIN LAYOUT */}
-<div className="event-browsing-content">
-  <Sidebar />
+        <div className="event-browsing-content">
+          <Sidebar />
 
-  <section className="event-list">
-    {eventData.map((event, index) => (
-      <EventCard key={index} {...event} />
-    ))}
-  </section>
-</div>
-
+          <section className="event-list">
+            {eventData.map((event, index) => (
+              <EventCard key={index} {...event} />
+            ))}
+          </section>
+        </div>
 
         <Footer />
       </main>

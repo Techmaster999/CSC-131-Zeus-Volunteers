@@ -1,0 +1,83 @@
+.organizer-dashboard-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* LEFT PROFILE SECTION */
+.profile-section {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.profile-pic {
+  width: 100px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+/* DASHBOARD LAYOUT GRID */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* EVENT LIST */
+.events-list {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  height: 360px;
+  overflow-y: auto;
+}
+
+.event-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.event-item.active {
+  background: #e5e7ff;
+  border-radius: 6px;
+}
+
+/* EVENT CARD */
+.event-preview-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.event-card-img {
+  width: 80%;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+/* BUTTONS */
+.dashboard-buttons {
+  margin-top: 40px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn-large {
+  background: #4f5dff;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.btn-outline {
+  border: 2px solid #4f5dff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #4f5dff;
+}

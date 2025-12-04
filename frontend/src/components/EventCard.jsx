@@ -1,19 +1,18 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-function EventCard({ img, title, org, date, volunteers }) {
+
+function EventCard({ id, img, title, org, date, volunteers }) {
   return (
-    <article className="event-card">
-      <img src={img} className="event-img" alt={title} />
-
-      <h3>{title}</h3>
-      <p>Org: {org}</p>
-      <p>{date}</p>
-      <p>Volunteers: {volunteers}</p>
-
-     <a href="#">View Details &gt;</a>
-
-    </article>
+    <Link to={`/event/${id}`} className="event-card-link">
+      <div className="event-card">
+        <img src={img} alt={title} />
+        <h3>{title}</h3>
+        <p>{org}</p>
+        <p>{date}</p>
+        <p>{volunteers} volunteers</p>
+      </div>
+    </Link>
   );
 }
-
 export default EventCard;
