@@ -1,49 +1,56 @@
+// src/App.js
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 
+// PUBLIC PAGES
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage.jsx";
 import SignupPage from "./pages/SignupPage";
-import ContactPage from "./pages/ContactPage.jsx";
+import ContactPage from "./pages/ContactPage";
 
-
-import EventBrowsingPage from "./pages/EventBrowsingPage";
-import EventDetailPage from "./pages/EventDetailPage";
+// GENERAL AUTHENTICATED PAGES
+import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 
+// EVENTS
+import EventBrowsingPage from "./pages/EventBrowsingPage";
+import EventDetailPage from "./pages/EventDetailPage";
+
+// DASHBOARDS
 import AdminDashboard from "./pages/AdminDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
-import UnauthorizedPage from "./pages/UnauthorizedPage";
 
+// ORGANIZER TOOLS
 import EventCreationPage from "./pages/organizer/EventCreationPage";
 
-
-// import AnnouncementsPage from "./pages/AnnouncementsPage";
-
+// ACCESS CONTROL
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
 
-          {/* PUBLIC PAGES */}
+          {/* ------------------------- */}
+          {/* PUBLIC ROUTES */}
+          {/* ------------------------- */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-
-          {/* PUBLIC (VIEW ONLY, NO ACTIONS) */}
+          {/* Public View → Browsing Events */}
           <Route path="/events" element={<EventBrowsingPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
-          
 
-          {/* ANY LOGGED-IN USER */}
+
+          {/* ------------------------- */}
+          {/* AUTHENTICATED (ANY ROLE) */}
+          {/* ------------------------- */}
           <Route
             path="/home"
             element={
@@ -52,18 +59,20 @@ function App() {
               </ProtectedRoute>
             }
           />
-            <Route
-              path="/calendar"
-              element={
-                <ProtectedRoute>
-                  <CalendarPage />
-                </ProtectedRoute>
-              }
-            />
 
-          
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
 
+
+          {/* ------------------------- */}
           {/* VOLUNTEER DASHBOARD */}
+          {/* ------------------------- */}
           <Route
             path="/volunteer"
             element={
@@ -71,10 +80,12 @@ function App() {
                 <VolunteerDashboard />
               </RoleProtectedRoute>
             }
-            
           />
 
-          {/* ORGANIZER ROUTES */}
+
+          {/* ------------------------- */}
+          {/* ORGANIZER DASHBOARD + TOOLS */}
+          {/* ------------------------- */}
           <Route
             path="/organizer"
             element={
@@ -93,16 +104,10 @@ function App() {
             }
           />
 
-          {/* <Route
-            path="/organizer/announcements"
-            element={
-              <RoleProtectedRoute allowedRoles={["organizer"]}>
-                <AnnouncementsPage />
-              </RoleProtectedRoute>
-            }
-          /> */}
 
-          {/* ADMIN */}
+          {/* ------------------------- */}
+          {/* ADMIN DASHBOARD */}
+          {/* ------------------------- */}
           <Route
             path="/admin"
             element={
@@ -112,10 +117,15 @@ function App() {
             }
           />
 
+
+          {/* ------------------------- */}
+          {/* UNAUTHORIZED PAGE */}
+          {/* ------------------------- */}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

@@ -252,3 +252,21 @@ body {
   pointer-events: none;
 }
 
+/* FIX: limit blur behavior ONLY to the calendar content container */
+.calendar-content.blurred {
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* Override old .blurred rules that affect everything */
+.blurred {
+  filter: none !important;
+  pointer-events: auto !important;
+}
+
+/* Calendar must always accept click events */
+.fc, .fc * {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+}

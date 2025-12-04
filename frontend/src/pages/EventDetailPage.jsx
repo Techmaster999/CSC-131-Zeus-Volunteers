@@ -1,62 +1,104 @@
 // src/pages/EventDetailPage.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+
 import "../styles/eventDetailPage.css";
 
 function EventDetailPage() {
-  const { user } = useAuth();
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  function handleVolunteer() {
-    if (!user) {
-      navigate("/login");
-      return;
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEvent() {
+      try {
+        const res = await fetch(`http://localhost:5001/api/events/${id}`);
+        const json = await res.json();
+        setEvent(json.data || json);
+      } catch (err) {
+        console.error("Load error:", err);
+      }
+      setLoading(false);
     }
 
-    // Later this will POST to backend to join event
-    console.log("User is volunteering!");
+    fetchEvent();
+  }, [id]);
+
+  function handleVolunteer() {
+    if (!user) return navigate("/login");
+    console.log("Volunteer for event:", id);
   }
+
+  if (loading) return <p className="loading">Loading...</p>;
+  if (!event) return <p className="not-found">Event not found.</p>;
+
+  const rotatingImages = [
+    "/img/clean1.jpg",
+    "/img/clean2.jpg",
+    "/img/clean3.jpg",
+    "/img/clean4.jpg",
+    "/img/clean5.jpg",
+    "/img/clean6.jpg",
+  ];
+  const index = Math.abs(event._id?.charCodeAt(0) % rotatingImages.length);
+  const finalImage = event.imageUrl || rotatingImages[index];
 
   return (
     <>
       <NavigationBar />
 
-      <main className="event-detail-container">
-        <div className="event-detail-header">
-          <img
-            src="/img/event-placeholder.png"
-            alt="event"
-            className="event-detail-image"
-          />
-          <h2 className="event-title">Event Title</h2>
+      <main className="event-detail-wrapper">
+
+        {/* HERO BANNER */}
+        <div className="hero-banner">
+          <img src={finalImage} alt={event.eventName} className="hero-img" />
+
+          <div className="hero-overlay"></div>
+
+          <div className="hero-content">
+            <h1 className="hero-title">{event.eventName}</h1>
+
+            <p className="hero-sub">
+              Organized by <span>{event.organizer}</span>
+            </p>
+
+            <p className="hero-date">
+              📅 {new Date(event.date).toLocaleDateString()} — ⏰ {event.time}
+            </p>
+          </div>
         </div>
 
-        <section className="event-details-section">
-          <h3>Announcements</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque
-            pellentesque sapien placerat.
-          </p>
+        {/* CONTENT */}
+        <section className="content-section">
 
-          <h3>Volunteering Info</h3>
-          <p>
-            Add info here…
-          </p>
+          <div className="info-card glass-card">
+            <h2>About This Event</h2>
+            <p>{event.details}</p>
+          </div>
 
-          <h3>Commitments</h3>
-          <p>
-            Add commitments here…
-          </p>
+          <div className="info-card glass-card">
+            <h2>Announcements</h2>
+            <p>{event.announcements || "No announcements available."}</p>
+          </div>
+
+          <div className="info-card glass-card">
+            <h2>Commitments</h2>
+            <p>{event.commitments || "No commitments listed."}</p>
+          </div>
+
+          <div className="volunteer-btn-container">
+            <button className="volunteer-btn" onClick={handleVolunteer}>
+              Volunteer Today!
+            </button>
+          </div>
         </section>
-
-        <div className="center-btn">
-          <button className="blue-btn" onClick={handleVolunteer}>
-            Volunteer Today!
-          </button>
-        </div>
       </main>
 
       <Footer />

@@ -1,62 +1,116 @@
 import User from "../models/Accounts.model.js";
 import generateToken from "../utils/generateToken.js";
 
-// Register new user
+// REGISTER USER
 export const register = async (req, res) => {
     try {
-        const { username, email, password, firstName, lastName, role, phoneNumber } = req.body;
+        const {
+            firstName,
+            lastName,
+            userName,
+            email,
+            password,
+            country,
+            state,
+            city,
+            role,
+            phone
+        } = req.body;
 
-        // Check if user exists
-        const userExists = await User.findOne({ $or: [{ email }, { username }] });
+        // Check required fields
+        if (
+            !firstName ||
+            !lastName ||
+            !userName ||
+            !email ||
+            !password ||
+            !country ||
+            !state ||
+            !city ||
+            !role ||
+            !phone
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
+
+        // Check if user already exists
+        const userExists = await User.findOne({
+            $or: [{ email }, { userName }],
+        });
+
         if (userExists) {
             return res.status(400).json({
                 success: false,
-                message: 'User already exists with that email or username'
+                message: "User already exists with that username or email",
             });
         }
 
         // Create user
-        const user = await User.create ({
+        const user = await User.create({
+            firstName,
+            lastName,
             userName,
             email,
             password,
-            firstName,
-            lastName,
-            role: role || 'volunteer',
-            phoneNumber
+            country,
+            state,
+            city,
+            role: role || "volunteer",
+            phone
         });
 
         res.status(201).json({
             success: true,
-            message: 'Account created successfully',
+            message: "Account created successfully",
             data: {
                 id: user._id,
                 userName: user.userName,
                 email: user.email,
                 role: user.role,
-                token: generateToken(user._id)
-            }
+                token: generateToken(user._id),
+            },
         });
-
     } catch (error) {
         res.status(400).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
-// Login user 
+// LOGIN USER
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body; // add username here
+        console.log("REQ BODY:", req.body);
 
-        const user = await User.findOne({ email }).select('+password');
+        const { identifier, email, password } = req.body;
 
-        if(!user) {
+        // allow login via email OR username
+        const loginValue = email || identifier;
+
+        // Validate input
+        if (!loginValue || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email/Username and password are required",
+            });
+        }
+
+        // Find user by email OR username
+        const user = await User.findOne({
+            $or: [
+                { email: loginValue },
+                { userName: loginValue }
+            ]
+        }).select("+password");
+
+        if (!user) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid email or password'
+                message: "Invalid login credentials",
             });
         }
 
@@ -66,13 +120,13 @@ export const login = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid email or password'
+                message: "Invalid login credentials",
             });
         }
 
         res.json({
             success: true,
-            message: 'Login successful',
+            message: "Login successful",
             data: {
                 id: user._id,
                 userName: user.userName,
@@ -80,66 +134,74 @@ export const login = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 role: user.role,
-                token: generateToken(user._id)
-            }
+                token: generateToken(user._id),
+            },
         });
 
     } catch (error) {
         res.status(400).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
-// Get user profile
+
+// GET USER PROFILE
 export const getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id).select("-password");
 
         res.json({
             success: true,
-            data: user
+            data: user,
         });
-
     } catch (error) {
         res.status(400).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
-// Update user profile
+// UPDATE USER PROFILE
 export const updateProfile = async (req, res) => {
     try {
-        const { firstName, lastName, phoneNumber, city, state, country, emailNotifications, reminderFrequency} = req.body;
+        const {
+            firstName,
+            lastName,
+            phone,
+            city,
+            state,
+            country,
+            emailNotifications,
+            reminderFrequency,
+        } = req.body;
 
         const user = await User.findByIdAndUpdate(
             req.user.id,
             {
                 firstName,
                 lastName,
-                phoneNumber,
+                phone,
                 city,
                 state,
                 country,
                 emailNotifications,
-                reminderFrequency
+                reminderFrequency,
             },
-            { new: true, runValidators: true}
-        );
+            { new: true, runValidators: true }
+        ).select("-password");
 
         res.json({
             success: true,
-            message: 'Profile updated successfully',
-            data: user
+            message: "Profile updated successfully",
+            data: user,
         });
-
     } catch (error) {
         res.status(400).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
-}
+};

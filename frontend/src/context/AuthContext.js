@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -6,6 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   //
   // Load user from localStorage on app start
@@ -22,7 +24,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   //
-  // Login function (calls your backend)
+  // Login function (calls backend)
   //
   async function login(identifier, password) {
     const res = await fetch("http://localhost:5001/api/auth/login", {
@@ -37,17 +39,19 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || "Login failed");
     }
 
-    // Save user + token
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    const userData = data.data; // id, name, email, role, token
 
-    setUser(data.user);
+    // Save auth info
+    localStorage.setItem("token", userData.token);
+    localStorage.setItem("user", JSON.stringify(userData));
 
-    return data.user;
+    setUser(userData);
+
+    return userData;
   }
 
   //
-  // Registration (calls your backend)
+  // Registration
   //
   async function registerUser(formData) {
     const res = await fetch("http://localhost:5001/api/auth/register", {
@@ -66,16 +70,37 @@ export function AuthProvider({ children }) {
   }
 
   //
-  // Logout function
+  // LOGOUT — FULL FIXED VERSION
   //
-  function logout() {
+  async function logout() {
+    const token = localStorage.getItem("token");
+
+    try {
+      // optional backend logout call
+      await fetch("http://localhost:5001/api/auth/logout", {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (err) {
+      console.warn("Logout request failed:", err);
+    }
+
+    // Clear stored auth data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Clear context state
     setUser(null);
+
+    // Redirect to homepage
+    navigate("/");
   }
 
   //
-  // Attach token to all future API calls
+  // authFetch adds Authorization to requests
   //
   function authFetch(url, options = {}) {
     const token = localStorage.getItem("token");
@@ -91,15 +116,15 @@ export function AuthProvider({ children }) {
   }
 
   //
-  // Auth context object
+  // Context API value
   //
   const value = {
-    user,          // {id, name, email, role}
-    loading,       // boolean
-    login,         // login function
-    registerUser,  // register function
-    logout,        // logout function
-    authFetch,     // secure fetch wrapper
+    user,
+    loading,
+    login,
+    registerUser,
+    logout,
+    authFetch,
   };
 
   return (
