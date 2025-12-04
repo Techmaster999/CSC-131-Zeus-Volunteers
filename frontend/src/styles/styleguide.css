@@ -38,13 +38,8 @@
   --variable-collection-attention-color: rgba(255, 213, 5, 1);
   --variable-collection-secondary-primary-color-muted: rgba(76, 84, 146, 1);
 }
-/* NOW write your global rules outside */
+
 * {
   font-family: "Space Grotesk", sans-serif !important; 
   /* Added !important temporarily to force it to override any defaults */
-}
-
-/* Optional: Remove the red border test */
-body {
-  /* border: 10px solid red;  <-- Delete or comment this out */
 }
