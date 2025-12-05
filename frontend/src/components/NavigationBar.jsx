@@ -8,7 +8,6 @@ function NavigationBar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const role = user?.role;
-
   const isLoggedIn = !!user;
 
   return (
@@ -51,11 +50,19 @@ function NavigationBar() {
           </>
         )}
 
-        {/* NO ADMIN LINKS ANYMORE */}
+        {/* ADMIN */}
+        {role === "admin" && (
+           <Link to="/admin">Admin Dashboard</Link>
+        )}
 
         {/* MOBILE AUTH BUTTONS */}
         {!isLoggedIn ? (
           <>
+            {/* Added "blue" class here so it matches the others */}
+            <Link className="nav-btn blue mobile-only" to="/admin-login">
+              Admin
+            </Link>
+            
             <Link className="nav-btn blue mobile-only" to="/login">
               Login
             </Link>
@@ -74,6 +81,18 @@ function NavigationBar() {
       <div className="nav-right">
         {!isLoggedIn && (
           <>
+            {/* 1. Added "blue" to className 
+                2. Removed background color style
+                3. Kept margin-right so it doesn't touch the Login button
+            */}
+            <Link 
+              to="/admin-login" 
+              className="nav-btn blue" 
+              style={{ marginRight: "15px" }} 
+            >
+              Admin
+            </Link>
+
             <Link to="/login" className="nav-btn blue">
               Login
             </Link>
@@ -92,6 +111,8 @@ function NavigationBar() {
               to={
                 role === "organizer"
                   ? "/organizer"
+                  : role === "admin"
+                  ? "/admin"
                   : "/volunteer"
               }
               className="profile-circle"

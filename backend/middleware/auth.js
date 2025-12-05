@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/Accounts.model.js';
 
-//protect routes - verify JWT token
+// Protect routes - verify JWT token
 export const protect = async (req, res, next) => {
     try {
         let token;
@@ -10,8 +10,8 @@ export const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
         }
 
-        if(!token) {
-            return resizeBy.status(401).json({
+        if (!token) {
+            return res.status(401).json({  // ✅ FIXED: was resizeBy.status
                 success: false,
                 message: 'Not authorized, no token provided'
             });
@@ -21,7 +21,7 @@ export const protect = async (req, res, next) => {
         req.user = await User.findById(decoded.id).select('-password');
 
         if (!req.user) {
-            return requestAnimationFrame.status(401).json ({
+            return res.status(401).json({  // ✅ FIXED: was requestAnimationFrame.status
                 success: false,
                 message: 'User not found'
             });
@@ -29,44 +29,33 @@ export const protect = async (req, res, next) => {
 
         next();
     } catch (error) {
-        res.status(500).json({
+        res.status(401).json({
             success: false,
-            message: error.message
+            message: 'Not authorized, token failed'
         });
     }
 };
 
-// Admin only routes
-
-// Authentication middleware (protect routes)
-export const requireAuth = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ success: false, message: "No token provided" });
-        }
-
-        const token = authHeader.split(" ")[1];
-
-        // Decode token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // NOTE: use decoded.id ONLY
-        const user = await User.findById(decoded.id).select("-password");
-
-        if (!user) {
-            return res.status(401).json({ success: false, message: "Invalid user" });
-        }
-
-        req.user = user;  // Attach user to request
-
+// ✅ ADDED: Admin only routes
+export const admin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
         next();
-
-    } catch (error) {
-        console.error("Auth Error:", error);
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+    } else {
+        res.status(403).json({
+            success: false,
+            message: 'Access denied. Admin only.'
+        });
     }
 };
 
-// Admin and Organizer routes
+// ✅ ADDED: Organizer or Admin routes
+export const organizer = (req, res, next) => {
+    if (req.user && (req.user.role === 'organizer' || req.user.role === 'admin')) {
+        next();
+    } else {
+        res.status(403).json({
+            success: false,
+            message: 'Access denied. Organizer or Admin only.'
+        });
+    }
+};
