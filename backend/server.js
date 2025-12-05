@@ -1,6 +1,8 @@
 // ----------------------------------------------------
 // ENV SETUP (load first)
 // ----------------------------------------------------
+
+
 import dotenv from "dotenv";
 dotenv.config();
 console.log("DEBUG JWT_SECRET:", process.env.JWT_SECRET);
