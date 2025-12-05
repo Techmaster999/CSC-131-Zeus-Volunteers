@@ -59,6 +59,16 @@ const EventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    skills: [{
+    type: String,
+    enum: ['Leadership', 'Teaching', 'Physical Labor', 'Technical', 'Creative', 'Administrative']
+    }],
+
+    coordinates: {
+    latitude: { type: Number },
+    longitude: { type: Number }
+    },
   },
   { timestamps: true }
 );

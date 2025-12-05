@@ -17,7 +17,6 @@ export const getEventUsers = async (req, res) => {
     try {
         console.log("eventId param:", eventId);
         const links = await UserEvent.find({ eventId })
-        // Populating the VIRTUAL field 'user' to get user details along with role, not the userId
         .populate({ path: "userId", select: "_id firstName lastName userName email role"})
         .sort ({ createdAt: 1 })
         .lean();
@@ -25,9 +24,8 @@ export const getEventUsers = async (req, res) => {
         console.log("UserEvent matches:", links.length);
 
         const attendees = links
-        // .filter(l => l.user) // virtual 'user' is now present
         .map(l => ({
-            user: l.userId,   // contains role from Accounts.model.js
+            user: l.userId,
             joinedAt: l.createdAt,
         }));
 
@@ -40,8 +38,6 @@ export const getEventUsers = async (req, res) => {
             return res.status(500).json({ success: false, message: err.message } );
         }
 };
-
-
 
 // GET /api/events/:eventId/users-agg
 export const getEventUsersAgg = async (req, res) => {
@@ -58,13 +54,13 @@ export const getEventUsersAgg = async (req, res) => {
             { $match: { eventId: _eventId } },
             {
                 $lookup: {
-                    from: "users",              // <- collection for Accounts.model.js
+                    from: "users",
                     localField: "userId",
                     foreignField: "_id",
                     as: "user"
                 }
             },
-          { $unwind: "$user" },           // remove docs where no matching user
+          { $unwind: "$user" },
             {
                 $project: {
                     _id: 0,
@@ -80,7 +76,6 @@ export const getEventUsersAgg = async (req, res) => {
             { $sort: { joinedAt: 1 } }
         ]);
 
-        // shape to match your previous response
         const attendees = docs.map(d => ({ user: d.user, joinedAt: d.joinedAt }));
 
         return res.json({
@@ -93,9 +88,7 @@ export const getEventUsersAgg = async (req, res) => {
     }
 };
 
-
-
-//Get user's registered events 
+// Get user's registered events 
 export const getUserRegisteredEvents = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -128,21 +121,20 @@ export const getUserRegisteredEvents = async (req, res) => {
     }
 };
 
-//Get user's participation history
+// Get user's participation history
 export const getUserHistory = async (req, res) => {
     try {
-        const userId = req.user.id; // From auth middleware
+        const userId = req.user.id;
 
         const history = await Participation.find({ user: userId })
-            .populate('activity') // Get Full activity details
-            .sort({ createdAt: -1 }); // Most recent first
+            .populate('activity')
+            .sort({ createdAt: -1 });
 
-        // Count activities by status
         const stats = {
             total: history.length,
             attended: history.filter(p => p.status === 'attended').length,
             registered: history.filter(p => p.status === 'registered').length,
-            cancelled: history.filter([p => p.status === 'cancelled']).length
+            cancelled: history.filter(p => p.status === 'cancelled').length
         };
 
         res.json({
@@ -160,7 +152,6 @@ export const getUserHistory = async (req, res) => {
         });
     }
 };
-
 
 // Attach a user to an event 
 export const addUserToEvent = async (req, res) => {
@@ -182,7 +173,7 @@ export const addUserToEvent = async (req, res) => {
     if (!eventExists) return res.status(404).json({ success: false, message: "Event not found" });
 
     try {
-        const link = await UserEvent.findOOneAndUpdate(
+        const link = await UserEvent.findOneAndUpdate(
             {userId, eventId},
             { $setOnInsert: { userId, eventId } },
             { new: true, upsert: true }
@@ -206,13 +197,12 @@ export const addUserToEvent = async (req, res) => {
             return res
             .status(409)
             .json({ success: false, message: "User is already registered for this event" })
-
         }
     }
     return res.status(500).json({ success: false, message: "Server Error" });
-}
+};
 
-// approve or deny events 
+// Approve or deny events 
 export const reviewEvent = async (req, res) => {
     const { eventId } = req.params;
     const { decision, adminId, notes } = req.body;
@@ -250,19 +240,16 @@ export const reviewEvent = async (req, res) => {
                     reviewedBy: event.reviewedBy,
                     reviewNotes: event.reviewNotes
                 }
-            
-            
         });
     } catch (err) {
-        return res.status(500).json(
-            {
+        return res.status(500).json({
                 success: false,
                 message: err.message || "Server Error"
         })
     }
-}
+};
 
-// GET all events
+// GET all events (for testing/admin)
 export const getAllEvents = async (req, res) => {
   try {
     const events = await Event.find();
@@ -279,4 +266,229 @@ export const getAllEvents = async (req, res) => {
       message: err.message
     });
   }
+};
+
+// ====== NEW FILTERING FUNCTIONS ======
+
+// Browse all approved upcoming events
+export const getEvents = async (req, res) => {
+    try {
+        const events = await Event.find({
+            status: 'upcoming',
+            approvalStatus: 'approved'
+        })
+        .populate('createdBy', 'username organization email')
+        .sort({ dateTime: 1})
+        .lean();
+
+        // Add volunteer counts if you have SignUp model
+        // const eventsWithCounts = await Promise.all(
+        //     events.map(async (event) => {
+        //         const volunteerCount = await SignUp.countDocuments({
+        //             event: event._id,
+        //             status: 'registered'
+        //         });
+        //         return {
+        //             ...event,
+        //             currentVolunteers: volunteerCount,
+        //             spotsRemaining: event.maxVolunteers > 0
+        //                 ? event.maxVolunteers - volunteerCount
+        //                 : 'Unlimited'
+        //         };
+        //     })
+        // );
+
+        res.json({
+            success: true,
+            count: events.length,
+            data: events
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Search events with filters INCLUDING SKILLS
+export const searchEvents = async (req, res) => {
+    try {
+        const { query, category, location, startDate, endDate, skills } = req.query;
+
+        let searchCriteria = {
+            status: 'upcoming',
+            approvalStatus: 'approved'
+        };
+
+        // Text search
+        if (query && query.trim()) {
+            searchCriteria.$text = { $search: query };
+        }
+
+        // Category filter
+        if (category && category !== 'all') {
+            searchCriteria.category = category;
+        }
+
+        // Location filter
+        if (location) {
+            searchCriteria.location = {
+                $regex: location,
+                $options: 'i'
+            };
+        }
+
+        // Date range filter
+        if (startDate || endDate) {
+            searchCriteria.dateTime = {};
+
+            if (startDate) {
+                searchCriteria.dateTime.$gte = new Date(startDate);
+            }
+
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                searchCriteria.dateTime.$lte = end;
+            }
+        }
+
+        // ✅ NEW: Skills filter
+        if (skills) {
+            const skillsArray = Array.isArray(skills) 
+                ? skills 
+                : skills.split(',').map(s => s.trim());
+            
+            searchCriteria.skills = { $in: skillsArray };
+        }
+
+        let eventsQuery = Event.find(searchCriteria)
+            .populate('createdBy', 'username organization email')
+            .sort({ dateTime: 1 });
+
+        // If text search, sort by relevance
+        if (query && query.trim()) {
+            eventsQuery = eventsQuery.select({ score: { $meta: "textScore" } });
+            eventsQuery = eventsQuery.sort({ score: { $meta: "textScore" } });
+        }
+
+        const events = await eventsQuery.lean();
+
+        res.json({
+            success: true,
+            count: events.length,
+            filters: {
+                query: query || null,
+                category: category || null,
+                location: location || null,
+                startDate: startDate || null,
+                endDate: endDate || null,
+                skills: skills || null
+            },
+            data: events
+        });
+    
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Get single event by ID
+export const getEventById = async (req, res) => {
+    try {
+        const { eventId } = req.params;
+
+        const event = await Event.findById(eventId)
+            .populate('createdBy', 'username email organization phoneNumber');
+        
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: 'Event not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: event
+        });
+
+    }  catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Get events by category
+export const getEventsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        const events = await Event.find({
+            category,
+            status: 'upcoming',
+            approvalStatus: 'approved'
+        })
+        .populate('createdBy', 'username organization')
+        .sort({ dateTime: 1 });
+
+        res.json({
+            success: true,
+            category,
+            count: events.length,
+            data: events
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Get all categories with counts
+export const getCategories = async (req, res) => {
+    try {
+        const categories = [
+            'cultural',
+            'environmental',
+            'health',
+            'education',
+            'community service',
+            'other'
+        ];
+
+        const categoriesWithCounts = await Promise.all(
+            categories.map(async (cat) => {
+                const count = await Event.countDocuments({
+                    category: cat,
+                    status: 'upcoming',
+                    approvalStatus: 'approved'
+                });
+
+                return {
+                    name: cat,
+                    count
+                };
+            })
+        );
+
+        res.json({
+            success: true,
+            data: categoriesWithCounts
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
