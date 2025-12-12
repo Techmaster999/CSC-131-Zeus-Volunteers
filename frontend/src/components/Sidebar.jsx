@@ -1,120 +1,106 @@
 import React, { useState } from 'react';
 
-function Sidebar({ onFilterChange, selectedFilters = {} }) {
+function Sidebar({ onFilterChange, selectedFilters }) {
   const [expanded, setExpanded] = useState({
     category: true,
-    skills: false,
-    distance: false
+    skills: true,
+    distance: false  // Collapsed by default since it's not working yet
   });
 
-  // Categories with checkboxes
-  const categories = [
-    'Cultural',
-    'Environmental',
-    'Health',
-    'Education',
-    'Community Service',
-    'Other'
-  ];
-
-  // Skills options
-  const skills = [
-    'Leadership',
-    'Teaching',
-    'Physical Labor',
-    'Technical',
-    'Creative',
-    'Administrative'
-  ];
-
-  // Distance options
-  const distances = [
-    { label: '5 miles', value: 5 },
-    { label: '10 miles', value: 10 },
-    { label: '25 miles', value: 25 },
-    { label: '50 miles', value: 50 },
-    { label: '100+ miles', value: 100 }
-  ];
-
   const toggleSection = (section) => {
-    setExpanded({ ...expanded, [section]: !expanded[section] });
+    setExpanded(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const handleCategoryChange = (category) => {
     const currentCategories = selectedFilters.categories || [];
-    const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter(c => c !== category)
-      : [...currentCategories, category];
-    
-    if (onFilterChange) {
-      onFilterChange({ ...selectedFilters, categories: newCategories });
+    let newCategories;
+
+    if (currentCategories.includes(category)) {
+      // Remove category
+      newCategories = currentCategories.filter(c => c !== category);
+    } else {
+      // Add category
+      newCategories = [...currentCategories, category];
     }
+
+    onFilterChange({
+      ...selectedFilters,
+      categories: newCategories
+    });
   };
 
   const handleSkillChange = (skill) => {
     const currentSkills = selectedFilters.skills || [];
-    const newSkills = currentSkills.includes(skill)
-      ? currentSkills.filter(s => s !== skill)
-      : [...currentSkills, skill];
-    
-    if (onFilterChange) {
-      onFilterChange({ ...selectedFilters, skills: newSkills });
+    let newSkills;
+
+    if (currentSkills.includes(skill)) {
+      // Remove skill
+      newSkills = currentSkills.filter(s => s !== skill);
+    } else {
+      // Add skill
+      newSkills = [...currentSkills, skill];
     }
+
+    onFilterChange({
+      ...selectedFilters,
+      skills: newSkills
+    });
   };
 
   const handleDistanceChange = (distance) => {
-    if (onFilterChange) {
-      onFilterChange({ ...selectedFilters, distance });
-    }
+    onFilterChange({
+      ...selectedFilters,
+      distance: distance
+    });
   };
 
-  const clearAllFilters = () => {
-    if (onFilterChange) {
-      onFilterChange({});
-    }
+  const handleClearAll = () => {
+    // Reset all filters to empty/default state
+    onFilterChange({
+      categories: [],
+      skills: [],
+      distance: null
+    });
   };
 
   return (
-    <aside className="sidebar">
-      {/* CAUSE/CATEGORY SECTION */}
-      <div style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0', paddingBottom: '15px' }}>
-        <div 
-          onClick={() => toggleSection('category')}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            padding: '10px 0',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            userSelect: 'none'
-          }}
+    <aside className="sidebar" style={styles.sidebar}>
+      <div style={styles.header}>
+        <h3 style={styles.title}>Filter By</h3>
+        <button 
+          onClick={handleClearAll}
+          style={styles.clearButton}
         >
-          <span>— Cause/Category</span>
-          <span style={{ fontSize: '12px' }}>{expanded.category ? '▼' : '▶'}</span>
+          Clear All Filters
+        </button>
+      </div>
+
+      {/* CATEGORY SECTION */}
+      <div style={styles.section}>
+        <div 
+          style={styles.sectionHeader}
+          onClick={() => toggleSection('category')}
+        >
+          <span style={styles.arrow}>{expanded.category ? '▼' : '▶'}</span>
+          <span style={styles.sectionTitle}>Cause / Category</span>
         </div>
         
         {expanded.category && (
-          <div style={{ marginTop: '10px' }}>
-            {categories.map((category) => (
-              <label 
-                key={category} 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 10px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
+          <div style={styles.options}>
+            {['cultural', 'environmental', 'health', 'education', 'community service', 'other'].map(category => (
+              <label key={category} style={styles.checkboxLabel}>
                 <input
                   type="checkbox"
-                  checked={selectedFilters.categories?.includes(category.toLowerCase()) || false}
-                  onChange={() => handleCategoryChange(category.toLowerCase())}
-                  style={{ marginRight: '10px', cursor: 'pointer' }}
+                  checked={selectedFilters.categories?.includes(category) || false}
+                  onChange={() => handleCategoryChange(category)}
+                  style={styles.checkbox}
                 />
-                {category}
+                <span style={styles.labelText}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </span>
               </label>
             ))}
           </div>
@@ -122,116 +108,144 @@ function Sidebar({ onFilterChange, selectedFilters = {} }) {
       </div>
 
       {/* SKILLS SECTION */}
-      <div style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0', paddingBottom: '15px' }}>
+      <div style={styles.section}>
         <div 
+          style={styles.sectionHeader}
           onClick={() => toggleSection('skills')}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            padding: '10px 0',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            userSelect: 'none'
-          }}
         >
-          <span>— Skills</span>
-          <span style={{ fontSize: '12px' }}>{expanded.skills ? '▼' : '▶'}</span>
+          <span style={styles.arrow}>{expanded.skills ? '▼' : '▶'}</span>
+          <span style={styles.sectionTitle}>Skills Required</span>
         </div>
         
         {expanded.skills && (
-          <div style={{ marginTop: '10px' }}>
-            {skills.map((skill) => (
-              <label 
-                key={skill}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 10px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
+          <div style={styles.options}>
+            {['Leadership', 'Teaching', 'Physical Labor', 'Technical', 'Creative', 'Administrative'].map(skill => (
+              <label key={skill} style={styles.checkboxLabel}>
                 <input
                   type="checkbox"
                   checked={selectedFilters.skills?.includes(skill) || false}
                   onChange={() => handleSkillChange(skill)}
-                  style={{ marginRight: '10px', cursor: 'pointer' }}
+                  style={styles.checkbox}
                 />
-                {skill}
+                <span style={styles.labelText}>{skill}</span>
               </label>
             ))}
           </div>
         )}
       </div>
 
-      {/* DISTANCE SECTION */}
-      <div style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0', paddingBottom: '15px' }}>
+      {/* DISTANCE SECTION - DISABLED FOR NOW */}
+      <div style={styles.section}>
         <div 
-          onClick={() => toggleSection('distance')}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            padding: '10px 0',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            userSelect: 'none'
-          }}
+          style={{...styles.sectionHeader, opacity: 0.5, cursor: 'not-allowed'}}
         >
-          <span>— Distance</span>
-          <span style={{ fontSize: '12px' }}>{expanded.distance ? '▼' : '▶'}</span>
+          <span style={styles.arrow}>▶</span>
+          <span style={styles.sectionTitle}>Distance (Coming Soon)</span>
         </div>
         
+        {/* Commented out until Google Maps API is integrated
         {expanded.distance && (
-          <div style={{ marginTop: '10px' }}>
-            {distances.map((dist) => (
-              <label 
-                key={dist.value}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 10px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
+          <div style={styles.options}>
+            {[5, 10, 25, 50, 100].map(miles => (
+              <label key={miles} style={styles.radioLabel}>
                 <input
                   type="radio"
                   name="distance"
-                  checked={selectedFilters.distance === dist.value}
-                  onChange={() => handleDistanceChange(dist.value)}
-                  style={{ marginRight: '10px', cursor: 'pointer' }}
+                  checked={selectedFilters.distance === miles}
+                  onChange={() => handleDistanceChange(miles)}
+                  style={styles.radio}
                 />
-                {dist.label}
+                <span style={styles.labelText}>{miles}+ miles</span>
               </label>
             ))}
           </div>
         )}
+        */}
       </div>
-
-      {/* CLEAR FILTERS BUTTON */}
-      <button
-        onClick={clearAllFilters}
-        style={{
-          width: '100%',
-          padding: '12px',
-          backgroundColor: '#ff5252',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-          fontSize: '14px',
-          marginTop: '10px'
-        }}
-      >
-        Clear All Filters
-      </button>
     </aside>
   );
 }
+
+const styles = {
+  sidebar: {
+    width: '250px',
+    backgroundColor: '#f9f9f9',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    height: 'fit-content'
+  },
+  header: {
+    marginBottom: '20px',
+    borderBottom: '2px solid #ddd',
+    paddingBottom: '10px'
+  },
+  title: {
+    margin: '0 0 10px 0',
+    fontSize: '20px',
+    fontWeight: 'bold'
+  },
+  clearButton: {
+    padding: '8px 12px',
+    backgroundColor: '#ff6b6b',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    width: '100%',
+    fontWeight: 'bold'
+  },
+  section: {
+    marginBottom: '20px',
+    borderBottom: '1px solid #eee',
+    paddingBottom: '10px'
+  },
+  sectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 0',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  arrow: {
+    marginRight: '8px',
+    fontSize: '12px',
+    color: '#666'
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    fontSize: '16px'
+  },
+  options: {
+    paddingLeft: '20px',
+    marginTop: '10px'
+  },
+  checkboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '8px',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  radioLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '8px',
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  checkbox: {
+    marginRight: '8px',
+    cursor: 'pointer'
+  },
+  radio: {
+    marginRight: '8px',
+    cursor: 'pointer'
+  },
+  labelText: {
+    fontSize: '14px'
+  }
+};
 
 export default Sidebar;

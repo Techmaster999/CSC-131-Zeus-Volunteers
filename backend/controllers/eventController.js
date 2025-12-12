@@ -273,8 +273,10 @@ export const getAllEvents = async (req, res) => {
 // Browse all approved upcoming events
 export const getEvents = async (req, res) => {
     try {
-        // ✅ NO FILTERS AT ALL - Return EVERYTHING
-        const events = await Event.find({})
+        const events = await Event.find({
+            status: 'upcoming',          
+            approvalStatus: 'approved'
+        })
 //        .populate('createdBy', 'username organization email')
         .sort({ dateTime: 1})
         .lean();
