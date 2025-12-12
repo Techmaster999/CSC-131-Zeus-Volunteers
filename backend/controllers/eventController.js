@@ -90,6 +90,42 @@ export const getEventUsersAgg = async (req, res) => {
     }
 };
 
+// Get events created by the logged-in organizer (includes pending/denied)
+export const getOrganizerEvents = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        // Find events where organizer matches or organizerId matches
+        const events = await Event.find({
+            $or: [
+                { organizer: organizerName },
+                { organizerId: userId },
+                { createdBy: userId }
+            ]
+        }).sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            count: events.length,
+            data: events
+        });
+
+    } catch (error) {
+        console.error('Error in getOrganizerEvents:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 
 // Get user's participation history

@@ -25,6 +25,9 @@ import VolunteerDashboard from "./pages/VolunteerDashboard";
 // ORGANIZER TOOLS
 import EventCreationPage from "./pages/organizer/EventCreationPage";
 
+// ADMIN TOOLS
+import AdminEventReview from "./pages/admin/AdminEventReview";
+
 // ACCESS CONTROL
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
@@ -115,6 +118,15 @@ function App() {
             element={
               <RoleProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/events/:eventId/review"
+            element={
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <AdminEventReview />
               </RoleProtectedRoute>
             }
           />

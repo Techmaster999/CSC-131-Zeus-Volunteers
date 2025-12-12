@@ -23,7 +23,8 @@ import {
     checkUserRegistration,
     getUserRegisteredEvents,
     getUserHistory,
-    reviewEvent
+    reviewEvent,
+    getOrganizerEvents
 } from "../controllers/eventController.js";
 
 // ===== PUBLIC ROUTES =====
@@ -47,6 +48,9 @@ router.get("/my/registered", protect, getUserRegisteredEvents);
 
 // Get user's participation history
 router.get("/my/history", protect, getUserHistory);
+
+// Get organizer's created events (includes pending/denied)
+router.get("/my/created", protect, getOrganizerEvents);
 
 // Check if user is registered for event (MUST BE BEFORE /:id)
 router.get("/check-registration", protect, checkUserRegistration);
