@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
@@ -36,7 +36,7 @@ function OrganizerDashboard() {
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header />
+        <NavigationBar />
 
         <main className="volunteer-dashboard-page page-container" style={{ flex: 1, width: "100%", margin: "0 auto" }}>
           <div className="dashboard-layout">

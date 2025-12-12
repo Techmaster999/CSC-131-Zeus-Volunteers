@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
@@ -25,7 +25,7 @@ function VolunteerDashboard() {
 
   return (
     <>
-      <Header />
+      <NavigationBar />
 
       <main className="volunteer-dashboard-page page-container">
         <div className="dashboard-layout">

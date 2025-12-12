@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
@@ -12,7 +12,7 @@ function EventBrowsingPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const initialLoad = useRef(true);
-  
+
   // Top search bar filters (no category here)
   const [searchFilters, setSearchFilters] = useState({
     query: '',
@@ -79,24 +79,24 @@ function EventBrowsingPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      
+
       // Top search bar filters
       if (searchFilters.query) params.append('query', searchFilters.query);
       if (searchFilters.location) params.append('location', searchFilters.location);
       if (searchFilters.startDate) params.append('startDate', searchFilters.startDate);
       if (searchFilters.endDate) params.append('endDate', searchFilters.endDate);
-      
+
       // Sidebar filters
       if (sidebarFilters.categories && sidebarFilters.categories.length > 0) {
         params.append('category', sidebarFilters.categories.join(','));
       }
-      
+
       if (sidebarFilters.skills && sidebarFilters.skills.length > 0) {
         params.append('skills', sidebarFilters.skills.join(','));
       }
 
       console.log("🔍 Search params:", params.toString());
-      
+
       const res = await fetch(`http://localhost:5001/api/events/search?${params}`);
       const json = await res.json();
 
@@ -132,13 +132,13 @@ function EventBrowsingPage() {
 
   return (
     <>
-      <Header />
+      <NavigationBar />
 
       <main className="event-browsing-page">
         {/* TOP SEARCH BAR - NO CATEGORY */}
         <section className="filter-section" style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
           <h3>Search Events</h3>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
             {/* Keyword Search */}
             <input
@@ -148,7 +148,7 @@ function EventBrowsingPage() {
               onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
             />
-            
+
             {/* Location Filter */}
             <input
               type="text"
@@ -157,7 +157,7 @@ function EventBrowsingPage() {
               onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
             />
-            
+
             {/* Start Date */}
             <input
               type="date"
@@ -166,7 +166,7 @@ function EventBrowsingPage() {
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               placeholder="Start Date"
             />
-            
+
             {/* End Date */}
             <input
               type="date"
@@ -176,14 +176,14 @@ function EventBrowsingPage() {
               placeholder="End Date"
             />
           </div>
-          
+
           {/* Search & Reset Buttons */}
           <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-            <button 
+            <button
               onClick={handleSearch}
-              style={{ 
-                padding: '10px 30px', 
-                backgroundColor: '#4CAF50', 
+              style={{
+                padding: '10px 30px',
+                backgroundColor: '#4CAF50',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
@@ -193,12 +193,12 @@ function EventBrowsingPage() {
             >
               🔍 Search
             </button>
-            
-            <button 
+
+            <button
               onClick={handleReset}
-              style={{ 
-                padding: '10px 30px', 
-                backgroundColor: '#666', 
+              style={{
+                padding: '10px 30px',
+                backgroundColor: '#666',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
@@ -225,7 +225,7 @@ function EventBrowsingPage() {
 
         <div className="event-browsing-content">
           {/* SIDEBAR - Category, Skills, Distance */}
-          <Sidebar 
+          <Sidebar
             onFilterChange={setSidebarFilters}
             selectedFilters={sidebarFilters}
           />

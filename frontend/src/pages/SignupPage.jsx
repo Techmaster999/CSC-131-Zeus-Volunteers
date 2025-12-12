@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
 
@@ -172,7 +172,7 @@ function SignupPage() {
   ============================ */
   return (
     <>
-      <Header />
+      <NavigationBar />
 
       <div className="signup-wrapper">
         <div className="signup-card">
