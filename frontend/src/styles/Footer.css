@@ -1,0 +1,49 @@
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px; /* Matching common header padding */
+  height: 80px;
+  /* Uses your global variable for consistency, falls back to light grey if missing */
+  background-color: var(--variable-collection-tertiary-color, #f3f3f3); 
+  border-top: 1px solid #e0e0e0;
+  width: 100%;
+  margin-top: auto; /* Crucial for sticking to the bottom */
+}
+
+/* LEFT SIDE */
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-left img {
+  height: 40px; /* Standard logo height */
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-title {
+  font-family: "Space Grotesk", sans-serif; /* Matching your H1 font family */
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+}
+
+/* RIGHT SIDE */
+.footer-right {
+  font-family: "Poppins", sans-serif; /* Matching your text font */
+  font-size: 14px;
+  color: #333;
+}
+
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 600px) {
+  .footer {
+    flex-direction: column;
+    height: auto;
+    padding: 20px;
+    gap: 15px;
+  }
+}

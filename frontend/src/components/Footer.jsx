@@ -1,20 +1,18 @@
 import React from "react";
+import "../styles/Footer.css"; 
 
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-logo">
-        <img
-          src="/img/zeus-volunteer-logo-1copy.png"
-          alt="Zeus Volunteers Logo"
-          className="footer-logo-img"
-        />
-        <span className="footer-text">Zeus Volunteers</span>
+      {/* LEFT SIDE: Logo + Title */}
+      <div className="footer-left">
+        <img src="/img/logo.png" alt="Zeus Volunteers Logo" />
+        <span className="footer-title">Zeus Volunteers</span>
       </div>
 
-      <div className="footer-year">
-        <span>©</span>
-        <span>2025</span>
+      {/* RIGHT SIDE: Copyright */}
+      <div className="footer-right">
+        <span>&copy; 2025 Zeus Volunteers</span>
       </div>
     </footer>
   );
