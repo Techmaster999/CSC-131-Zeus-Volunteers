@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ContactPage from "./pages/ContactPage";
+import AdminLogin from "./pages/AdminLogin";
 
 // GENERAL AUTHENTICATED PAGES
 import HomePage from "./pages/HomePage";
@@ -40,6 +41,7 @@ function App() {
           {/* ------------------------- */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/contact" element={<ContactPage />} />
 

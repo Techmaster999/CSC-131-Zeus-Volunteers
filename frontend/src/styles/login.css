@@ -55,3 +55,12 @@ input {
   color: red;
   font-size: 14px;
 }
+
+.admin-btn {
+  background-color: #FFC300; /* Zeus Gold */
+  color: black; /* Text needs to be dark to be readable on yellow */
+}
+
+.admin-btn:hover {
+  background-color: #e6b000; /* Slightly darker gold for hover effect */
+}
