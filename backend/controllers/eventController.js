@@ -11,23 +11,23 @@ import UserEvent from "../models/User_Events.models.js";
 export const getEventUsers = async (req, res) => {
     const { eventId } = req.params;
 
-    if(!isValidObjectId(eventId)) {
+    if (!isValidObjectId(eventId)) {
         return res.status(400).json({ message: "Invalid event ID" });
     }
     try {
         console.log("eventId param:", eventId);
         const links = await UserEvent.find({ eventId })
-//        .populate({ path: "userId", select: "_id firstName lastName userName email role"})
-        .sort ({ createdAt: 1 })
-        .lean();
+            //        .populate({ path: "userId", select: "_id firstName lastName userName email role"})
+            .sort({ createdAt: 1 })
+            .lean();
 
         console.log("UserEvent matches:", links.length);
 
         const attendees = links
-        .map(l => ({
-            user: l.userId,
-            joinedAt: l.createdAt,
-        }));
+            .map(l => ({
+                user: l.userId,
+                joinedAt: l.createdAt,
+            }));
 
         return res.json({
             success: true,
@@ -35,8 +35,8 @@ export const getEventUsers = async (req, res) => {
             attendees,
         });
     } catch (err) {
-            return res.status(500).json({ success: false, message: err.message } );
-        }
+        return res.status(500).json({ success: false, message: err.message });
+    }
 };
 
 // GET /api/events/:eventId/users-agg
@@ -60,7 +60,7 @@ export const getEventUsersAgg = async (req, res) => {
                     as: "user"
                 }
             },
-          { $unwind: "$user" },
+            { $unwind: "$user" },
             {
                 $project: {
                     _id: 0,
@@ -95,10 +95,10 @@ export const getUserRegisteredEvents = async (req, res) => {
 
         const signups = await SignUp.find({
             user: userId,
-            status: { $in: ['registered']}
+            status: { $in: ['registered'] }
         })
-//        .populate('event')
-        .sort({ 'event.dateTime': 1});
+            //        .populate('event')
+            .sort({ 'event.dateTime': 1 });
 
         const activeEvents = signups
             .filter(s => s.event && s.event.status !== 'cancelled')
@@ -109,10 +109,10 @@ export const getUserRegisteredEvents = async (req, res) => {
                 ...s.event.toObject()
             }));
 
-            res.json({
-                success: true,
-                data: activeEvents
-            });
+        res.json({
+            success: true,
+            data: activeEvents
+        });
     } catch (error) {
         res.status(500).json({
             succes: false,
@@ -127,7 +127,7 @@ export const getUserHistory = async (req, res) => {
         const userId = req.user.id;
 
         const history = await Participation.find({ user: userId })
-//            .populate('activity')
+            //            .populate('activity')
             .sort({ createdAt: -1 });
 
         const stats = {
@@ -157,7 +157,7 @@ export const getUserHistory = async (req, res) => {
 export const addUserToEvent = async (req, res) => {
     const { userId, eventId } = req.body;
 
-    if (!isValidObjectId(userId) ) {
+    if (!isValidObjectId(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
     }
     if (!isValidObjectId(eventId)) {
@@ -165,25 +165,25 @@ export const addUserToEvent = async (req, res) => {
     }
 
     const [userExists, eventExists] = await Promise.all([
-        User.exists({ _id: userId}),
-        Event.exists({ _id: eventId}),
+        User.exists({ _id: userId }),
+        Event.exists({ _id: eventId }),
     ]);
-    
+
     if (!userExists) return res.status(404).json({ success: false, message: "User not found" });
     if (!eventExists) return res.status(404).json({ success: false, message: "Event not found" });
 
     try {
         const link = await UserEvent.findOneAndUpdate(
-            {userId, eventId},
+            { userId, eventId },
             { $setOnInsert: { userId, eventId } },
             { new: true, upsert: true }
         ).lean();
 
         const alreadyExists = await UserEvent.findOne({ userId, eventId });
-        if(alreadyExists && alreadyExists._id.toString() !== link._id.toString()) {
+        if (alreadyExists && alreadyExists._id.toString() !== link._id.toString()) {
             return res
-            .status(409)
-            .json({ success: false, message: "User is already registered for this event" });
+                .status(409)
+                .json({ success: false, message: "User is already registered for this event" });
         }
 
         return res.status(201).json({
@@ -193,10 +193,10 @@ export const addUserToEvent = async (req, res) => {
         });
     }
     catch (err) {
-        if(err.code === 11000) {
+        if (err.code === 11000) {
             return res
-            .status(409)
-            .json({ success: false, message: "User is already registered for this event" })
+                .status(409)
+                .json({ success: false, message: "User is already registered for this event" })
         }
     }
     return res.status(500).json({ success: false, message: "Server Error" });
@@ -207,11 +207,11 @@ export const reviewEvent = async (req, res) => {
     const { eventId } = req.params;
     const { decision, adminId, notes } = req.body;
 
-    if(!["approved", "denied"].includes(decision)) {
+    if (!["approved", "denied"].includes(decision)) {
         return res.status(400).json({ success: false, message: "Decision must be 'approved' or 'denied'" });
     }
 
-    if(!isValidObjectId(eventId) || !isValidObjectId(adminId)) {
+    if (!isValidObjectId(eventId) || !isValidObjectId(adminId)) {
         return res.status(400).json({ success: false, message: "Invalid event ID or admin ID" });
     }
 
@@ -219,13 +219,13 @@ export const reviewEvent = async (req, res) => {
         const event = await Event.findByIdAndUpdate(
             eventId,
             {
-                status: decision,
+                approvalStatus: decision,
                 reviewedBy: adminId,
                 reviewNotes: notes || ""
             },
             { new: true }
         );
-        if(!event) {
+        if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
         }
 
@@ -233,39 +233,39 @@ export const reviewEvent = async (req, res) => {
             success: true,
             message: `Event ${decision} successfully`,
             data: {
-                    _id: event._id, 
-                    eventName: event.eventName,
-                    Organizer: event.organizer,
-                    status: event.status,
-                    reviewedBy: event.reviewedBy,
-                    reviewNotes: event.reviewNotes
-                }
+                _id: event._id,
+                eventName: event.eventName,
+                Organizer: event.organizer,
+                status: event.status,
+                reviewedBy: event.reviewedBy,
+                reviewNotes: event.reviewNotes
+            }
         });
     } catch (err) {
         return res.status(500).json({
-                success: false,
-                message: err.message || "Server Error"
+            success: false,
+            message: err.message || "Server Error"
         })
     }
 };
 
 // GET all events (for testing/admin)
 export const getAllEvents = async (req, res) => {
-  try {
-    const events = await Event.find();
+    try {
+        const events = await Event.find();
 
-    res.json({
-      success: true,
-      count: events.length,
-      data: events
-    });
+        res.json({
+            success: true,
+            count: events.length,
+            data: events
+        });
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 };
 
 // ====== NEW FILTERING FUNCTIONS ======
@@ -274,12 +274,12 @@ export const getAllEvents = async (req, res) => {
 export const getEvents = async (req, res) => {
     try {
         const events = await Event.find({
-            status: 'upcoming',          
+            status: 'upcoming',
             approvalStatus: 'approved'
         })
-//        .populate('createdBy', 'username organization email')
-        .sort({ dateTime: 1})
-        .lean();
+            //        .populate('createdBy', 'username organization email')
+            .sort({ dateTime: 1 })
+            .lean();
 
         console.log("📊 Total events in DB:", events.length);
 
@@ -335,8 +335,8 @@ export const searchEvents = async (req, res) => {
         }
 
         if (skills) {
-            const skillsArray = Array.isArray(skills) 
-                ? skills 
+            const skillsArray = Array.isArray(skills)
+                ? skills
                 : skills.split(',').map(s => s.trim());
             searchCriteria.skills = { $in: skillsArray };
         }
@@ -344,7 +344,7 @@ export const searchEvents = async (req, res) => {
         console.log("🔍 Search criteria:", searchCriteria);
 
         const events = await Event.find(searchCriteria)
-        //    .populate('createdBy', 'username organization email')
+            //    .populate('createdBy', 'username organization email')
             .sort({ dateTime: 1 })
             .lean();
 
@@ -353,7 +353,7 @@ export const searchEvents = async (req, res) => {
             count: events.length,
             data: events
         });
-    
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -368,8 +368,8 @@ export const getEventById = async (req, res) => {
         const { eventId } = req.params;
 
         const event = await Event.findById(eventId)
-//            .populate('createdBy', 'username email organization phoneNumber');
-        
+        //            .populate('createdBy', 'username email organization phoneNumber');
+
         if (!event) {
             return res.status(404).json({
                 success: false,
@@ -382,7 +382,7 @@ export const getEventById = async (req, res) => {
             data: event
         });
 
-    }  catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: error.message
@@ -397,11 +397,11 @@ export const getEventsByCategory = async (req, res) => {
 
         const events = await Event.find({
             category,
-//            status: 'upcoming',
+            //            status: 'upcoming',
             approvalStatus: 'approved'
         })
-//        .populate('createdBy', 'username organization')
-        .sort({ dateTime: 1 });
+            //        .populate('createdBy', 'username organization')
+            .sort({ dateTime: 1 });
 
         res.json({
             success: true,
@@ -434,7 +434,7 @@ export const getCategories = async (req, res) => {
             categories.map(async (cat) => {
                 const count = await Event.countDocuments({
                     category: cat,
-//                    status: 'upcoming',
+                    //                    status: 'upcoming',
                     approvalStatus: 'approved'
                 });
 
