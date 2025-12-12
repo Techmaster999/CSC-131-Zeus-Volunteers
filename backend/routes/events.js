@@ -5,6 +5,9 @@ import Event from "../models/Events.model.js";
 import User from "../models/Accounts.model.js";
 import UserEvent from "../models/User_Events.models.js";
 
+// Import email service
+import { sendEventCreatedEmail } from "../services/emailService.js";
+
 // Import controller functions
 import {
     getEvents,
@@ -54,20 +57,20 @@ router.post("/signup", protect, addUserToEvent);
 // Create new event
 router.post("/", async (req, res) => {  // (with or without protect, organizer)
     try {
-        const { 
-            eventName, 
+        const {
+            eventName,
             title,
-            organizer, 
-            date, 
-            time, 
+            organizer,
+            date,
+            time,
             dateTime,
-            details, 
+            details,
             description,
             category,
             location,
             skills,
-            announcements = "", 
-            commitments = "", 
+            announcements = "",
+            commitments = "",
             imageUrl = "",
             maxVolunteers,
             duration
@@ -76,7 +79,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
         // Flexible field names
         const eventTitle = title || eventName;
         const eventDescription = description || details;
-        
+
         // ✅ FIXED VALIDATION:
         if (!eventTitle || !organizer || !eventDescription || !category || !location) {
             return res.status(400).json({
@@ -125,6 +128,15 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
 
         await newEvent.save();
 
+        // Send email notification to organizer
+        // Note: Using organizer field as email for now
+        // In production, you'd fetch the actual organizer's email from User model
+        if (organizer) {
+            await sendEventCreatedEmail(newEvent, organizer).catch(err => {
+                console.error('Email notification failed (non-blocking):', err.message);
+            });
+        }
+
         res.status(201).json({
             success: true,
             message: "Event created successfully",
@@ -133,9 +145,9 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
 
     } catch (err) {
         console.error("Error creating event:", err);
-        res.status(500).json({ 
-            success: false, 
-            message: err.message 
+        res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 });

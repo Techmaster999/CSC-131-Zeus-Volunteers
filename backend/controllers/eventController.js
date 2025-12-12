@@ -3,8 +3,10 @@ import User from "../models/Accounts.model.js";
 import mongoose from "mongoose";
 import { isValidObjectId } from "mongoose";
 import UserEvent from "../models/User_Events.models.js";
+import { sendEventApprovedEmail, sendEventDeniedEmail } from "../services/emailService.js";
 // import Notification from "../models/Notification.js";
 // import SignUp from "../models/SignUp.js"; // file doesn't exist 
+
 
 
 // Get /events/:eventID/users
@@ -227,6 +229,21 @@ export const reviewEvent = async (req, res) => {
         );
         if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Send email notification to organizer
+        // Note: Using organizer field as email for now
+        // In production, you'd fetch the actual organizer's email from User model
+        if (event.organizer) {
+            if (decision === "approved") {
+                await sendEventApprovedEmail(event, event.organizer, notes).catch(err => {
+                    console.error('Email notification failed (non-blocking):', err.message);
+                });
+            } else if (decision === "denied") {
+                await sendEventDeniedEmail(event, event.organizer, notes).catch(err => {
+                    console.error('Email notification failed (non-blocking):', err.message);
+                });
+            }
         }
 
         res.json({
