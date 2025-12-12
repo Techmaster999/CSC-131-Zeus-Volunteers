@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
@@ -11,17 +11,21 @@ import "../styles/styleguide.css";
 function EventBrowsingPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const initialLoad = useRef(true);
   
-  // Combined filter state
-  const [filters, setFilters] = useState({
+  // Top search bar filters (no category here)
+  const [searchFilters, setSearchFilters] = useState({
     query: '',
-    category: 'all',
     location: '',
     startDate: '',
-    endDate: '',
-    categories: [],  // from sidebar
-    skills: [],      // from sidebar
-    distance: null   // from sidebar
+    endDate: ''
+  });
+
+  // Sidebar filters
+  const [sidebarFilters, setSidebarFilters] = useState({
+    categories: [],
+    skills: [],
+    distance: null
   });
 
   // Load events on mount
@@ -29,12 +33,23 @@ function EventBrowsingPage() {
     loadEvents();
   }, []);
 
-  // Auto-apply sidebar filters when they change
+  // Auto-search when sidebar filters change
   useEffect(() => {
-    if (events.length > 0 && (filters.categories.length > 0 || filters.skills.length > 0 || filters.distance)) {
-      applyFilters();
+    // Skip on initial load
+    if (initialLoad.current) {
+      initialLoad.current = false;
+      return;
     }
-  }, [filters.categories, filters.skills, filters.distance]);
+
+    // If any filters are active, search
+    if (sidebarFilters.categories.length > 0 || sidebarFilters.skills.length > 0 || sidebarFilters.distance) {
+      handleSearch();
+    } else {
+      // If all filters are cleared, reload all events
+      console.log("🔄 Filters cleared, reloading all events");
+      loadEvents();
+    }
+  }, [sidebarFilters]);
 
   // Fetch all events (initial load)
   const loadEvents = async () => {
@@ -43,7 +58,7 @@ function EventBrowsingPage() {
       const res = await fetch("http://localhost:5001/api/events");
       const json = await res.json();
 
-      console.log("EVENT RESPONSE:", json);
+      console.log("📥 Loaded events:", json.count || json.data?.length);
 
       if (json.success && Array.isArray(json.data)) {
         setEvents(json.data);
@@ -59,29 +74,36 @@ function EventBrowsingPage() {
     setLoading(false);
   };
 
-  // Handle search with top bar filters
+  // Handle search with ALL filters (top bar + sidebar)
   const handleSearch = async () => {
     setLoading(true);
     try {
-      // Build query string from top search bar
       const params = new URLSearchParams();
       
-      if (filters.query) params.append('query', filters.query);
-      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
-      if (filters.location) params.append('location', filters.location);
-      if (filters.startDate) params.append('startDate', filters.startDate);
-      if (filters.endDate) params.append('endDate', filters.endDate);
+      // Top search bar filters
+      if (searchFilters.query) params.append('query', searchFilters.query);
+      if (searchFilters.location) params.append('location', searchFilters.location);
+      if (searchFilters.startDate) params.append('startDate', searchFilters.startDate);
+      if (searchFilters.endDate) params.append('endDate', searchFilters.endDate);
+      
+      // Sidebar filters
+      if (sidebarFilters.categories && sidebarFilters.categories.length > 0) {
+        params.append('category', sidebarFilters.categories.join(','));
+      }
+      
+      if (sidebarFilters.skills && sidebarFilters.skills.length > 0) {
+        params.append('skills', sidebarFilters.skills.join(','));
+      }
+
+      console.log("🔍 Search params:", params.toString());
       
       const res = await fetch(`http://localhost:5001/api/events/search?${params}`);
       const json = await res.json();
 
+      console.log("📥 Search results:", json.count || json.data?.length);
+
       if (json.success && Array.isArray(json.data)) {
-        let filtered = json.data;
-        
-        // Apply sidebar filters on top of search results
-        filtered = applySidebarFilters(filtered);
-        
-        setEvents(filtered);
+        setEvents(json.data);
       } else {
         setEvents([]);
       }
@@ -92,51 +114,15 @@ function EventBrowsingPage() {
     setLoading(false);
   };
 
-  // Apply sidebar filters to current events
-  const applyFilters = () => {
-    setLoading(true);
-    loadEvents().then(() => {
-      // After loading, filter will be applied automatically
-      setLoading(false);
-    });
-  };
-
-  // Helper function to apply sidebar filters
-  const applySidebarFilters = (eventList) => {
-    let filtered = [...eventList];
-    
-    // Filter by categories from sidebar
-    if (filters.categories && filters.categories.length > 0) {
-      filtered = filtered.filter(event => 
-        filters.categories.includes(event.category?.toLowerCase())
-      );
-    }
-
-    // TODO: Filter by skills when backend supports it
-    // if (filters.skills && filters.skills.length > 0) {
-    //   filtered = filtered.filter(event => 
-    //     event.skills?.some(skill => filters.skills.includes(skill))
-    //   );
-    // }
-
-    // TODO: Filter by distance when backend supports it
-    // if (filters.distance) {
-    //   filtered = filtered.filter(event => 
-    //     calculateDistance(event.location) <= filters.distance
-    //   );
-    // }
-
-    return filtered;
-  };
-
   // Reset all filters
   const handleReset = () => {
-    setFilters({
+    setSearchFilters({
       query: '',
-      category: 'all',
       location: '',
       startDate: '',
-      endDate: '',
+      endDate: ''
+    });
+    setSidebarFilters({
       categories: [],
       skills: [],
       distance: null
@@ -144,64 +130,39 @@ function EventBrowsingPage() {
     loadEvents();
   };
 
-  // Handle sidebar filter changes
-  const handleSidebarFilterChange = (newSidebarFilters) => {
-    setFilters({
-      ...filters,
-      categories: newSidebarFilters.categories || [],
-      skills: newSidebarFilters.skills || [],
-      distance: newSidebarFilters.distance || null
-    });
-  };
-
   return (
     <>
       <Header />
 
       <main className="event-browsing-page">
-        {/* FILTER SECTION */}
+        {/* TOP SEARCH BAR - NO CATEGORY */}
         <section className="filter-section" style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
-          <h3>Search & Filter Events</h3>
+          <h3>Search Events</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
             {/* Keyword Search */}
             <input
               type="text"
               placeholder="Search by keyword..."
-              value={filters.query}
-              onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+              value={searchFilters.query}
+              onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
             />
-            
-            {/* Category Filter */}
-            <select
-              value={filters.category}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-              style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-            >
-              <option value="all">All Categories</option>
-              <option value="cultural">Cultural</option>
-              <option value="environmental">Environmental</option>
-              <option value="health">Health</option>
-              <option value="education">Education</option>
-              <option value="community service">Community Service</option>
-              <option value="other">Other</option>
-            </select>
             
             {/* Location Filter */}
             <input
               type="text"
               placeholder="Location..."
-              value={filters.location}
-              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+              value={searchFilters.location}
+              onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
             />
             
             {/* Start Date */}
             <input
               type="date"
-              value={filters.startDate}
-              onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              value={searchFilters.startDate}
+              onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               placeholder="Start Date"
             />
@@ -209,8 +170,8 @@ function EventBrowsingPage() {
             {/* End Date */}
             <input
               type="date"
-              value={filters.endDate}
-              onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              value={searchFilters.endDate}
+              onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
               style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               placeholder="End Date"
             />
@@ -244,12 +205,12 @@ function EventBrowsingPage() {
                 cursor: 'pointer'
               }}
             >
-              Reset
+              Reset All Filters
             </button>
           </div>
         </section>
 
-        {/* EXISTING FILTER TOP SECTION */}
+        {/* RESULTS COUNT */}
         <section className="filter-top">
           <p>Showing {loading ? '...' : events.length} Results</p>
 
@@ -263,14 +224,10 @@ function EventBrowsingPage() {
         </section>
 
         <div className="event-browsing-content">
-          {/* FIXED: Pass correct props */}
+          {/* SIDEBAR - Category, Skills, Distance */}
           <Sidebar 
-            onFilterChange={handleSidebarFilterChange}
-            selectedFilters={{
-              categories: filters.categories,
-              skills: filters.skills,
-              distance: filters.distance
-            }}
+            onFilterChange={setSidebarFilters}
+            selectedFilters={sidebarFilters}
           />
 
           <section className="event-list">
