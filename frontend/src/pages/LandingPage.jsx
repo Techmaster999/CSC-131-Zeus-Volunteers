@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import NavigationBar from "../components/NavigationBar";
+import Footer from "../components/Footer";
 import "../styles/landingpage-style.css";
 
 function LandingPage() {
@@ -12,7 +13,7 @@ function LandingPage() {
 
       {/* MAIN CONTENT */}
       <div className="landing-page-content">
-        
+
         {/* LEFT SIDE TEXT */}
         <div className="landing-page-info">
           <div className="header-container">
@@ -44,10 +45,7 @@ function LandingPage() {
       </div>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <p className="text-wrapper-5">© 2025 Zeus Volunteers</p>
-        <p className="text-wrapper-6">All Rights Reserved</p>
-      </footer>
+      <Footer />
 
     </div>
   );

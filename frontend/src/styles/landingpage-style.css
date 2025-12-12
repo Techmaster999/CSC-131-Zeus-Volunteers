@@ -102,6 +102,7 @@
   margin: 0 auto;
   padding: 100px 40px;
   gap: 60px;
+  flex: 1;
 }
 
 /* LEFT SIDE TEXT */
@@ -127,7 +128,7 @@
 
 /* CTA BUTTON */
 .launch-button {
-  border: 3px solid var(--primary-blue);
+  border: 5px solid var(--variable-collection-second-primary-color);
   padding: 18px 32px;
   display: inline-flex;
   align-items: center;
@@ -162,19 +163,5 @@
 }
 
 /* ------------------------------
-   FOOTER
+   FOOTER (Handled by Footer.jsx)
 --------------------------------*/
-.footer {
-  background: var(--tertiary-color);
-  height: 80px;
-  padding: 0 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #e3e3e3;
-}
-
-.text-wrapper-5,
-.text-wrapper-6 {
-  font-size: 17px;
-}
