@@ -317,10 +317,59 @@ export const sendOrganizerVolunteerNotification = async (eventData, organizerEma
     }
 };
 
+/**
+ * Send event reminder email to volunteer
+ */
+export const sendEventReminderEmail = async (eventData, userEmail, userName, timeUntilEvent) => {
+    if (!emailServiceReady || !transporter) {
+        console.log('📧 Email service not available - skipping reminder email');
+        return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+        const content = `
+            <h2>Event Reminder ⏰</h2>
+            <p>Hi ${userName},</p>
+            <p>This is a friendly reminder about your upcoming volunteer event:</p>
+            
+            <div class="event-details">
+                <h3>${eventData.eventName || eventData.title}</h3>
+                <p><strong>📅 Date:</strong> ${new Date(eventData.dateTime || eventData.date).toLocaleDateString()}</p>
+                <p><strong>⏰ Time:</strong> ${eventData.time}</p>
+                <p><strong>📍 Location:</strong> ${eventData.location}</p>
+                <p><strong>🏷️ Category:</strong> ${eventData.category}</p>
+            </div>
+            
+            <div style="background: #e8f4fd; padding: 15px; border-left: 4px solid #2196F3; margin: 20px 0;">
+                <p><strong>⏰ Time until event:</strong> ${timeUntilEvent}</p>
+            </div>
+            
+            ${eventData.details || eventData.description ? `<p><strong>📝 Details:</strong> ${eventData.details || eventData.description}</p>` : ''}
+            
+            <p>We're counting on you! Thank you for volunteering. 💜</p>
+        `;
+
+        const mailOptions = {
+            from: `"Zeus Volunteers" <${process.env.FROM_EMAIL || process.env.EMAIL_USER}>`,
+            to: userEmail,
+            subject: `⏰ Reminder: ${eventData.eventName || eventData.title} - ${timeUntilEvent}`,
+            html: createEmailTemplate('Event Reminder', content)
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('📧 Event reminder email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('❌ Error sending event reminder email:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 export default {
     sendEventCreatedEmail,
     sendEventApprovedEmail,
     sendEventDeniedEmail,
     sendVolunteerSignupConfirmation,
-    sendOrganizerVolunteerNotification
+    sendOrganizerVolunteerNotification,
+    sendEventReminderEmail
 };

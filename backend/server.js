@@ -18,6 +18,11 @@ import { connectDB } from "./config/db.js";
 // Import route files
 import authRoutes from "./routes/auth.js";
 import eventRoutes from "./routes/events.js";
+import reminderRoutes from "./routes/reminders.js";
+
+// Import cron for scheduled tasks
+import cron from "node-cron";
+import { processReminders } from "./services/reminderServices.js";
 
 // ----------------------------------------------------
 // CONNECT TO DATABASE
@@ -39,6 +44,7 @@ app.use(cors());
 // ----------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/reminders", reminderRoutes);
 
 // ----------------------------------------------------
 // ROOT ROUTE (API INFO)
@@ -49,7 +55,8 @@ app.get("/", (req, res) => {
         status: "running",
         endpoints: {
             auth: "/api/auth",
-            events: "/api/events"
+            events: "/api/events",
+            reminders: "/api/reminders"
         }
     });
 });
@@ -76,7 +83,17 @@ const server = app.listen(PORT, () => {
     console.log(`📡 API endpoints:`);
     console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
     console.log(`   - Events: http://localhost:${PORT}/api/events`);
+    console.log(`   - Reminders: http://localhost:${PORT}/api/reminders`);
 });
+
+// ----------------------------------------------------
+// CRON JOB: Process reminders every 15 minutes
+// ----------------------------------------------------
+cron.schedule('*/15 * * * *', async () => {
+    console.log('⏰ Running scheduled reminder check...');
+    await processReminders();
+});
+console.log('⏰ Reminder cron job scheduled (every 15 minutes)');
 
 // Handle server errors
 server.on('error', (error) => {
