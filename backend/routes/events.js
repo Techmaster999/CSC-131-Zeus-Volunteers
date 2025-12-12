@@ -5,6 +5,9 @@ import Event from "../models/Events.model.js";
 import User from "../models/Accounts.model.js";
 import UserEvent from "../models/User_Events.models.js";
 
+// Import email service
+import { sendEventCreatedEmail } from "../services/emailService.js";
+
 // Import controller functions
 import {
     getEvents,
@@ -130,10 +133,19 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             maxVolunteers: maxVolunteers || 0,
             duration: duration || 2,
             status: 'upcoming',
-            approvalStatus: 'approved'
+            approvalStatus: 'pending'  // Events now require admin approval
         });
 
         await newEvent.save();
+
+        // Send email notification to organizer
+        // Note: Using organizer field as email for now
+        // In production, you'd fetch the actual organizer's email from User model
+        if (organizer) {
+            await sendEventCreatedEmail(newEvent, organizer).catch(err => {
+                console.error('Email notification failed (non-blocking):', err.message);
+            });
+        }
 
         res.status(201).json({
             success: true,
