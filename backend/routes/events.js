@@ -16,6 +16,8 @@ import {
     getEventUsers,
     getEventUsersAgg,
     addUserToEvent,
+    removeUserFromEvent,
+    checkUserRegistration,
     getUserRegisteredEvents,
     getUserHistory,
     reviewEvent
@@ -29,14 +31,11 @@ router.get("/", getEvents);
 // Search with filters (query, category, location, dates, skills)
 router.get("/search", searchEvents);
 
-// Get all categories with counts
-router.get("/categories/list", getCategories);
+// Get all categories
+router.get("/categories", getCategories);
 
 // Get events by category
 router.get("/category/:category", getEventsByCategory);
-
-// Get single event by ID
-router.get("/:eventId", getEventById);
 
 // ===== VOLUNTEER ROUTES (Protected) =====
 
@@ -46,28 +45,39 @@ router.get("/my/registered", protect, getUserRegisteredEvents);
 // Get user's participation history
 router.get("/my/history", protect, getUserHistory);
 
+// Check if user is registered for event (MUST BE BEFORE /:id)
+router.get("/check-registration", protect, checkUserRegistration);
+
 // Sign up for event
 router.post("/signup", protect, addUserToEvent);
+
+// Un-volunteer from event
+router.delete("/signup", protect, removeUserFromEvent);
+
+// ===== ROUTES WITH :id PARAMETER (MUST BE AFTER SPECIFIC ROUTES) =====
+
+// Get single event by id
+router.get("/:eventId", getEventById);
 
 // ===== ORGANIZER ROUTES =====
 
 // Create new event
 router.post("/", async (req, res) => {  // (with or without protect, organizer)
     try {
-        const { 
-            eventName, 
+        const {
+            eventName,
             title,
-            organizer, 
-            date, 
-            time, 
+            organizer,
+            date,
+            time,
             dateTime,
-            details, 
+            details,
             description,
             category,
             location,
             skills,
-            announcements = "", 
-            commitments = "", 
+            announcements = "",
+            commitments = "",
             imageUrl = "",
             maxVolunteers,
             duration
@@ -76,7 +86,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
         // Flexible field names
         const eventTitle = title || eventName;
         const eventDescription = description || details;
-        
+
         // ✅ FIXED VALIDATION:
         if (!eventTitle || !organizer || !eventDescription || !category || !location) {
             return res.status(400).json({
@@ -133,9 +143,9 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
 
     } catch (err) {
         console.error("Error creating event:", err);
-        res.status(500).json({ 
-            success: false, 
-            message: err.message 
+        res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 });

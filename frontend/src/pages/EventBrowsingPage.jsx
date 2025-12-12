@@ -3,14 +3,17 @@ import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
 import "../styles/globals.css";
 import "../styles/style.css";
 import "../styles/styleguide.css";
 
 function EventBrowsingPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
   const initialLoad = useRef(true);
 
   // Top search bar filters (no category here)
@@ -27,6 +30,36 @@ function EventBrowsingPage() {
     skills: [],
     distance: null
   });
+
+  // Fetch user's registered events
+  useEffect(() => {
+    async function fetchRegisteredEvents() {
+      if (!user) {
+        console.log("No user, skipping registered events fetch");
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5001/api/events/my/registered", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const json = await res.json();
+        console.log("Registered events response:", json);
+        if (json.success && json.data) {
+          const eventIds = new Set(json.data.map(event => event._id));
+          console.log("Registered event IDs:", Array.from(eventIds));
+          setRegisteredEventIds(eventIds);
+        }
+      } catch (err) {
+        console.error("Error fetching registered events:", err);
+      }
+    }
+
+    fetchRegisteredEvents();
+  }, [user]);
 
   // Load events on mount
   useEffect(() => {
@@ -237,8 +270,12 @@ function EventBrowsingPage() {
               ) : events.length === 0 ? (
                 <p>No events found. Try different filters!</p>
               ) : (
-                events.map(event => (
-                  <EventCard key={event._id} event={event} />
+                events.map((event) => (
+                  <EventCard
+                    key={event._id}
+                    event={event}
+                    isRegistered={registeredEventIds.has(event._id)}
+                  />
                 ))
               )}
             </section>

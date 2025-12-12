@@ -88,38 +88,7 @@ export const getEventUsersAgg = async (req, res) => {
     }
 };
 
-// Get user's registered events 
-export const getUserRegisteredEvents = async (req, res) => {
-    try {
-        const userId = req.user.id;
 
-        const signups = await SignUp.find({
-            user: userId,
-            status: { $in: ['registered'] }
-        })
-            //        .populate('event')
-            .sort({ 'event.dateTime': 1 });
-
-        const activeEvents = signups
-            .filter(s => s.event && s.event.status !== 'cancelled')
-            .map(s => ({
-                signUpId: s._id,
-                role: s.role,
-                status: s.status,
-                ...s.event.toObject()
-            }));
-
-        res.json({
-            success: true,
-            data: activeEvents
-        });
-    } catch (error) {
-        res.status(500).json({
-            succes: false,
-            message: error.message
-        });
-    }
-};
 
 // Get user's participation history
 export const getUserHistory = async (req, res) => {
@@ -202,6 +171,69 @@ export const addUserToEvent = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server Error" });
 };
 
+// Remove a user from an event (un-volunteer)
+export const removeUserFromEvent = async (req, res) => {
+    const { userId, eventId } = req.body;
+
+    if (!isValidObjectId(userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const result = await UserEvent.findOneAndDelete({ userId, eventId });
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: "User was not registered for this event"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User successfully unregistered from the event"
+        });
+    } catch (err) {
+        console.error("Error removing user from event:", err);
+        return res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// Check if user is registered for an event
+export const checkUserRegistration = async (req, res) => {
+    const { userId, eventId } = req.query;
+
+    console.log("checkUserRegistration called with userId:", userId, "eventId:", eventId);
+
+    if (!isValidObjectId(userId) || !isValidObjectId(eventId)) {
+        console.log("Invalid ObjectId detected");
+        return res.status(400).json({ success: false, message: "Invalid user or event ID" });
+    }
+
+    try {
+        // Convert string IDs to ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const eventObjectId = new mongoose.Types.ObjectId(eventId);
+
+        const registration = await UserEvent.findOne({
+            userId: userObjectId,
+            eventId: eventObjectId
+        });
+        console.log("Registration found:", registration);
+
+        return res.status(200).json({
+            success: true,
+            isRegistered: !!registration
+        });
+    } catch (err) {
+        console.error("Error checking registration:", err);
+        return res.status(500).json({ success: false, message: "Server Error", error: err.message });
+    }
+};
+
 // Approve or deny events 
 export const reviewEvent = async (req, res) => {
     const { eventId } = req.params;
@@ -269,6 +301,41 @@ export const getAllEvents = async (req, res) => {
 };
 
 // ====== NEW FILTERING FUNCTIONS ======
+
+// Get events the user has signed up for
+export const getUserRegisteredEvents = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        console.log("Fetching registered events for user:", userId);
+
+        // Find all UserEvent records for this user and populate the event details
+        const registrations = await UserEvent.find({ userId })
+            .populate('eventId')
+            .lean();
+
+        console.log("Found registrations:", registrations.length);
+
+        // Extract the event details (filter out any null eventIds)
+        const events = registrations
+            .filter(reg => reg.eventId)
+            .map(reg => reg.eventId);
+
+        console.log("Returning events:", events.length);
+
+        res.json({
+            success: true,
+            data: events
+        });
+
+    } catch (error) {
+        console.error('Error in getUserRegisteredEvents:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 // Browse all approved upcoming events
 export const getEvents = async (req, res) => {

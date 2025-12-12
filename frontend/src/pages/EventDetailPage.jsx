@@ -15,6 +15,9 @@ function EventDetailPage() {
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   useEffect(() => {
     async function fetchEvent() {
@@ -31,9 +34,81 @@ function EventDetailPage() {
     fetchEvent();
   }, [id]);
 
-  function handleVolunteer() {
+  // Check if user is registered for this event
+  useEffect(() => {
+    async function checkRegistration() {
+      if (!user || !id) return;
+
+      console.log("Checking registration for user:", user.id, "event:", id);
+
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(
+          `http://localhost:5001/api/events/check-registration?userId=${user.id}&eventId=${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const json = await res.json();
+        console.log("Registration check response:", json);
+        if (json.success) {
+          setIsRegistered(json.isRegistered);
+        }
+      } catch (err) {
+        console.error("Error checking registration:", err);
+      }
+    }
+
+    checkRegistration();
+  }, [user, id]);
+
+  async function handleVolunteer() {
     if (!user) return navigate("/login");
-    console.log("Volunteer for event:", id);
+
+    setActionLoading(true);
+    setMessage({ text: "", type: "" });
+
+    try {
+      const token = localStorage.getItem("token");
+      const endpoint = isRegistered
+        ? "http://localhost:5001/api/events/signup"
+        : "http://localhost:5001/api/events/signup";
+
+      const method = isRegistered ? "DELETE" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          eventId: id,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (json.success) {
+        setIsRegistered(!isRegistered);
+        setMessage({
+          text: isRegistered
+            ? "Successfully un-volunteered from this event"
+            : "Successfully volunteered for this event!",
+          type: "success",
+        });
+      } else {
+        setMessage({ text: json.message || "An error occurred", type: "error" });
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setMessage({ text: "Failed to process request", type: "error" });
+    } finally {
+      setActionLoading(false);
+    }
   }
 
   if (loading) return <p className="loading">Loading...</p>;
@@ -94,9 +169,39 @@ function EventDetailPage() {
               <p>{event.commitments || "No commitments listed."}</p>
             </div>
 
+            {/* Message Display */}
+            {message.text && (
+              <div
+                style={{
+                  padding: "12px",
+                  marginBottom: "20px",
+                  borderRadius: "8px",
+                  textAlign: "center",
+                  backgroundColor: message.type === "success" ? "#d4edda" : "#f8d7da",
+                  color: message.type === "success" ? "#155724" : "#721c24",
+                  border: `1px solid ${message.type === "success" ? "#c3e6cb" : "#f5c6cb"}`,
+                }}
+              >
+                {message.text}
+              </div>
+            )}
+
             <div className="volunteer-btn-container">
-              <button className="volunteer-btn" onClick={handleVolunteer}>
-                Volunteer Today!
+              <button
+                className="volunteer-btn"
+                onClick={handleVolunteer}
+                disabled={actionLoading}
+                style={{
+                  backgroundColor: isRegistered ? "#888" : "#4c63ff",
+                  cursor: actionLoading ? "not-allowed" : "pointer",
+                  opacity: actionLoading ? 0.6 : 1,
+                }}
+              >
+                {actionLoading
+                  ? "Processing..."
+                  : isRegistered
+                    ? "Un-Volunteer?"
+                    : "Volunteer Today!"}
               </button>
             </div>
           </section>

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/EventCard.css";
 
-function EventCard({ event }) {
+function EventCard({ event, isRegistered = false }) {
   const {
     _id,
     eventName,
@@ -28,7 +28,34 @@ function EventCard({ event }) {
   const finalImage = imageUrl || rotatingImages[index];
 
   return (
-    <Link to={`/events/${_id}`} className="event-card">
+    <Link
+      to={`/events/${_id}`}
+      className="event-card"
+      style={{
+        opacity: isRegistered ? 0.85 : 1,
+        backgroundColor: isRegistered ? "#ffe6e6" : "white",
+        border: isRegistered ? "2px solid #ff4444" : "1px solid #ddd",
+        position: "relative"
+      }}
+    >
+      {isRegistered && (
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            backgroundColor: "#ff4444",
+            color: "white",
+            padding: "5px 10px",
+            borderRadius: "5px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            zIndex: 1
+          }}
+        >
+          ✓ Registered
+        </div>
+      )}
       <img
         src={finalImage}
         alt={eventName}
