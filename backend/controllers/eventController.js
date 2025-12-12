@@ -126,7 +126,7 @@ export const getUserHistory = async (req, res) => {
 
 // Attach a user to an event 
 export const addUserToEvent = async (req, res) => {
-    const { userId, eventId } = req.body;
+    const { userId, eventId, role, notes } = req.body;
 
     if (!isValidObjectId(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
@@ -134,6 +134,10 @@ export const addUserToEvent = async (req, res) => {
     if (!isValidObjectId(eventId)) {
         return res.status(400).json({ message: "Invalid event ID" });
     }
+
+    // Validate role if provided
+    const validRoles = ['Team Lead', 'Setup Crew', 'Registration', 'Cleanup', 'General Volunteer', 'Coordinator', 'Other'];
+    const volunteerRole = role && validRoles.includes(role) ? role : 'General Volunteer';
 
     const [userExists, eventExists] = await Promise.all([
         User.exists({ _id: userId }),
@@ -144,18 +148,22 @@ export const addUserToEvent = async (req, res) => {
     if (!eventExists) return res.status(404).json({ success: false, message: "Event not found" });
 
     try {
-        const link = await UserEvent.findOneAndUpdate(
-            { userId, eventId },
-            { $setOnInsert: { userId, eventId } },
-            { new: true, upsert: true }
-        ).lean();
-
-        const alreadyExists = await UserEvent.findOne({ userId, eventId });
-        if (alreadyExists && alreadyExists._id.toString() !== link._id.toString()) {
+        // Check if already registered
+        const existing = await UserEvent.findOne({ userId, eventId });
+        if (existing) {
             return res
                 .status(409)
                 .json({ success: false, message: "User is already registered for this event" });
         }
+
+        // Create new registration with role
+        const link = await UserEvent.create({
+            userId,
+            eventId,
+            role: volunteerRole,
+            status: 'registered',
+            notes: notes || ''
+        });
 
         return res.status(201).json({
             success: true,
@@ -169,8 +177,8 @@ export const addUserToEvent = async (req, res) => {
                 .status(409)
                 .json({ success: false, message: "User is already registered for this event" })
         }
+        return res.status(500).json({ success: false, message: err.message || "Server Error" });
     }
-    return res.status(500).json({ success: false, message: "Server Error" });
 };
 
 // Remove a user from an event (un-volunteer)
@@ -201,6 +209,109 @@ export const removeUserFromEvent = async (req, res) => {
     } catch (err) {
         console.error("Error removing user from event:", err);
         return res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// Update a volunteer's role for an event
+export const updateVolunteerRole = async (req, res) => {
+    const { eventId, volunteerId } = req.params;
+    const { role, status, notes } = req.body;
+
+    if (!isValidObjectId(eventId) || !isValidObjectId(volunteerId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid event ID or volunteer ID"
+        });
+    }
+
+    const validRoles = ['Team Lead', 'Setup Crew', 'Registration', 'Cleanup', 'General Volunteer', 'Coordinator', 'Other'];
+    const validStatuses = ['registered', 'confirmed', 'attended', 'no-show', 'cancelled'];
+
+    const updateData = {};
+    if (role && validRoles.includes(role)) updateData.role = role;
+    if (status && validStatuses.includes(status)) updateData.status = status;
+    if (notes !== undefined) updateData.notes = notes;
+
+    if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "No valid fields to update. Valid roles: " + validRoles.join(', ')
+        });
+    }
+
+    try {
+        const registration = await UserEvent.findOneAndUpdate(
+            { userId: volunteerId, eventId },
+            { $set: updateData },
+            { new: true }
+        ).populate('userId', 'firstName lastName email');
+
+        if (!registration) {
+            return res.status(404).json({
+                success: false,
+                message: "Volunteer registration not found"
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Volunteer role updated successfully",
+            data: registration
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message || "Server Error"
+        });
+    }
+};
+
+// Get all volunteers for an event with their roles
+export const getEventVolunteers = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid event ID"
+        });
+    }
+
+    try {
+        const volunteers = await UserEvent.find({ eventId })
+            .populate('userId', 'firstName lastName email phone role')
+            .sort({ role: 1, createdAt: 1 });
+
+        // Group by role for easy viewing
+        const byRole = volunteers.reduce((acc, v) => {
+            const role = v.role || 'General Volunteer';
+            if (!acc[role]) acc[role] = [];
+            acc[role].push({
+                _id: v._id,
+                volunteerId: v.userId?._id,
+                firstName: v.userId?.firstName,
+                lastName: v.userId?.lastName,
+                email: v.userId?.email,
+                phone: v.userId?.phone,
+                role: v.role,
+                status: v.status,
+                notes: v.notes,
+                registeredAt: v.createdAt
+            });
+            return acc;
+        }, {});
+
+        return res.json({
+            success: true,
+            count: volunteers.length,
+            byRole,
+            data: volunteers
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message || "Server Error"
+        });
     }
 };
 

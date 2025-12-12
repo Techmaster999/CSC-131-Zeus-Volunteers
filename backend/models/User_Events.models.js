@@ -16,13 +16,28 @@ const UserEventsSchema = new mongoose.Schema({
         ref: 'Event',
         required: true
     },
-    
-    
-}, { 
-        timestamps: true,
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+    // Volunteer's assigned role for this event
+    role: {
+        type: String,
+        enum: ['Team Lead', 'Setup Crew', 'Registration', 'Cleanup', 'General Volunteer', 'Coordinator', 'Other'],
+        default: 'General Volunteer'
+    },
+    // Status of volunteer participation
+    status: {
+        type: String,
+        enum: ['registered', 'confirmed', 'attended', 'no-show', 'cancelled'],
+        default: 'registered'
+    },
+    // Optional notes about the volunteer's participation
+    notes: {
+        type: String,
+        default: ''
     }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+}
 
 );
 
@@ -35,8 +50,8 @@ UserEventsSchema.virtual("user", {
 });
 
 // helpful indexes 
-UserEventsSchema.index({ eventId: 1, userId: 1}, { unique:true});
-UserEventsSchema.index({ eventId: 1});
+UserEventsSchema.index({ eventId: 1, userId: 1 }, { unique: true });
+UserEventsSchema.index({ eventId: 1 });
 
 
 const UserEvent = mongoose.model('UserEvent', UserEventsSchema);
