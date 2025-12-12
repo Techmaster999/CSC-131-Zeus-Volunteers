@@ -12,38 +12,61 @@ function ContactPage() {
         <NavigationBar />
 
         <main className="contact-page-content" style={{ flex: 1 }}>
-
-          {/* Logo Section */}
-          <div className="logo-2">
-            <img className="img" src="/img/zeus-volunteer-logo-1-2.png" alt="Zeus Logo" />
-            <div className="text-wrapper-4">Zeus Volunteers</div>
-          </div>
-
-          {/* --- FIXED SECTION BELOW --- */}
-
-          {/* This "text-container" is the ONE CONTAINER holding everything */}
           <div className="text-container">
 
-            {/* 1. The Title (Keep separate so it stays bold/large) */}
-            <div className="header-container">
-              <div className="header">Contact Support Information</div>
+            {/* Header */}
+            <div className="contact-header">
+              <h1>We are here for you</h1>
+              <p>
+                Whether you have a question, need help, or just want to share
+                feedback, we would love to hear from you.
+              </p>
             </div>
 
-            {/* 2. The Details (Sibling to header, but inside the same wrapper) */}
-            <div className="contact-details">
-              Phone number: 707-999-9999
-              <br />
-              Email: ZeusSupport@ZeusVolunteers.com
-              <br />
-              <br />
-              When emailing support please provide details of your problem like
-              time of day when problem started, picture and written detail of
-              what the problem looks like, and any additional details of your issue.
+            {/* Contact Info */}
+            <div className="contact-info">
+              <div className="info-card">
+                <strong>Phone</strong>
+                <span>707 999 9999</span>
+              </div>
+
+              <div className="info-card">
+                <strong>Email</strong>
+                <span>ZeusSupport@ZeusVolunteers.com</span>
+              </div>
+            </div>
+
+            {/* Help Text */}
+            <p className="contact-help-text">
+              When contacting support, please include helpful details such as
+              when the issue occurred, what you were trying to do, and
+              screenshots if available.
+            </p>
+
+            {/* Illustration */}
+            <div className="contact-visual">
+              <img
+                src="/img/communitySupport.png"
+                alt="Community support illustration"
+              />
+            </div>
+
+            {/* Prompt */}
+            <p className="contact-prompt">
+              Tell us what is on your mind. We read every message and truly
+              appreciate your feedback.
+            </p>
+
+            {/* Form */}
+            <div className="contact-form">
+              <textarea
+                placeholder="Write your message, feedback, or review here..."
+                rows="6"
+              />
+              <button type="button">Submit</button>
             </div>
 
           </div>
-          {/* --- END FIXED SECTION --- */}
-
         </main>
 
         <Footer />

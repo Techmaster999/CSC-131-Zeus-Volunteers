@@ -264,7 +264,7 @@ function EventBrowsingPage() {
               selectedFilters={sidebarFilters}
             />
 
-            <section className="event-list">
+           <section className="event-list events-grid">
               {loading ? (
                 <p>Loading events...</p>
               ) : events.length === 0 ? (
