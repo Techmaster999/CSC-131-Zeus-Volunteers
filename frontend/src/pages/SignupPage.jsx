@@ -183,7 +183,7 @@ function SignupPage() {
           </div>
 
           <form className="signup-form" onSubmit={handleSubmit}>
-            
+
             {/* First Name */}
             <div className="input-group">
               <label>First Name</label>
@@ -259,6 +259,21 @@ function SignupPage() {
                 onChange={handleChange}
                 required
               />
+            </div>
+
+            {/* ROLE SELECTOR (Added for testing) */}
+            <div className="input-group">
+              <label>I want to join as a:</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+              >
+                <option value="volunteer">Volunteer</option>
+                <option value="organizer">Organizer</option>
+                <option value="admin">Admin (Test)</option>
+              </select>
             </div>
 
             {/* COUNTRY */}

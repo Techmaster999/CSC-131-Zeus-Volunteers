@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom"; 
-import Footer from "../components/Footer"; 
+import { useNavigate, Link } from "react-router-dom";
+import Footer from "../components/Footer";
 import "../styles/login.css";
 
 function LoginPage() {
@@ -20,6 +20,7 @@ function LoginPage() {
       const user = await login(identifier, password);
 
       // Redirect based on role
+
       if (user.role === "admin") navigate("/admin");
       else if (user.role === "organizer") navigate("/organizer");
       else navigate("/home");
@@ -31,20 +32,20 @@ function LoginPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      
+
       <div className="login-page-container" style={{ flex: 1 }}>
         <div className="login-box">
-          
+
           {/* Back to Home Button */}
           <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <Link 
-              to="/" 
-              style={{ 
-                textDecoration: 'none', 
-                color: '#666', 
-                fontSize: '14px', 
-                display: 'inline-flex', 
-                alignItems: 'center', 
+            <Link
+              to="/"
+              style={{
+                textDecoration: 'none',
+                color: '#666',
+                fontSize: '14px',
+                display: 'inline-flex',
+                alignItems: 'center',
                 gap: '5px',
                 fontWeight: '500'
               }}
@@ -79,30 +80,30 @@ function LoginPage() {
 
             {/* NEW SECTIONS: Forgot Password & Sign Up */}
             <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px", textAlign: "center" }}>
-               
-               {/* 1. Forgot Password Link */}
-               <Link 
-                 to="/forgot-password" 
-                 className="forgot-password" 
-                 style={{ textDecoration: 'none', color: '#666' }}
-               >
-                 Forgot Password?
-               </Link>
 
-               {/* 2. Register Link */}
-               <div className="forgot-password" style={{ cursor: 'default' }}>
-                 Don't have an account?{' '}
-                 <Link 
-                   to="/signup" 
-                   style={{ 
-                     color: "#586bff", // Matches your login button blue
-                     fontWeight: "bold", 
-                     textDecoration: 'none' 
-                   }}
-                 >
-                   Register
-                 </Link>
-               </div>
+              {/* 1. Forgot Password Link */}
+              <Link
+                to="/forgot-password"
+                className="forgot-password"
+                style={{ textDecoration: 'none', color: '#666' }}
+              >
+                Forgot Password?
+              </Link>
+
+              {/* 2. Register Link */}
+              <div className="forgot-password" style={{ cursor: 'default' }}>
+                Don't have an account?{' '}
+                <Link
+                  to="/signup"
+                  style={{
+                    color: "#586bff", // Matches your login button blue
+                    fontWeight: "bold",
+                    textDecoration: 'none'
+                  }}
+                >
+                  Register
+                </Link>
+              </div>
             </div>
 
           </form>
