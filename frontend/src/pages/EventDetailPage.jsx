@@ -52,56 +52,58 @@ function EventDetailPage() {
 
   return (
     <>
-      <NavigationBar />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <NavigationBar />
 
-      <main className="event-detail-wrapper">
+        <main className="event-detail-wrapper" style={{ flex: 1 }}>
 
-        {/* HERO BANNER */}
-        <div className="hero-banner">
-          <img src={finalImage} alt={event.eventName} className="hero-img" />
+          {/* HERO BANNER */}
+          <div className="hero-banner">
+            <img src={finalImage} alt={event.eventName} className="hero-img" />
 
-          <div className="hero-overlay"></div>
+            <div className="hero-overlay"></div>
 
-          <div className="hero-content">
-            <h1 className="hero-title">{event.eventName}</h1>
+            <div className="hero-content">
+              <h1 className="hero-title">{event.eventName}</h1>
 
-            <p className="hero-sub">
-              Organized by <span>{event.organizer}</span>
-            </p>
+              <p className="hero-sub">
+                Organized by <span>{event.organizer}</span>
+              </p>
 
-            <p className="hero-date">
-              📅 {new Date(event.date).toLocaleDateString()} — ⏰ {event.time}
-            </p>
-          </div>
-        </div>
-
-        {/* CONTENT */}
-        <section className="content-section">
-
-          <div className="info-card glass-card">
-            <h2>About This Event</h2>
-            <p>{event.details}</p>
+              <p className="hero-date">
+                📅 {new Date(event.date).toLocaleDateString()} — ⏰ {event.time}
+              </p>
+            </div>
           </div>
 
-          <div className="info-card glass-card">
-            <h2>Announcements</h2>
-            <p>{event.announcements || "No announcements available."}</p>
-          </div>
+          {/* CONTENT */}
+          <section className="content-section">
 
-          <div className="info-card glass-card">
-            <h2>Commitments</h2>
-            <p>{event.commitments || "No commitments listed."}</p>
-          </div>
+            <div className="info-card glass-card">
+              <h2>About This Event</h2>
+              <p>{event.details}</p>
+            </div>
 
-          <div className="volunteer-btn-container">
-            <button className="volunteer-btn" onClick={handleVolunteer}>
-              Volunteer Today!
-            </button>
-          </div>
-        </section>
-      </main>
+            <div className="info-card glass-card">
+              <h2>Announcements</h2>
+              <p>{event.announcements || "No announcements available."}</p>
+            </div>
 
-      <Footer />
+            <div className="info-card glass-card">
+              <h2>Commitments</h2>
+              <p>{event.commitments || "No commitments listed."}</p>
+            </div>
+
+            <div className="volunteer-btn-container">
+              <button className="volunteer-btn" onClick={handleVolunteer}>
+                Volunteer Today!
+              </button>
+            </div>
+          </section>
+        </main>
+
+        <Footer />
+      </div>
     </>
   );
 }

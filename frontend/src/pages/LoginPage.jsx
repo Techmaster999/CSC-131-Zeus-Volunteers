@@ -31,87 +31,88 @@ function LoginPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <div className="login-page-container" style={{ flex: 1 }}>
+          <div className="login-box">
 
-      <div className="login-page-container" style={{ flex: 1 }}>
-        <div className="login-box">
-
-          {/* Back to Home Button */}
-          <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <Link
-              to="/"
-              style={{
-                textDecoration: 'none',
-                color: '#666',
-                fontSize: '14px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontWeight: '500'
-              }}
-            >
-              <span>&larr;</span> Back to Home
-            </Link>
-          </div>
-
-          <h2>Zeus Volunteers</h2>
-
-          <form onSubmit={handleSubmit}>
-            <label>Username or Email</label>
-            <input
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              required
-              autoFocus
-            />
-
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-
-            {error && <p className="error">{error}</p>}
-
-            <button type="submit" className="login-btn">Login</button>
-
-            {/* NEW SECTIONS: Forgot Password & Sign Up */}
-            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px", textAlign: "center" }}>
-
-              {/* 1. Forgot Password Link */}
+            {/* Back to Home Button */}
+            <div style={{ textAlign: 'left', marginBottom: '20px' }}>
               <Link
-                to="/forgot-password"
-                className="forgot-password"
-                style={{ textDecoration: 'none', color: '#666' }}
+                to="/"
+                style={{
+                  textDecoration: 'none',
+                  color: '#666',
+                  fontSize: '14px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontWeight: '500'
+                }}
               >
-                Forgot Password?
+                <span>&larr;</span> Back to Home
               </Link>
-
-              {/* 2. Register Link */}
-              <div className="forgot-password" style={{ cursor: 'default' }}>
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  style={{
-                    color: "#586bff", // Matches your login button blue
-                    fontWeight: "bold",
-                    textDecoration: 'none'
-                  }}
-                >
-                  Register
-                </Link>
-              </div>
             </div>
 
-          </form>
-        </div>
-      </div>
+            <h2>Zeus Volunteers</h2>
 
-      <Footer />
-    </div>
+            <form onSubmit={handleSubmit}>
+              <label>Username or Email</label>
+              <input
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+                autoFocus
+              />
+
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+
+              {error && <p className="error">{error}</p>}
+
+              <button type="submit" className="login-btn">Login</button>
+
+              {/* NEW SECTIONS: Forgot Password & Sign Up */}
+              <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px", textAlign: "center" }}>
+
+                {/* 1. Forgot Password Link */}
+                <Link
+                  to="/forgot-password"
+                  className="forgot-password"
+                  style={{ textDecoration: 'none', color: '#666' }}
+                >
+                  Forgot Password?
+                </Link>
+
+                {/* 2. Register Link */}
+                <div className="forgot-password" style={{ cursor: 'default' }}>
+                  Don't have an account?{' '}
+                  <Link
+                    to="/signup"
+                    style={{
+                      color: "#586bff", // Matches your login button blue
+                      fontWeight: "bold",
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Register
+                  </Link>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <Footer />
+      </div>
+    </>
   );
 }
 

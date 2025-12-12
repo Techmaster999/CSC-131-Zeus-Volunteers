@@ -6,13 +6,11 @@ import "../styles/landingpage-style.css";
 
 function LandingPage() {
   return (
-    <div className="landing-page">
-
-      {/* REACT NAVIGATION BAR */}
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <NavigationBar />
 
       {/* MAIN CONTENT */}
-      <div className="landing-page-content">
+      <div className="landing-page-content" style={{ flex: 1 }}>
 
         {/* LEFT SIDE TEXT */}
         <div className="landing-page-info">
@@ -44,9 +42,7 @@ function LandingPage() {
         ></div>
       </div>
 
-      {/* FOOTER */}
       <Footer />
-
     </div>
   );
 }

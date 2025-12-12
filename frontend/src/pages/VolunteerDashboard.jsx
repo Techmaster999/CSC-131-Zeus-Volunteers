@@ -25,89 +25,91 @@ function VolunteerDashboard() {
 
   return (
     <>
-      <NavigationBar />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <NavigationBar />
 
-      <main className="volunteer-dashboard-page page-container">
-        <div className="dashboard-layout">
+        <main className="volunteer-dashboard-page page-container" style={{ flex: 1 }}>
+          <div className="dashboard-layout">
 
-          {/* SIDEBAR */}
-          <Sidebar />
+            {/* SIDEBAR */}
+            <Sidebar />
 
-          {/* MAIN CONTENT */}
-          <section className="dashboard-main">
+            {/* MAIN CONTENT */}
+            <section className="dashboard-main">
 
-            {/* PROFILE SECTION */}
-            <div className="dashboard-profile">
-              <div className="avatar-large">👤</div>
+              {/* PROFILE SECTION */}
+              <div className="dashboard-profile">
+                <div className="avatar-large">👤</div>
 
-              <div className="profile-info">
-                <h2>John Appleseed</h2>
-                <p>Email: johnappleseed@example.com</p>
-                <p>City: San Rafael</p>
-                <p>State: California, USA</p>
-                <p>Total Events Volunteered: <strong>14</strong></p>
+                <div className="profile-info">
+                  <h2>John Appleseed</h2>
+                  <p>Email: johnappleseed@example.com</p>
+                  <p>City: San Rafael</p>
+                  <p>State: California, USA</p>
+                  <p>Total Events Volunteered: <strong>14</strong></p>
+                </div>
               </div>
-            </div>
 
-            {/* TWO-PANEL GRID */}
-            <div className="dashboard-panels">
+              {/* TWO-PANEL GRID */}
+              <div className="dashboard-panels">
 
-              {/* LEFT PANEL - UPCOMING EVENTS */}
-              <div className="dashboard-panel">
-                <h3>Upcoming Events</h3>
+                {/* LEFT PANEL - UPCOMING EVENTS */}
+                <div className="dashboard-panel">
+                  <h3>Upcoming Events</h3>
 
-                {upcomingEvents.map((ev, i) => (
+                  {upcomingEvents.map((ev, i) => (
+                    <div key={i} className="event-row">
+                      <div>
+                        <h4>{ev.title}</h4>
+                        <p>{ev.desc}</p>
+                      </div>
+                      <span className="event-date">{ev.date}</span>
+                    </div>
+                  ))}
+
+                  <button className="primary-btn">View Calendar</button>
+                </div>
+
+                {/* RIGHT PANEL - FEATURED EVENT */}
+                <div className="dashboard-panel">
+                  <img
+                    src="/img/clean1.jpg"
+                    alt="Event Preview"
+                    className="featured-img"
+                  />
+
+                  <h3>Community Clean Up</h3>
+                  <p>Org: Cleanup Sacramento</p>
+                  <p>Date: 10/25/2025 at 2:30 PM</p>
+                  <p>Volunteers: 100/250</p>
+
+                  <button className="primary-btn">Event Details</button>
+                </div>
+              </div>
+
+              {/* PARTICIPATION HISTORY */}
+              <div className="dashboard-panel history-panel">
+                <h3>Participation History</h3>
+
+                {history.map((ev, i) => (
                   <div key={i} className="event-row">
                     <div>
                       <h4>{ev.title}</h4>
-                      <p>{ev.desc}</p>
+                      <p>{ev.org}</p>
                     </div>
                     <span className="event-date">{ev.date}</span>
                   </div>
                 ))}
 
-                <button className="primary-btn">View Calendar</button>
+                <button className="primary-btn">Reminders</button>
               </div>
 
-              {/* RIGHT PANEL - FEATURED EVENT */}
-              <div className="dashboard-panel">
-                <img
-                  src="/img/clean1.jpg"
-                  alt="Event Preview"
-                  className="featured-img"
-                />
-
-                <h3>Community Clean Up</h3>
-                <p>Org: Cleanup Sacramento</p>
-                <p>Date: 10/25/2025 at 2:30 PM</p>
-                <p>Volunteers: 100/250</p>
-
-                <button className="primary-btn">Event Details</button>
-              </div>
-            </div>
-
-            {/* PARTICIPATION HISTORY */}
-            <div className="dashboard-panel history-panel">
-              <h3>Participation History</h3>
-
-              {history.map((ev, i) => (
-                <div key={i} className="event-row">
-                  <div>
-                    <h4>{ev.title}</h4>
-                    <p>{ev.org}</p>
-                  </div>
-                  <span className="event-date">{ev.date}</span>
-                </div>
-              ))}
-
-              <button className="primary-btn">Reminders</button>
-            </div>
-
-          </section>
-        </div>
+            </section>
+          </div>
+        </main>
 
         <Footer />
-      </main>
+      </div>
     </>
   );
 }

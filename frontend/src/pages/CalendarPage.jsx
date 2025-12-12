@@ -65,67 +65,69 @@ function CalendarPage() {
 
   return (
     <>
-      <NavigationBar />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <NavigationBar />
 
-      {!user && (
-        <div className="calendar-modal-overlay">
-          <div className="calendar-modal">
-            <h2>Please Sign In</h2>
-            <p>You must be signed in to view your personalized events.</p>
+        {!user && (
+          <div className="calendar-modal-overlay">
+            <div className="calendar-modal">
+              <h2>Please Sign In</h2>
+              <p>You must be signed in to view your personalized events.</p>
 
-            <div className="modal-buttons">
-              <Link to="/login" className="modal-btn login">Login</Link>
-              <Link to="/" className="modal-btn back">Return Home</Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className={`calendar-content ${!user ? "blurred" : ""}`}>
-        <header className="page-header">My Events & Calendar</header>
-
-        <div className="dashboard">
-          <section className="calendar-section">
-            <div className="card calendar-card">
-              <h3 className="card-title">Calendar</h3>
-
-              <div className="fc-wrapper">
-                <FullCalendar
-                  ref={calendarRef}
-                  plugins={[dayGridPlugin, interactionPlugin]}
-                  initialView="dayGridMonth"
-                  events={events}
-                  dateClick={handleDateClick}
-                  height={480}
-                />
+              <div className="modal-buttons">
+                <Link to="/login" className="modal-btn login">Login</Link>
+                <Link to="/" className="modal-btn back">Return Home</Link>
               </div>
             </div>
-          </section>
+          </div>
+        )}
 
-          <section className="events-section">
-            <div className="card events-card">
-              <h3 className="card-title">Events on Selected Date</h3>
+        <div className={`calendar-content ${!user ? "blurred" : ""}`} style={{ flex: 1 }}>
+          <header className="page-header">My Events & Calendar</header>
 
-              <ul className="event-list">
-                {selectedEvents.length === 0 ? (
-                  <li className="event-item">Select a day to view events.</li>
-                ) : (
-                  selectedEvents.map((ev, index) => (
-                    <li key={index} className="event-item">
-                      <strong>{ev.title}</strong>
-                      <br />Organizer: {ev.organizer}
-                      <br />Time: {ev.time}
-                      <br /><small>{ev.description}</small>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          </section>
+          <div className="dashboard">
+            <section className="calendar-section">
+              <div className="card calendar-card">
+                <h3 className="card-title">Calendar</h3>
+
+                <div className="fc-wrapper">
+                  <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    events={events}
+                    dateClick={handleDateClick}
+                    height={480}
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="events-section">
+              <div className="card events-card">
+                <h3 className="card-title">Events on Selected Date</h3>
+
+                <ul className="event-list">
+                  {selectedEvents.length === 0 ? (
+                    <li className="event-item">Select a day to view events.</li>
+                  ) : (
+                    selectedEvents.map((ev, index) => (
+                      <li key={index} className="event-item">
+                        <strong>{ev.title}</strong>
+                        <br />Organizer: {ev.organizer}
+                        <br />Time: {ev.time}
+                        <br /><small>{ev.description}</small>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 }

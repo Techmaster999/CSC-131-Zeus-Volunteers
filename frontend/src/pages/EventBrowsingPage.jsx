@@ -132,119 +132,122 @@ function EventBrowsingPage() {
 
   return (
     <>
-      <NavigationBar />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <NavigationBar />
 
-      <main className="event-browsing-page">
-        {/* TOP SEARCH BAR - NO CATEGORY */}
-        <section className="filter-section" style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
-          <h3>Search Events</h3>
+        <main className="event-browsing-page" style={{ flex: 1 }}>
+          {/* TOP SEARCH BAR - NO CATEGORY */}
+          <section className="filter-section" style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
+            <h3>Search Events</h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
-            {/* Keyword Search */}
-            <input
-              type="text"
-              placeholder="Search by keyword..."
-              value={searchFilters.query}
-              onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
-              style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
+              {/* Keyword Search */}
+              <input
+                type="text"
+                placeholder="Search by keyword..."
+                value={searchFilters.query}
+                onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
 
-            {/* Location Filter */}
-            <input
-              type="text"
-              placeholder="Location..."
-              value={searchFilters.location}
-              onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
-              style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
+              {/* Location Filter */}
+              <input
+                type="text"
+                placeholder="Location..."
+                value={searchFilters.location}
+                onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
 
-            {/* Start Date */}
-            <input
-              type="date"
-              value={searchFilters.startDate}
-              onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
-              style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-              placeholder="Start Date"
-            />
+              {/* Start Date */}
+              <input
+                type="date"
+                value={searchFilters.startDate}
+                onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                placeholder="Start Date"
+              />
 
-            {/* End Date */}
-            <input
-              type="date"
-              value={searchFilters.endDate}
-              onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
-              style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-              placeholder="End Date"
-            />
-          </div>
+              {/* End Date */}
+              <input
+                type="date"
+                value={searchFilters.endDate}
+                onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
+                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                placeholder="End Date"
+              />
+            </div>
 
-          {/* Search & Reset Buttons */}
-          <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-            <button
-              onClick={handleSearch}
-              style={{
-                padding: '10px 30px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              🔍 Search
-            </button>
+            {/* Search & Reset Buttons */}
+            <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+              <button
+                onClick={handleSearch}
+                style={{
+                  padding: '10px 30px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                🔍 Search
+              </button>
 
-            <button
-              onClick={handleReset}
-              style={{
-                padding: '10px 30px',
-                backgroundColor: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Reset All Filters
-            </button>
-          </div>
-        </section>
-
-        {/* RESULTS COUNT */}
-        <section className="filter-top">
-          <p>Showing {loading ? '...' : events.length} Results</p>
-
-          <div className="filter-right">
-            <label>Sort by:</label>
-            <select className="sort-select">
-              <option>Most Recent</option>
-              <option>Upcoming</option>
-            </select>
-          </div>
-        </section>
-
-        <div className="event-browsing-content">
-          {/* SIDEBAR - Category, Skills, Distance */}
-          <Sidebar
-            onFilterChange={setSidebarFilters}
-            selectedFilters={sidebarFilters}
-          />
-
-          <section className="event-list">
-            {loading ? (
-              <p>Loading events...</p>
-            ) : events.length === 0 ? (
-              <p>No events found. Try different filters!</p>
-            ) : (
-              events.map(event => (
-                <EventCard key={event._id} event={event} />
-              ))
-            )}
+              <button
+                onClick={handleReset}
+                style={{
+                  padding: '10px 30px',
+                  backgroundColor: '#666',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Reset All Filters
+              </button>
+            </div>
           </section>
-        </div>
+
+          {/* RESULTS COUNT */}
+          <section className="filter-top">
+            <p>Showing {loading ? '...' : events.length} Results</p>
+
+            <div className="filter-right">
+              <label>Sort by:</label>
+              <select className="sort-select">
+                <option>Most Recent</option>
+                <option>Upcoming</option>
+              </select>
+            </div>
+          </section>
+
+          <div className="event-browsing-content">
+            {/* SIDEBAR - Category, Skills, Distance */}
+            <Sidebar
+              onFilterChange={setSidebarFilters}
+              selectedFilters={sidebarFilters}
+            />
+
+            <section className="event-list">
+              {loading ? (
+                <p>Loading events...</p>
+              ) : events.length === 0 ? (
+                <p>No events found. Try different filters!</p>
+              ) : (
+                events.map(event => (
+                  <EventCard key={event._id} event={event} />
+                ))
+              )}
+            </section>
+          </div>
+
+        </main>
 
         <Footer />
-      </main>
+      </div>
     </>
   );
 }
