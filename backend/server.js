@@ -59,20 +59,47 @@ app.get("/", (req, res) => {
 // ----------------------------------------------------
 app.use((err, _req, res, _next) => {
     console.error("Unhandled error:", err);
-    res.status(500).json({ 
-        success: false, 
-        message: err.message || "Server Error" 
+    res.status(500).json({
+        success: false,
+        message: err.message || "Server Error"
     });
 });
 
 // ----------------------------------------------------
 // START SERVER
 // ----------------------------------------------------
-const PORT = process.env.PORT || 5001;
+// Clean the PORT value (remove any trailing backslashes or whitespace)
+const PORT = parseInt((process.env.PORT || '5001').replace(/[^\d]/g, '')) || 5001;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Backend API running at http://localhost:${PORT}`);
     console.log(`📡 API endpoints:`);
     console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
     console.log(`   - Events: http://localhost:${PORT}/api/events`);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`💥 ERROR: Port ${PORT} is already in use!`);
+        console.error('Please stop the other process or use a different port.');
+        process.exit(1);
+    } else {
+        console.error('💥 SERVER ERROR:', error);
+        console.error('Stack:', error.stack);
+        process.exit(1);
+    }
+});
+
+// ----------------------------------------------------
+// PROCESS ERROR HANDLERS  
+// ----------------------------------------------------
+process.on('uncaughtException', (error) => {
+    console.error('💥 UNCAUGHT EXCEPTION:', error);
+    console.error('Stack:', error.stack);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 UNHANDLED REJECTION at:', promise);
+    console.error('Reason:', reason);
 });

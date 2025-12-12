@@ -123,7 +123,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             maxVolunteers: maxVolunteers || 0,
             duration: duration || 2,
             status: 'upcoming',
-            approvalStatus: 'approved'
+            approvalStatus: 'pending'  // Events now require admin approval
         });
 
         await newEvent.save();

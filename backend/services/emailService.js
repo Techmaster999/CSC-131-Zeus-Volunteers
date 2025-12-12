@@ -4,22 +4,39 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Create Gmail SMTP transporter
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
+let transporter;
+let emailServiceReady = false;
 
-// Verify transporter configuration
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Email service configuration error:', error);
+try {
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        // Verify transporter configuration (non-blocking)
+        transporter.verify((error, success) => {
+            if (error) {
+                console.error('❌ Email service configuration error:', error.message);
+                console.log('⚠️  Email notifications will be disabled');
+                emailServiceReady = false;
+            } else {
+                console.log('✅ Email service ready to send emails');
+                emailServiceReady = true;
+            }
+        });
     } else {
-        console.log('✅ Email service ready to send emails');
+        console.log('⚠️  Email credentials not configured. Email notifications disabled.');
+        emailServiceReady = false;
     }
-});
+} catch (error) {
+    console.error('❌ Email service initialization error:', error.message);
+    console.log('⚠️  Server will continue without email functionality');
+    emailServiceReady = false;
+}
 
 // ===== EMAIL TEMPLATES =====
 
@@ -93,6 +110,11 @@ const createEmailTemplate = (title, content) => `
  * Send event creation confirmation to organizer
  */
 export const sendEventCreatedEmail = async (eventData, organizerEmail) => {
+    if (!emailServiceReady || !transporter) {
+        console.log('📧 Email service not available - skipping event created email');
+        return { success: false, error: 'Email service not configured' };
+    }
+
     try {
         const content = `
             <h2>Event Successfully Created! 🎉</h2>
@@ -130,6 +152,11 @@ export const sendEventCreatedEmail = async (eventData, organizerEmail) => {
  * Send event approval notification to organizer
  */
 export const sendEventApprovedEmail = async (eventData, organizerEmail, adminNotes) => {
+    if (!emailServiceReady || !transporter) {
+        console.log('📧 Email service not available - skipping event approved email');
+        return { success: false, error: 'Email service not configured' };
+    }
+
     try {
         const content = `
             <h2>Your Event Has Been Approved! 🎊</h2>
@@ -168,6 +195,11 @@ export const sendEventApprovedEmail = async (eventData, organizerEmail, adminNot
  * Send event denial notification to organizer
  */
 export const sendEventDeniedEmail = async (eventData, organizerEmail, denialReason) => {
+    if (!emailServiceReady || !transporter) {
+        console.log('📧 Email service not available - skipping event denied email');
+        return { success: false, error: 'Email service not configured' };
+    }
+
     try {
         const content = `
             <h2>Event Review Update</h2>
