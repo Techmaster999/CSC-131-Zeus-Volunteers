@@ -17,7 +17,7 @@ export const getEventUsers = async (req, res) => {
     try {
         console.log("eventId param:", eventId);
         const links = await UserEvent.find({ eventId })
-        .populate({ path: "userId", select: "_id firstName lastName userName email role"})
+//        .populate({ path: "userId", select: "_id firstName lastName userName email role"})
         .sort ({ createdAt: 1 })
         .lean();
 
@@ -97,7 +97,7 @@ export const getUserRegisteredEvents = async (req, res) => {
             user: userId,
             status: { $in: ['registered']}
         })
-        .populate('event')
+//        .populate('event')
         .sort({ 'event.dateTime': 1});
 
         const activeEvents = signups
@@ -127,7 +127,7 @@ export const getUserHistory = async (req, res) => {
         const userId = req.user.id;
 
         const history = await Participation.find({ user: userId })
-            .populate('activity')
+//            .populate('activity')
             .sort({ createdAt: -1 });
 
         const stats = {
@@ -273,30 +273,13 @@ export const getAllEvents = async (req, res) => {
 // Browse all approved upcoming events
 export const getEvents = async (req, res) => {
     try {
-        const events = await Event.find({
-            status: 'upcoming',
-            approvalStatus: 'approved'
-        })
-        .populate('createdBy', 'username organization email')
+        // ✅ NO FILTERS AT ALL - Return EVERYTHING
+        const events = await Event.find({})
+//        .populate('createdBy', 'username organization email')
         .sort({ dateTime: 1})
         .lean();
 
-        // Add volunteer counts if you have SignUp model
-        // const eventsWithCounts = await Promise.all(
-        //     events.map(async (event) => {
-        //         const volunteerCount = await SignUp.countDocuments({
-        //             event: event._id,
-        //             status: 'registered'
-        //         });
-        //         return {
-        //             ...event,
-        //             currentVolunteers: volunteerCount,
-        //             spotsRemaining: event.maxVolunteers > 0
-        //                 ? event.maxVolunteers - volunteerCount
-        //                 : 'Unlimited'
-        //         };
-        //     })
-        // );
+        console.log("📊 Total events in DB:", events.length);
 
         res.json({
             success: true,
@@ -305,6 +288,7 @@ export const getEvents = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("❌ Error:", error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -317,22 +301,18 @@ export const searchEvents = async (req, res) => {
     try {
         const { query, category, location, startDate, endDate, skills } = req.query;
 
-        let searchCriteria = {
-            status: 'upcoming',
-            approvalStatus: 'approved'
-        };
+        // ✅ START WITH EMPTY CRITERIA
+        let searchCriteria = {};
 
-        // Text search
+        // Only add filters if they're provided
         if (query && query.trim()) {
             searchCriteria.$text = { $search: query };
         }
 
-        // Category filter
         if (category && category !== 'all') {
             searchCriteria.category = category;
         }
 
-        // Location filter
         if (location) {
             searchCriteria.location = {
                 $regex: location,
@@ -340,14 +320,11 @@ export const searchEvents = async (req, res) => {
             };
         }
 
-        // Date range filter
         if (startDate || endDate) {
             searchCriteria.dateTime = {};
-
             if (startDate) {
                 searchCriteria.dateTime.$gte = new Date(startDate);
             }
-
             if (endDate) {
                 const end = new Date(endDate);
                 end.setHours(23, 59, 59, 999);
@@ -355,38 +332,23 @@ export const searchEvents = async (req, res) => {
             }
         }
 
-        // ✅ NEW: Skills filter
         if (skills) {
             const skillsArray = Array.isArray(skills) 
                 ? skills 
                 : skills.split(',').map(s => s.trim());
-            
             searchCriteria.skills = { $in: skillsArray };
         }
 
-        let eventsQuery = Event.find(searchCriteria)
-            .populate('createdBy', 'username organization email')
-            .sort({ dateTime: 1 });
+        console.log("🔍 Search criteria:", searchCriteria);
 
-        // If text search, sort by relevance
-        if (query && query.trim()) {
-            eventsQuery = eventsQuery.select({ score: { $meta: "textScore" } });
-            eventsQuery = eventsQuery.sort({ score: { $meta: "textScore" } });
-        }
-
-        const events = await eventsQuery.lean();
+        const events = await Event.find(searchCriteria)
+        //    .populate('createdBy', 'username organization email')
+            .sort({ dateTime: 1 })
+            .lean();
 
         res.json({
             success: true,
             count: events.length,
-            filters: {
-                query: query || null,
-                category: category || null,
-                location: location || null,
-                startDate: startDate || null,
-                endDate: endDate || null,
-                skills: skills || null
-            },
             data: events
         });
     
@@ -404,7 +366,7 @@ export const getEventById = async (req, res) => {
         const { eventId } = req.params;
 
         const event = await Event.findById(eventId)
-            .populate('createdBy', 'username email organization phoneNumber');
+//            .populate('createdBy', 'username email organization phoneNumber');
         
         if (!event) {
             return res.status(404).json({
@@ -433,10 +395,10 @@ export const getEventsByCategory = async (req, res) => {
 
         const events = await Event.find({
             category,
-            status: 'upcoming',
+//            status: 'upcoming',
             approvalStatus: 'approved'
         })
-        .populate('createdBy', 'username organization')
+//        .populate('createdBy', 'username organization')
         .sort({ dateTime: 1 });
 
         res.json({
@@ -470,7 +432,7 @@ export const getCategories = async (req, res) => {
             categories.map(async (cat) => {
                 const count = await Event.countDocuments({
                     category: cat,
-                    status: 'upcoming',
+//                    status: 'upcoming',
                     approvalStatus: 'approved'
                 });
 
