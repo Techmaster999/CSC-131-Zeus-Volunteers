@@ -7,8 +7,8 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
-    title: {  // ✅ ADDED - Alias for eventName (some code uses this)
+
+    title: {
       type: String,
     },
 
@@ -16,30 +16,30 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
-    description: {  // ✅ ADDED - Alias for details
+
+    description: {
       type: String,
     },
 
     // ===== CATEGORIZATION (FOR FILTERS) =====
-    category: {  // ✅ ADDED - Required for category filter
+    category: {
       type: String,
       enum: ['cultural', 'environmental', 'health', 'education', 'community service', 'other'],
       required: true,
       default: 'other'
     },
-    
+
     skills: [{
       type: String,
       enum: ['Leadership', 'Teaching', 'Physical Labor', 'Technical', 'Creative', 'Administrative']
     }],
 
     // ===== LOCATION =====
-    location: {  // ✅ ADDED - Required for location filter
+    location: {
       type: String,
       required: true
     },
-    
+
     coordinates: {
       latitude: { type: Number },
       longitude: { type: Number }
@@ -50,8 +50,8 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
-    organization: {  // ✅ ADDED - Optional organization name
+
+    organization: {
       type: String
     },
 
@@ -65,32 +65,32 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
-    dateTime: {  // ✅ ADDED - Combined date+time for easier filtering/sorting
+
+    dateTime: {
       type: Date,
       required: true
     },
-    
-    duration: {  // ✅ ADDED - Event duration in hours
+
+    duration: {
       type: Number,
       default: 2
     },
 
     // ===== STATUS FIELDS =====
-    status: {  // ✅ UPDATED - Changed to event lifecycle status
+    status: {
       type: String,
       enum: ["pending", "upcoming", "ongoing", "completed", "cancelled"],
       default: "upcoming",
     },
-    
-    approvalStatus: {  // ✅ ADDED - Separate admin approval status
+
+    approvalStatus: {
       type: String,
       enum: ["pending", "approved", "denied"],
       default: "approved"  // Default to approved for existing events
     },
 
     // ===== VOLUNTEER MANAGEMENT =====
-    maxVolunteers: {  // ✅ ADDED - Max volunteers (0 = unlimited)
+    maxVolunteers: {
       type: Number,
       default: 0
     },
@@ -100,8 +100,8 @@ const EventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    
-    eventPicture: {  // ✅ ADDED - Alias for imageUrl
+
+    eventPicture: {
       type: String
     },
 
@@ -117,7 +117,7 @@ const EventSchema = new mongoose.Schema(
     },
 
     // ===== CONTACT INFO =====
-    contactInfo: {  // ✅ ADDED - Structured contact information
+    contactInfo: {
       contactPerson: String,
       email: String,
       phone: String
@@ -134,13 +134,13 @@ const EventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    
-    denialReason: {  // ✅ ADDED - Reason if event was denied
+
+    denialReason: {
       type: String,
       default: ""
     },
-    
-    createdBy: {  // ✅ ADDED - Track who created the event
+
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
     }
