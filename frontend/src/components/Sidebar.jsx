@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Sidebar({ onFilterChange, selectedFilters }) {
+function Sidebar({ onFilterChange = () => { }, selectedFilters = {} }) {
   const [expanded, setExpanded] = useState({
     category: true,
     skills: true,
@@ -70,7 +70,7 @@ function Sidebar({ onFilterChange, selectedFilters }) {
     <aside className="sidebar" style={styles.sidebar}>
       <div style={styles.header}>
         <h3 style={styles.title}>Filter By</h3>
-        <button 
+        <button
           onClick={handleClearAll}
           style={styles.clearButton}
         >
@@ -80,14 +80,14 @@ function Sidebar({ onFilterChange, selectedFilters }) {
 
       {/* CATEGORY SECTION */}
       <div style={styles.section}>
-        <div 
+        <div
           style={styles.sectionHeader}
           onClick={() => toggleSection('category')}
         >
           <span style={styles.arrow}>{expanded.category ? '▼' : '▶'}</span>
           <span style={styles.sectionTitle}>Cause / Category</span>
         </div>
-        
+
         {expanded.category && (
           <div style={styles.options}>
             {['cultural', 'environmental', 'health', 'education', 'community service', 'other'].map(category => (
@@ -109,14 +109,14 @@ function Sidebar({ onFilterChange, selectedFilters }) {
 
       {/* SKILLS SECTION */}
       <div style={styles.section}>
-        <div 
+        <div
           style={styles.sectionHeader}
           onClick={() => toggleSection('skills')}
         >
           <span style={styles.arrow}>{expanded.skills ? '▼' : '▶'}</span>
           <span style={styles.sectionTitle}>Skills Required</span>
         </div>
-        
+
         {expanded.skills && (
           <div style={styles.options}>
             {['Leadership', 'Teaching', 'Physical Labor', 'Technical', 'Creative', 'Administrative'].map(skill => (
@@ -136,13 +136,13 @@ function Sidebar({ onFilterChange, selectedFilters }) {
 
       {/* DISTANCE SECTION - DISABLED FOR NOW */}
       <div style={styles.section}>
-        <div 
-          style={{...styles.sectionHeader, opacity: 0.5, cursor: 'not-allowed'}}
+        <div
+          style={{ ...styles.sectionHeader, opacity: 0.5, cursor: 'not-allowed' }}
         >
           <span style={styles.arrow}>▶</span>
           <span style={styles.sectionTitle}>Distance (Coming Soon)</span>
         </div>
-        
+
         {/* Commented out until Google Maps API is integrated
         {expanded.distance && (
           <div style={styles.options}>
