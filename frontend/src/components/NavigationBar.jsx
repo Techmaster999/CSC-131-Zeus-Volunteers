@@ -46,7 +46,6 @@ function NavigationBar() {
           <>
             <Link to="/organizer">Organizer Dashboard</Link>
             <Link to="/events/create">Create Event</Link>
-            <Link to="/organizer/announcements">Announcements</Link>
           </>
         )}
 

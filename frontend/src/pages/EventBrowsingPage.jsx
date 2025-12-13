@@ -193,22 +193,28 @@ function EventBrowsingPage() {
               />
 
               {/* Start Date */}
-              <input
-                type="date"
-                value={searchFilters.startDate}
-                onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-                placeholder="Start Date"
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>From:</label>
+                <input
+                  type="date"
+                  value={searchFilters.startDate}
+                  onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
+                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  placeholder="Start Date"
+                />
+              </div>
 
               {/* End Date */}
-              <input
-                type="date"
-                value={searchFilters.endDate}
-                onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-                placeholder="End Date"
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>To:</label>
+                <input
+                  type="date"
+                  value={searchFilters.endDate}
+                  onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
+                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  placeholder="End Date"
+                />
+              </div>
             </div>
 
             {/* Search & Reset Buttons */}
