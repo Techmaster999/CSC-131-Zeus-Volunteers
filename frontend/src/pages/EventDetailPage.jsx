@@ -22,6 +22,7 @@ function EventDetailPage() {
   // Organizer-specific state
   const [volunteers, setVolunteers] = useState([]);
   const [attendanceMap, setAttendanceMap] = useState({});
+  const [showVolunteers, setShowVolunteers] = useState(false);
 
   // Check if current user is the organizer
   const isOrganizer = user && event && (
@@ -506,9 +507,28 @@ function EventDetailPage() {
                   )}
                 </div>
 
+                {/* View / Manage Volunteers Button */}
+                <div style={{ marginBottom: "20px" }}>
+                  <button
+                    onClick={() => setShowVolunteers(!showVolunteers)}
+                    className="secondary-btn"
+                    style={{
+                      padding: "10px 20px",
+                      backgroundColor: "#4c63ff", // Distinct blue
+                      color: "white",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontWeight: "500"
+                    }}
+                  >
+                    {showVolunteers ? "Hide Volunteers" : `View Volunteers (${volunteers.length})`}
+                  </button>
+                </div>
+
                 {/* Attendance List */}
-                {(event.status === 'ongoing' || event.status === 'completed') && (
-                  <div>
+                {showVolunteers && (
+                  <div style={{ textAlign: "left" }}>
                     <h3 style={{ marginBottom: "15px", fontSize: "18px" }}>
                       Volunteer Attendance ({volunteers.length} registered)
                     </h3>
@@ -558,7 +578,7 @@ function EventDetailPage() {
                                     {isAttended ? "Attended ✓" : "Mark Present"}
                                   </span>
                                 </label>
-                              ) : (
+                              ) : event.status === 'completed' ? (
                                 <span style={{
                                   padding: "4px 12px",
                                   borderRadius: "12px",
@@ -568,6 +588,17 @@ function EventDetailPage() {
                                   color: "white"
                                 }}>
                                   {isAttended ? "Attended" : "No-Show"}
+                                </span>
+                              ) : (
+                                <span style={{
+                                  padding: "4px 12px",
+                                  borderRadius: "12px",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
+                                  backgroundColor: "#4c63ff",
+                                  color: "white"
+                                }}>
+                                  Registered
                                 </span>
                               )}
                             </div>
