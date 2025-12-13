@@ -26,7 +26,12 @@ import {
     reviewEvent,
     getOrganizerEvents,
     updateVolunteerRole,
-    getEventVolunteers
+    getEventVolunteers,
+    startEvent,
+    endEvent,
+    cancelEvent,
+    markAttendance,
+    getUserCompletedEvents
 } from "../controllers/eventController.js";
 
 // ===== PUBLIC ROUTES =====
@@ -54,6 +59,9 @@ router.get("/my/history", protect, getUserHistory);
 // Get organizer's created events (includes pending/denied)
 router.get("/my/created", protect, getOrganizerEvents);
 
+// Get user's completed events (attended)
+router.get("/my/completed", protect, getUserCompletedEvents);
+
 // Check if user is registered for event (MUST BE BEFORE /:id)
 router.get("/check-registration", protect, checkUserRegistration);
 
@@ -73,6 +81,20 @@ router.get("/:eventId/volunteers", protect, getEventVolunteers);
 
 // Update a volunteer's role (organizer/admin)
 router.put("/:eventId/volunteers/:volunteerId", protect, updateVolunteerRole);
+
+// ===== EVENT LIFECYCLE ROUTES (organizer only) =====
+
+// Start an event
+router.put("/:eventId/start", protect, startEvent);
+
+// End an event
+router.put("/:eventId/end", protect, endEvent);
+
+// Cancel an event
+router.put("/:eventId/cancel", protect, cancelEvent);
+
+// Mark attendance for a volunteer
+router.put("/:eventId/attendance/:volunteerId", protect, markAttendance);
 
 // ===== ORGANIZER ROUTES =====
 

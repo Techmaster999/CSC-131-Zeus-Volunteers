@@ -19,6 +19,27 @@ function EventDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
 
+  // Organizer-specific state
+  const [volunteers, setVolunteers] = useState([]);
+  const [attendanceMap, setAttendanceMap] = useState({});
+
+  // Check if current user is the organizer
+  const isOrganizer = user && event && (
+    event.organizer === `${user.firstName} ${user.lastName}` ||
+    event.organizerId === user.id
+  );
+
+  // Debug logging
+  console.log("EventDetail Debug:", {
+    user: user?.firstName + " " + user?.lastName,
+    userId: user?.id,
+    eventOrganizer: event?.organizer,
+    eventOrganizerId: event?.organizerId,
+    eventStatus: event?.status,
+    isOrganizer,
+    shouldShowButton: event && !isOrganizer && event?.status !== 'completed'
+  });
+
   useEffect(() => {
     async function fetchEvent() {
       try {
@@ -39,8 +60,6 @@ function EventDetailPage() {
     async function checkRegistration() {
       if (!user || !id) return;
 
-      console.log("Checking registration for user:", user.id, "event:", id);
-
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
@@ -52,7 +71,6 @@ function EventDetailPage() {
           }
         );
         const json = await res.json();
-        console.log("Registration check response:", json);
         if (json.success) {
           setIsRegistered(json.isRegistered);
         }
@@ -64,6 +82,36 @@ function EventDetailPage() {
     checkRegistration();
   }, [user, id]);
 
+  // Fetch volunteers for organizer view
+  useEffect(() => {
+    async function fetchVolunteers() {
+      if (!isOrganizer || !id) return;
+
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://localhost:5001/api/events/${id}/volunteers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (json.success) {
+          setVolunteers(json.data || []);
+          // Initialize attendance map from existing statuses
+          const initialMap = {};
+          json.data.forEach(v => {
+            initialMap[v.userId?._id || v.userId] = v.status === 'attended';
+          });
+          setAttendanceMap(initialMap);
+        }
+      } catch (err) {
+        console.error("Error fetching volunteers:", err);
+      }
+    }
+
+    if (isOrganizer) {
+      fetchVolunteers();
+    }
+  }, [isOrganizer, id]);
+
   async function handleVolunteer() {
     if (!user) return navigate("/login");
 
@@ -72,13 +120,9 @@ function EventDetailPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const endpoint = isRegistered
-        ? "http://localhost:5001/api/events/signup"
-        : "http://localhost:5001/api/events/signup";
-
       const method = isRegistered ? "DELETE" : "POST";
 
-      const res = await fetch(endpoint, {
+      const res = await fetch("http://localhost:5001/api/events/signup", {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -108,6 +152,102 @@ function EventDetailPage() {
       setMessage({ text: "Failed to process request", type: "error" });
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  // Start event
+  async function handleStartEvent() {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/events/${id}/start`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEvent({ ...event, status: 'ongoing' });
+        setMessage({ text: "Event started! You can now take attendance.", type: "success" });
+      } else {
+        setMessage({ text: json.message, type: "error" });
+      }
+    } catch (err) {
+      setMessage({ text: "Failed to start event", type: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // End event
+  async function handleEndEvent() {
+    if (!window.confirm("Are you sure you want to end this event? This will finalize attendance.")) return;
+
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/events/${id}/end`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEvent({ ...event, status: 'completed' });
+        setMessage({ text: "Event completed! Attendance has been finalized.", type: "success" });
+      } else {
+        setMessage({ text: json.message, type: "error" });
+      }
+    } catch (err) {
+      setMessage({ text: "Failed to end event", type: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // Cancel event
+  async function handleCancelEvent() {
+    if (!window.confirm("Are you sure you want to cancel this event? This cannot be undone.")) return;
+
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/events/${id}/cancel`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMessage({ text: "Event cancelled successfully. Redirecting...", type: "success" });
+        setTimeout(() => {
+          navigate("/organizer");
+        }, 1500);
+      } else {
+        setMessage({ text: json.message, type: "error" });
+      }
+    } catch (err) {
+      setMessage({ text: "Failed to cancel event", type: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // Mark attendance
+  async function handleMarkAttendance(volunteerId, attended) {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/events/${id}/attendance/${volunteerId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ attended }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setAttendanceMap(prev => ({ ...prev, [volunteerId]: attended }));
+      }
+    } catch (err) {
+      console.error("Error marking attendance:", err);
     }
   }
 
@@ -148,6 +288,23 @@ function EventDetailPage() {
               <p className="hero-date">
                 📅 {new Date(event.date).toLocaleDateString()} — ⏰ {event.time}
               </p>
+
+              {/* Event Status Badge */}
+              {event.status && event.status !== 'upcoming' && (
+                <span style={{
+                  padding: "6px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  backgroundColor: event.status === 'ongoing' ? "#FFC300" : event.status === 'completed' ? "#28a745" : "#888",
+                  color: event.status === 'ongoing' ? "#000" : "#fff",
+                  marginTop: "10px",
+                  display: "inline-block"
+                }}>
+                  {event.status === 'ongoing' ? '🔴 Event In Progress' : event.status === 'completed' ? '✓ Completed' : event.status}
+                </span>
+              )}
             </div>
           </div>
 
@@ -186,24 +343,195 @@ function EventDetailPage() {
               </div>
             )}
 
-            <div className="volunteer-btn-container">
-              <button
-                className="volunteer-btn"
-                onClick={handleVolunteer}
-                disabled={actionLoading}
-                style={{
-                  backgroundColor: isRegistered ? "#888" : "#4c63ff",
-                  cursor: actionLoading ? "not-allowed" : "pointer",
-                  opacity: actionLoading ? 0.6 : 1,
-                }}
-              >
-                {actionLoading
-                  ? "Processing..."
-                  : isRegistered
-                    ? "Un-Volunteer?"
-                    : "Volunteer Today!"}
-              </button>
-            </div>
+            {/* ===== ORGANIZER CONTROLS ===== */}
+            {isOrganizer && (
+              <div style={{
+                backgroundColor: "white",
+                padding: "25px",
+                borderRadius: "12px",
+                marginBottom: "25px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                textAlign: "center"
+              }}>
+                <h2 style={{ marginTop: 0, marginBottom: "20px", color: "#dc3545", fontSize: "22px" }}>Organizer Controls</h2>
+
+                {/* Start/End Buttons */}
+                <div style={{ display: "flex", gap: "15px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+                  {event.status !== 'ongoing' && event.status !== 'completed' && event.status !== 'cancelled' && (
+                    <button
+                      onClick={handleStartEvent}
+                      disabled={actionLoading}
+                      style={{
+                        padding: "12px 30px",
+                        backgroundColor: "#28a745",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Start Event
+                    </button>
+                  )}
+
+                  {event.status === 'ongoing' && (
+                    <button
+                      onClick={handleEndEvent}
+                      disabled={actionLoading}
+                      style={{
+                        padding: "12px 30px",
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: "pointer"
+                      }}
+                    >
+                      End Event
+                    </button>
+                  )}
+
+                  {/* Cancel Button - available for upcoming or ongoing events */}
+                  {event.status !== 'completed' && event.status !== 'cancelled' && (
+                    <button
+                      onClick={handleCancelEvent}
+                      disabled={actionLoading}
+                      style={{
+                        padding: "12px 30px",
+                        backgroundColor: "white",
+                        color: "#dc3545",
+                        border: "2px solid #dc3545",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Cancel Event
+                    </button>
+                  )}
+                </div>
+
+                {/* Attendance List */}
+                {(event.status === 'ongoing' || event.status === 'completed') && (
+                  <div>
+                    <h3 style={{ marginBottom: "15px", fontSize: "18px" }}>
+                      Volunteer Attendance ({volunteers.length} registered)
+                    </h3>
+
+                    {volunteers.length === 0 ? (
+                      <p style={{ color: "#666" }}>No volunteers registered for this event.</p>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {volunteers.map(v => {
+                          const volId = v.userId?._id || v.userId;
+                          const volName = v.userId?.firstName
+                            ? `${v.userId.firstName} ${v.userId.lastName}`
+                            : `Volunteer ${volId}`;
+                          const isAttended = attendanceMap[volId] || false;
+
+                          return (
+                            <div
+                              key={volId}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: "12px 15px",
+                                backgroundColor: isAttended ? "#d4edda" : "#f8f9fa",
+                                borderRadius: "8px",
+                                border: isAttended ? "1px solid #28a745" : "1px solid #ddd"
+                              }}
+                            >
+                              <div>
+                                <strong>{volName}</strong>
+                                {v.userId?.email && (
+                                  <span style={{ color: "#666", marginLeft: "10px", fontSize: "14px" }}>
+                                    {v.userId.email}
+                                  </span>
+                                )}
+                              </div>
+
+                              {event.status === 'ongoing' ? (
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isAttended}
+                                    onChange={(e) => handleMarkAttendance(volId, e.target.checked)}
+                                    style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                                  />
+                                  <span style={{ fontWeight: isAttended ? "bold" : "normal", color: isAttended ? "#28a745" : "#666" }}>
+                                    {isAttended ? "Attended ✓" : "Mark Present"}
+                                  </span>
+                                </label>
+                              ) : (
+                                <span style={{
+                                  padding: "4px 12px",
+                                  borderRadius: "12px",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
+                                  backgroundColor: isAttended ? "#28a745" : "#dc3545",
+                                  color: "white"
+                                }}>
+                                  {isAttended ? "Attended" : "No-Show"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {event.status === 'completed' && (
+                  <p style={{ marginTop: "15px", color: "#28a745", fontWeight: "bold" }}>
+                    ✓ This event has been completed. Attendance is finalized.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Volunteer Button (for non-organizers when event is not completed) */}
+            {event && !isOrganizer && event.status !== 'completed' && (
+              <div className="volunteer-btn-container" style={{ marginTop: "20px" }}>
+                <button
+                  className="volunteer-btn"
+                  onClick={handleVolunteer}
+                  disabled={actionLoading || event.status === 'ongoing'}
+                  style={{
+                    padding: "15px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    borderRadius: "8px",
+                    border: "none",
+                    backgroundColor: isRegistered ? "#888" : event.status === 'ongoing' ? "#ccc" : "#4c63ff",
+                    color: "white",
+                    cursor: actionLoading || event.status === 'ongoing' ? "not-allowed" : "pointer",
+                    opacity: actionLoading ? 0.6 : 1,
+                  }}
+                >
+                  {actionLoading
+                    ? "Processing..."
+                    : event.status === 'ongoing'
+                      ? "Event In Progress"
+                      : isRegistered
+                        ? "Un-Volunteer?"
+                        : "Volunteer Today!"}
+                </button>
+              </div>
+            )}
+
+            {/* Always show button if user is logged in and not organizer - fallback */}
+            {event && user && !isOrganizer && event.status === 'completed' && (
+              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>
+                <p>This event has been completed.</p>
+              </div>
+            )}
           </section>
         </main>
 
