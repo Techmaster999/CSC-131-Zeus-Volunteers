@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import Footer from "../../components/Footer";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
 import { useAuth } from "../../context/AuthContext";
 
 import "../../styles/eventCreationPage.css";
@@ -19,6 +20,7 @@ function EventCreationPage() {
     date: "",
     time: "",
     location: "",
+    coordinates: null,
     category: "community service",
     details: "",
     announcements: "",
@@ -26,6 +28,15 @@ function EventCreationPage() {
     maxVolunteers: 20,
     duration: 2,
   });
+
+  // Handle location selection from autocomplete
+  function handleLocationChange(locationData) {
+    setEventData({
+      ...eventData,
+      location: locationData.location,
+      coordinates: locationData.coordinates
+    });
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -48,6 +59,7 @@ function EventCreationPage() {
         date: eventData.date,
         time: eventData.time,
         location: eventData.location,
+        coordinates: eventData.coordinates,
         category: eventData.category,
         details: eventData.details,
         announcements: eventData.announcements,
@@ -188,15 +200,13 @@ function EventCreationPage() {
               </div>
             </div>
 
-            {/* Row 3: Location */}
+            {/* Row 3: Location with Autocomplete */}
             <div className="form-group full-width">
               <label>Location *</label>
-              <input
-                type="text"
-                name="location"
+              <LocationAutocomplete
                 value={eventData.location}
-                onChange={handleChange}
-                placeholder="e.g., 123 Main Street, Sacramento, CA"
+                onChange={handleLocationChange}
+                placeholder="Start typing an address..."
                 required
               />
             </div>
