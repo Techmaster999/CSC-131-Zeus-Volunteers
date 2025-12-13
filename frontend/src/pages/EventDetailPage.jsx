@@ -50,6 +50,19 @@ function EventDetailPage() {
   const index = Math.abs(event._id?.charCodeAt(0) % rotatingImages.length);
   const finalImage = event.imageUrl || rotatingImages[index];
 
+  const eventAddress = event.location
+  const encodedLocation = encodeURIComponent(eventAddress);
+  const GOOGLE_API_KEY = "AIzaSyDzGBPDdTCc9h_QgnSki4FU6GYz0VWEUsA";
+  const staticMapUrl = 
+    `https://maps.googleapis.com/maps/api/staticmap?` +
+    `center=${encodedLocation}` + // Map center is the event location
+    `&zoom=12` +
+    `&maptype=roadmap` +
+    `&size=520x150` +
+    `&scale=2` +
+    `&markers=color:red|label:|${encodedLocation}` + // Add a red marker labeled 'E' at the same location
+    `&key=${GOOGLE_API_KEY}`;
+
   return (
     <>
       <NavigationBar />
@@ -77,6 +90,11 @@ function EventDetailPage() {
 
         {/* CONTENT */}
         <section className="content-section">
+
+          <div>
+            <img src={staticMapUrl}>
+            </img>
+          </div>
 
           <div className="info-card glass-card">
             <h2>About This Event</h2>
