@@ -20,6 +20,8 @@ import authRoutes from "./routes/auth.js";
 import eventRoutes from "./routes/events.js";
 import reminderRoutes from "./routes/reminders.js";
 import contactRoutes from "./routes/contact.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
+
 
 // Import cron for scheduled tasks
 import cron from "node-cron";
@@ -47,6 +49,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/contact", contactRoutes);
+app.use(express.json());
+app.use("/api/feedback", feedbackRoutes);
 
 // ----------------------------------------------------
 // ROOT ROUTE (API INFO)
