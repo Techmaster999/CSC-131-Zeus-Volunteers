@@ -550,13 +550,33 @@ export const searchEvents = async (req, res) => {
         }
 
         if (location) {
-            // Split location into parts (city, state, country, etc.) for flexible matching
-            // e.g., "Sacramento, CA, USA" becomes search for Sacramento OR CA OR USA
-            const locationParts = location.split(/[,\s]+/).filter(part => part.length > 1);
-            if (locationParts.length > 0) {
-                // Create OR condition for any part of the location
+            console.log("📍 Location filter input:", location);
+
+            // Smart location matching:
+            // - If input contains comma (from autocomplete like "Alameda, CA, USA") → use city name (first part)
+            // - If no comma (direct typing like "CA" or "Sacramento") → search entire location field
+
+            if (location.includes(',')) {
+                // Autocomplete selection - extract city name for precise matching
+                const locationParts = location.split(',').map(part => part.trim()).filter(part => part.length > 1);
+                console.log("📍 Location parts:", locationParts);
+
+                if (locationParts.length > 0) {
+                    const cityName = locationParts[0];
+                    console.log("📍 Searching for city:", cityName);
+
+                    searchCriteria.location = {
+                        $regex: cityName,
+                        $options: 'i'
+                    };
+                }
+            } else {
+                // Direct text input - search anywhere in location field
+                // This allows searching by state abbreviation (CA), zip code, street name, etc.
+                console.log("📍 Searching entire location for:", location);
+
                 searchCriteria.location = {
-                    $regex: locationParts.join('|'),
+                    $regex: location.trim(),
                     $options: 'i'
                 };
             }
