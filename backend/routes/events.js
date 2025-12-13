@@ -24,7 +24,9 @@ import {
     getUserRegisteredEvents,
     getUserHistory,
     reviewEvent,
-    getOrganizerEvents
+    getOrganizerEvents,
+    updateVolunteerRole,
+    getEventVolunteers
 } from "../controllers/eventController.js";
 
 // ===== PUBLIC ROUTES =====
@@ -65,6 +67,12 @@ router.delete("/signup", protect, removeUserFromEvent);
 
 // Get single event by id
 router.get("/:eventId", getEventById);
+
+// Get all volunteers for an event (organizer/admin)
+router.get("/:eventId/volunteers", protect, getEventVolunteers);
+
+// Update a volunteer's role (organizer/admin)
+router.put("/:eventId/volunteers/:volunteerId", protect, updateVolunteerRole);
 
 // ===== ORGANIZER ROUTES =====
 
