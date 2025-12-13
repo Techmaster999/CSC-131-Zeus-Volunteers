@@ -25,7 +25,17 @@ function EventCreationPage() {
     commitments: "",
     maxVolunteers: 20,
     duration: 2,
+    skills: [],
   });
+
+  const AVAILABLE_SKILLS = [
+    'Leadership',
+    'Teaching',
+    'Physical Labor',
+    'Technical',
+    'Creative',
+    'Administrative'
+  ];
 
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -38,6 +48,15 @@ function EventCreationPage() {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
     }
+  }
+
+  function handleSkillChange(skill) {
+    setEventData(prev => {
+      const skills = prev.skills.includes(skill)
+        ? prev.skills.filter(s => s !== skill)
+        : [...prev.skills, skill];
+      return { ...prev, skills };
+    });
   }
 
   async function handleSubmit(e) {
@@ -64,6 +83,11 @@ function EventCreationPage() {
       formData.append("commitments", eventData.commitments);
       formData.append("maxVolunteers", parseInt(eventData.maxVolunteers) || 20);
       formData.append("duration", parseInt(eventData.duration) || 2);
+
+      // Append skills individually for array handling
+      eventData.skills.forEach(skill => {
+        formData.append("skills", skill);
+      });
 
       if (selectedFile) {
         formData.append("image", selectedFile);
@@ -94,6 +118,7 @@ function EventCreationPage() {
           commitments: "",
           maxVolunteers: 20,
           duration: 2,
+          skills: [],
         });
         setSelectedFile(null);
         // Redirect after 2 seconds
@@ -263,6 +288,34 @@ function EventCreationPage() {
                 onChange={handleChange}
                 placeholder="Any special announcements or updates for volunteers..."
               ></textarea>
+            </div>
+
+            {/* Commitments */}
+            <div className="form-group full-width">
+              <label>Required Skills</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "5px" }}>
+                {AVAILABLE_SKILLS.map(skill => (
+                  <label key={skill} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 12px",
+                    backgroundColor: eventData.skills.includes(skill) ? "#e6f0ff" : "#f5f5f5",
+                    border: eventData.skills.includes(skill) ? "1px solid #4c63ff" : "1px solid #ddd",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    fontSize: "14px"
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={eventData.skills.includes(skill)}
+                      onChange={() => handleSkillChange(skill)}
+                      style={{ accentColor: "#4c63ff" }}
+                    />
+                    {skill}
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Commitments */}

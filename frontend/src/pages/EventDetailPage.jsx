@@ -389,6 +389,27 @@ function EventDetailPage() {
 
 
 
+            {/* Required Skills */}
+            {event.skills && event.skills.length > 0 && (
+              <div className="info-card glass-card">
+                <h2>Required Skills</h2>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                  {event.skills.map((skill, index) => (
+                    <span key={index} style={{
+                      backgroundColor: "#e6f0ff",
+                      color: "#4c63ff",
+                      padding: "6px 12px",
+                      borderRadius: "20px",
+                      fontSize: "14px",
+                      fontWeight: "500"
+                    }}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="info-card glass-card">
               <h2>Commitments</h2>
               <p>{event.commitments || "No commitments listed."}</p>

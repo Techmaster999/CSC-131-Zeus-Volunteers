@@ -12,6 +12,7 @@ import "../styles/styleguide.css";
 function EventBrowsingPage() {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
+  const [sortOption, setSortOption] = useState("Soonest");
   const [loading, setLoading] = useState(true);
   const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
   const initialLoad = useRef(true);
@@ -163,6 +164,31 @@ function EventBrowsingPage() {
     loadEvents();
   };
 
+  // Sort events when option changes
+  useEffect(() => {
+    if (events.length === 0) return;
+
+    const sortedEvents = [...events].sort((a, b) => {
+      // Logic for chronological or creation-based sorting
+      if (sortOption === "Soonest") {
+        // Event Date Ascending
+        return new Date(a.date) - new Date(b.date);
+      } else if (sortOption === "Furthest") {
+        // Event Date Descending
+        return new Date(b.date) - new Date(a.date);
+      } else if (sortOption === "Recently Added") {
+        // Creation Date Descending
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return 0;
+    });
+
+    // Only update if order actually changed to avoid infinite loops
+    if (JSON.stringify(sortedEvents) !== JSON.stringify(events)) {
+      setEvents(sortedEvents);
+    }
+  }, [sortOption, events]); // Depend on sortOption and events
+
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
@@ -256,9 +282,14 @@ function EventBrowsingPage() {
 
             <div className="filter-right">
               <label>Sort by:</label>
-              <select className="sort-select">
-                <option>Most Recent</option>
-                <option>Upcoming</option>
+              <select
+                className="sort-select"
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+              >
+                <option value="Soonest">Date: Soonest</option>
+                <option value="Furthest">Date: Furthest</option>
+                <option value="Recently Added">Recently Added</option>
               </select>
             </div>
           </section>
