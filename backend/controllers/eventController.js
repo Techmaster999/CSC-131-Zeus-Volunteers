@@ -547,10 +547,16 @@ export const searchEvents = async (req, res) => {
         }
 
         if (location) {
-            searchCriteria.location = {
-                $regex: location,
-                $options: 'i'
-            };
+            // Split location into parts (city, state, country, etc.) for flexible matching
+            // e.g., "Sacramento, CA, USA" becomes search for Sacramento OR CA OR USA
+            const locationParts = location.split(/[,\s]+/).filter(part => part.length > 1);
+            if (locationParts.length > 0) {
+                // Create OR condition for any part of the location
+                searchCriteria.location = {
+                    $regex: locationParts.join('|'),
+                    $options: 'i'
+                };
+            }
         }
 
         if (startDate || endDate) {
