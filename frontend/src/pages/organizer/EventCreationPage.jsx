@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import Footer from "../../components/Footer";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
 import { useAuth } from "../../context/AuthContext";
 
 import "../../styles/eventCreationPage.css";
@@ -19,6 +20,7 @@ function EventCreationPage() {
     date: "",
     time: "",
     location: "",
+    coordinates: null,
     category: "community service",
     details: "",
     announcements: "",
@@ -38,6 +40,15 @@ function EventCreationPage() {
   ];
 
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // Handle location selection from autocomplete
+  function handleLocationChange(locationData) {
+    setEventData({
+      ...eventData,
+      location: locationData.location,
+      coordinates: locationData.coordinates
+    });
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -76,9 +87,13 @@ function EventCreationPage() {
       formData.append("date", eventData.date);
       formData.append("time", eventData.time);
       formData.append("location", eventData.location);
+      // Include coordinates if available
+      if (eventData.coordinates) {
+        formData.append("coordinates", JSON.stringify(eventData.coordinates));
+      }
       formData.append("category", eventData.category);
       formData.append("details", eventData.details);
-      formData.append("description", eventData.details); // fallback
+      formData.append("description", eventData.details);
       formData.append("announcements", eventData.announcements);
       formData.append("commitments", eventData.commitments);
       formData.append("maxVolunteers", parseInt(eventData.maxVolunteers) || 20);
@@ -227,15 +242,13 @@ function EventCreationPage() {
               </div>
             </div>
 
-            {/* Row 3: Location */}
+            {/* Row 3: Location with Autocomplete */}
             <div className="form-group full-width">
               <label>Location *</label>
-              <input
-                type="text"
-                name="location"
+              <LocationAutocomplete
                 value={eventData.location}
-                onChange={handleChange}
-                placeholder="e.g., 123 Main Street, Sacramento, CA"
+                onChange={handleLocationChange}
+                placeholder="Start typing an address..."
                 required
               />
             </div>
