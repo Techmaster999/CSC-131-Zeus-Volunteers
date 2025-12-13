@@ -25,7 +25,7 @@ function VolunteerDashboard() {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
         <NavigationBar />
 
         <main className="volunteer-dashboard-page page-container" style={{ flex: 1 }}>

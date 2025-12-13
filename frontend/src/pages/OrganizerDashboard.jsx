@@ -65,10 +65,10 @@ function OrganizerDashboard() {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
         <NavigationBar />
 
-        <main style={{ flex: 1, padding: "40px 20px", backgroundColor: "#f5f5f5" }}>
+        <main style={{ flex: "1 0 auto", padding: "40px 20px", backgroundColor: "#e8e8e8" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
             {/* HEADER */}

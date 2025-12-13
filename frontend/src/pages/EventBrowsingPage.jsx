@@ -165,7 +165,7 @@ function EventBrowsingPage() {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
         <NavigationBar />
 
         <main className="event-browsing-page" style={{ flex: 1 }}>
@@ -264,7 +264,7 @@ function EventBrowsingPage() {
               selectedFilters={sidebarFilters}
             />
 
-           <section className="event-list events-grid">
+            <section className="event-list events-grid">
               {loading ? (
                 <p>Loading events...</p>
               ) : events.length === 0 ? (

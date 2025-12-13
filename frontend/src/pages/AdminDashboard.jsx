@@ -61,7 +61,7 @@ function AdminDashboard() {
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <NavigationBar />
 
-        <div style={{ padding: "40px", flex: 1, backgroundColor: "#f5f5f5" }}>
+        <div style={{ padding: "40px", flex: 1, backgroundColor: "#e8e8e8" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
             {/* HEADER */}
