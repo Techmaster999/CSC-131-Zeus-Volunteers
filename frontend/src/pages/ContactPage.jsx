@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+import API_URL from "../config";
 
 import "../styles/contactPage.css";
 
@@ -20,7 +21,7 @@ function ContactPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/api/feedback", {
+      const response = await fetch(`${API_URL}/api/feedback`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../config";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -27,7 +28,7 @@ export function AuthProvider({ children }) {
   // Login function (calls backend)
   //
   async function login(identifier, password) {
-    const res = await fetch("http://localhost:5001/api/auth/login", {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifier, password }),
@@ -54,7 +55,7 @@ export function AuthProvider({ children }) {
   // Registration
   //
   async function registerUser(formData) {
-    const res = await fetch("http://localhost:5001/api/auth/register", {
+    const res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -77,7 +78,7 @@ export function AuthProvider({ children }) {
 
     try {
       // optional backend logout call
-      await fetch("http://localhost:5001/api/auth/logout", {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
         headers: {
           Authorization: token ? `Bearer ${token}` : "",

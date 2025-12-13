@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NavigationBar from "../components/NavigationBar";
 import { useAuth } from "../context/AuthContext";
+import API_URL from "../config";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 
@@ -16,7 +17,7 @@ function AdminDashboard() {
   async function fetchPendingEvents() {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5001/api/events/admin/all", {
+      const res = await fetch(`${API_URL}/api/events/admin/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

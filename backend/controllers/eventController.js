@@ -534,8 +534,11 @@ export const searchEvents = async (req, res) => {
     try {
         const { query, category, location, startDate, endDate, skills } = req.query;
 
-        // ✅ START WITH EMPTY CRITERIA
-        let searchCriteria = {};
+        // ✅ START WITH BASE CRITERIA - only show approved, non-cancelled events
+        let searchCriteria = {
+            approvalStatus: 'approved',
+            status: { $ne: 'cancelled' }
+        };
 
         // Only add filters if they're provided
         if (query && query.trim()) {
@@ -547,10 +550,16 @@ export const searchEvents = async (req, res) => {
         }
 
         if (location) {
-            searchCriteria.location = {
-                $regex: location,
-                $options: 'i'
-            };
+            // Split location into parts (city, state, country, etc.) for flexible matching
+            // e.g., "Sacramento, CA, USA" becomes search for Sacramento OR CA OR USA
+            const locationParts = location.split(/[,\s]+/).filter(part => part.length > 1);
+            if (locationParts.length > 0) {
+                // Create OR condition for any part of the location
+                searchCriteria.location = {
+                    $regex: locationParts.join('|'),
+                    $options: 'i'
+                };
+            }
         }
 
         if (startDate || endDate) {

@@ -3,6 +3,8 @@ import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
+import LocationAutocomplete from "../components/LocationAutocomplete";
+import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
 import "../styles/globals.css";
@@ -42,7 +44,7 @@ function EventBrowsingPage() {
 
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/events/my/registered", {
+        const res = await fetch(`${API_URL}/api/events/my/registered`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -89,7 +91,7 @@ function EventBrowsingPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/events");
+      const res = await fetch(`${API_URL}/api/events`);
       const json = await res.json();
 
       console.log("📥 Loaded events:", json.count || json.data?.length);
@@ -131,7 +133,7 @@ function EventBrowsingPage() {
 
       console.log("🔍 Search params:", params.toString());
 
-      const res = await fetch(`http://localhost:5001/api/events/search?${params}`);
+      const res = await fetch(`${API_URL}/api/events/search?${params}`);
       const json = await res.json();
 
       console.log("📥 Search results:", json.count || json.data?.length);
@@ -201,22 +203,30 @@ function EventBrowsingPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
               {/* Keyword Search */}
-              <input
-                type="text"
-                placeholder="Search by keyword..."
-                value={searchFilters.query}
-                onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Keyword:</label>
+                <input
+                  type="text"
+                  placeholder="Search by keyword..."
+                  value={searchFilters.query}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, query: e.target.value }))}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
 
-              {/* Location Filter */}
-              <input
-                type="text"
-                placeholder="Location..."
-                value={searchFilters.location}
-                onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-              />
+              {/* Location Filter with Google Places Autocomplete */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Location:</label>
+                <LocationAutocomplete
+                  value={searchFilters.location}
+                  onChange={(locationData) => setSearchFilters(prev => ({
+                    ...prev,
+                    location: locationData.location || locationData
+                  }))}
+                  placeholder="Search by location..."
+                  showSuccessMessage={false}
+                />
+              </div>
 
               {/* Start Date */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -224,8 +234,8 @@ function EventBrowsingPage() {
                 <input
                   type="date"
                   value={searchFilters.startDate}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
-                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', width: "100%", boxSizing: "border-box", fontSize: '14px' }}
                   placeholder="Start Date"
                 />
               </div>
@@ -236,8 +246,8 @@ function EventBrowsingPage() {
                 <input
                   type="date"
                   value={searchFilters.endDate}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
-                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', width: "100%", boxSizing: "border-box", fontSize: '14px' }}
                   placeholder="End Date"
                 />
               </div>

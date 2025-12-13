@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import Footer from "../../components/Footer";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
+import API_URL from "../../config";
 import { useAuth } from "../../context/AuthContext";
 
 import "../../styles/eventCreationPage.css";
@@ -82,7 +83,7 @@ function EventCreationPage() {
       const formData = new FormData();
       formData.append("eventName", eventData.eventName);
       formData.append("title", eventData.eventName);
-      formData.append("organizer", user?.firstName + " " + user?.lastName || "Unknown Organizer");
+      formData.append("organizer", user?.username || "Unknown Organizer");
       formData.append("organizerId", user?.id);
       formData.append("date", eventData.date);
       formData.append("time", eventData.time);
@@ -108,7 +109,7 @@ function EventCreationPage() {
         formData.append("image", selectedFile);
       }
 
-      const res = await fetch("http://localhost:5001/api/events", {
+      const res = await fetch(`${API_URL}/api/events`, {
         method: "POST",
         headers: {
           // Content-Type is set automatically by browser with boundary for FormData

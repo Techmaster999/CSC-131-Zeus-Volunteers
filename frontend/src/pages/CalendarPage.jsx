@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
 import ReminderPanel from "../components/ReminderPanel";
+import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
@@ -26,7 +27,7 @@ function CalendarPage() {
   useEffect(() => {
     async function loadEvents() {
       try {
-        const res = await fetch("http://localhost:5001/api/events");
+        const res = await fetch(`${API_URL}/api/events`);
         const json = await res.json();
 
         const formatted = json.data.map((ev) => ({
@@ -102,7 +103,7 @@ function CalendarPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:5001/api/reminders", {
+      const res = await fetch(`${API_URL}/api/reminders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

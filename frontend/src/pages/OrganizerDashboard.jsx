@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
 import "../styles/homepage-global.css";
@@ -24,7 +25,7 @@ function OrganizerDashboard() {
         const token = localStorage.getItem("token");
 
         // Use the organizer-specific endpoint
-        const res = await fetch("http://localhost:5001/api/events/my/created", {
+        const res = await fetch(`${API_URL}/api/events/my/created`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

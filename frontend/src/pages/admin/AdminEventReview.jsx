@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import NavigationBar from "../../components/NavigationBar";
 import Footer from "../../components/Footer";
+import API_URL from "../../config";
 import { useAuth } from "../../context/AuthContext";
 
 function AdminEventReview() {
@@ -19,7 +20,7 @@ function AdminEventReview() {
     useEffect(() => {
         async function fetchEvent() {
             try {
-                const res = await fetch(`http://localhost:5001/api/events/${eventId}`);
+                const res = await fetch(`${API_URL}/api/events/${eventId}`);
                 const json = await res.json();
                 setEvent(json.data || json);
             } catch (err) {
@@ -38,7 +39,7 @@ function AdminEventReview() {
 
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://localhost:5001/api/events/${eventId}/review`, {
+            const res = await fetch(`${API_URL}/api/events/${eventId}/review`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
