@@ -12,6 +12,7 @@ import AdminLogin from "./pages/AdminLogin";
 // GENERAL AUTHENTICATED PAGES
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 // EVENTS
 import EventBrowsingPage from "./pages/EventBrowsingPage";
@@ -73,6 +74,14 @@ function App() {
             }
           />
 
+          <Route
+            path="/announcements"
+            element={
+              <ProtectedRoute>
+                <AnnouncementsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ------------------------- */}
           {/* ORGANIZER DASHBOARD + TOOLS */}

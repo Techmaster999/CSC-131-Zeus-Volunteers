@@ -106,10 +106,10 @@ const EventSchema = new mongoose.Schema(
     },
 
     // ===== ADDITIONAL CONTENT =====
-    announcements: {
-      type: String,
-      default: "",
-    },
+    announcements: [{
+      message: { type: String, required: true },
+      sentAt: { type: Date, default: Date.now }
+    }],
 
     commitments: {
       type: String,

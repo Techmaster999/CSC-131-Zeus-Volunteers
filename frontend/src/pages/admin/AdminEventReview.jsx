@@ -172,7 +172,23 @@ function AdminEventReview() {
                 {event.announcements && (
                     <div style={{ backgroundColor: "#fff8e1", padding: "25px", borderRadius: "12px", marginBottom: "20px" }}>
                         <h3 style={{ marginBottom: "15px" }}>Announcements</h3>
-                        <p style={{ lineHeight: "1.7", color: "#444" }}>{event.announcements}</p>
+                        {Array.isArray(event.announcements) ? (
+                            event.announcements.length > 0 ? (
+                                <ul style={{ paddingLeft: "20px", color: "#444" }}>
+                                    {event.announcements.map((ann, idx) => (
+                                        <li key={idx} style={{ marginBottom: "10px" }}>
+                                            {typeof ann === 'string' ? ann : (ann.message || "")}
+                                            {ann.sentAt && <span style={{ fontSize: "12px", color: "#888", marginLeft: "10px" }}>({new Date(ann.sentAt).toLocaleDateString()})</span>}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ lineHeight: "1.7", color: "#666", fontStyle: "italic" }}>No announcements.</p>
+                            )
+                        ) : (
+                            // Fallback for legacy string format
+                            <p style={{ lineHeight: "1.7", color: "#444" }}>{event.announcements}</p>
+                        )}
                     </div>
                 )}
 

@@ -30,6 +30,7 @@ import {
     startEvent,
     endEvent,
     cancelEvent,
+    addAnnouncement,
     markAttendance,
     getUserCompletedEvents
 } from "../controllers/eventController.js";
@@ -96,6 +97,9 @@ router.put("/:eventId/cancel", protect, cancelEvent);
 // Mark attendance for a volunteer
 router.put("/:eventId/attendance/:volunteerId", protect, markAttendance);
 
+// Post an announcement
+router.post("/:eventId/announcement", protect, addAnnouncement);
+
 // ===== ORGANIZER ROUTES =====
 
 // Create new event
@@ -160,7 +164,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             category,
             location,
             skills: skills || [],
-            announcements: announcements || "",
+            announcements: announcements ? [{ message: announcements, sentAt: new Date() }] : [],
             commitments: commitments || "",
             eventPicture: imageUrl,
             imageUrl: imageUrl,

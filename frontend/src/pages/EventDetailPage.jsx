@@ -230,6 +230,39 @@ function EventDetailPage() {
     }
   }
 
+  // Post announcement
+  const [newAnnouncement, setNewAnnouncement] = useState("");
+
+  async function handlePostAnnouncement() {
+    if (!newAnnouncement.trim()) return;
+
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5001/api/events/${id}/announcement`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: newAnnouncement })
+      });
+      const json = await res.json();
+      if (json.success) {
+        // Update local event state with new announcement list
+        setEvent({ ...event, announcements: json.data });
+        setNewAnnouncement("");
+        setMessage({ text: "Announcement posted successfully!", type: "success" });
+      } else {
+        setMessage({ text: json.message, type: "error" });
+      }
+    } catch (err) {
+      setMessage({ text: "Failed to post announcement", type: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
   // Mark attendance
   async function handleMarkAttendance(volunteerId, attended) {
     try {
@@ -316,10 +349,7 @@ function EventDetailPage() {
               <p>{event.details}</p>
             </div>
 
-            <div className="info-card glass-card">
-              <h2>Announcements</h2>
-              <p>{event.announcements || "No announcements available."}</p>
-            </div>
+
 
             <div className="info-card glass-card">
               <h2>Commitments</h2>
@@ -496,6 +526,94 @@ function EventDetailPage() {
               </div>
             )}
 
+
+
+            {/* ===== ANNOUNCEMENTS SECTION ===== */}
+            {(isOrganizer || (event.announcements && event.announcements.length > 0)) && (
+              <div style={{
+                backgroundColor: "white",
+                padding: "25px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                marginBottom: "25px"
+              }}>
+                <h2 style={{ marginTop: 0, marginBottom: "20px", color: "#586bff" }}>📢 Announcements</h2>
+
+                {/* Organizer Post Box */}
+                {isOrganizer && (
+                  <div style={{ marginBottom: "25px", padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "10px", border: "1px solid #e9ecef" }}>
+                    <h4 style={{ marginTop: 0, marginBottom: "10px" }}>Post New Announcement</h4>
+                    <textarea
+                      value={newAnnouncement}
+                      onChange={(e) => setNewAnnouncement(e.target.value)}
+                      placeholder="Write an announcement for your volunteers..."
+                      rows="3"
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ced4da",
+                        marginBottom: "10px",
+                        fontFamily: "inherit",
+                        resize: "vertical"
+                      }}
+                    />
+                    <div style={{ textAlign: "right" }}>
+                      <button
+                        onClick={handlePostAnnouncement}
+                        disabled={actionLoading || !newAnnouncement.trim()}
+                        style={{
+                          padding: "8px 20px",
+                          backgroundColor: "#586bff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontWeight: "bold",
+                          cursor: (actionLoading || !newAnnouncement.trim()) ? "not-allowed" : "pointer",
+                          opacity: (actionLoading || !newAnnouncement.trim()) ? 0.6 : 1
+                        }}
+                      >
+                        {actionLoading ? "Posting..." : "Post Announcement"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Announcements List */}
+                {(!event.announcements || event.announcements.length === 0) ? (
+                  <p style={{ color: "#666", fontStyle: "italic", textAlign: "center", padding: "20px 0" }}>
+                    No announcements yet.
+                  </p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                    {[...(Array.isArray(event.announcements) ? event.announcements : [])]
+                      .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
+                      .map((ann, idx) => {
+                        const msg = typeof ann === 'string' ? ann : ann.message;
+                        return (
+                          <div key={idx} style={{
+                            padding: "15px",
+                            backgroundColor: "#f0f4ff",
+                            borderRadius: "8px",
+                            borderLeft: "4px solid #586bff"
+                          }}>
+                            <div style={{ display: "flex", justifySelf: "space-between", marginBottom: "5px" }}>
+                              <span style={{ fontSize: "12px", color: "#888", marginLeft: "auto" }}>
+                                {ann.sentAt ? new Date(ann.sentAt).toLocaleString() : new Date().toLocaleString()}
+                              </span>
+                            </div>
+                            <p style={{ margin: 0, lineHeight: "1.5", fontSize: "15px" }}>
+                              {/* Safe render to prevent crash if data is corrupted */}
+                              {typeof msg === 'object' ? JSON.stringify(msg) : msg}
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Volunteer Button (for non-organizers when event is not completed) */}
             {event && !isOrganizer && event.status !== 'completed' && (
               <div className="volunteer-btn-container" style={{ marginTop: "20px" }}>
@@ -536,7 +654,7 @@ function EventDetailPage() {
         </main>
 
         <Footer />
-      </div>
+      </div >
     </>
   );
 }

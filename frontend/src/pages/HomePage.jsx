@@ -168,6 +168,138 @@ function HomePage() {
               </div>
             </div>
 
+            {/* RECENT ANNOUNCEMENTS SECTION */}
+            <div style={{
+              backgroundColor: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+              marginBottom: "30px"
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>📢 Recent Announcements</h2>
+
+              {(() => {
+                // Flatten and gather all announcements from valid events
+                const allAnnouncements = [];
+
+                myEvents.forEach(e => {
+                  if (e.status !== 'completed' && e.status !== 'cancelled') {
+                    // Check for multiple announcements (array)
+                    if (Array.isArray(e.announcements) && e.announcements.length > 0) {
+                      e.announcements.forEach(ann => {
+                        allAnnouncements.push({
+                          _id: e._id + (ann.sentAt || Math.random()), // unique key fallback
+                          eventId: e._id,
+                          eventName: e.eventName,
+                          message: typeof ann === 'object' ? ann.message : ann,
+                          date: ann.sentAt || e.createdAt, // Fallback date
+                          eventDate: e.date
+                        });
+                      });
+                    }
+                    // Check for legacy single announcement (string)
+                    else if (typeof e.announcements === 'string' && e.announcements.trim()) {
+                      allAnnouncements.push({
+                        _id: e._id + "legacy",
+                        eventId: e._id,
+                        eventName: e.eventName,
+                        message: e.announcements,
+                        date: e.updatedAt || e.createdAt, // Estimation for legacy
+                        eventDate: e.date
+                      });
+                    }
+                  }
+                });
+
+                // Sort by announcement date (newest first)
+                allAnnouncements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Limit to 3 most recent
+                const displayAnnouncements = allAnnouncements.slice(0, 3);
+
+                if (loading) {
+                  return <p style={{ color: "#666" }}>Loading announcements...</p>;
+                }
+
+                if (allAnnouncements.length === 0) {
+                  return (
+                    <div style={{
+                      textAlign: "center",
+                      padding: "30px",
+                      backgroundColor: "#f9f9f9",
+                      borderRadius: "8px"
+                    }}>
+                      <p style={{ color: "#666", fontSize: "16px" }}>
+                        No announcements from your registered events.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                      {displayAnnouncements.map(ann => (
+                        <div
+                          key={ann._id}
+                          style={{
+                            padding: "15px 20px",
+                            borderRadius: "10px",
+                            border: "1px solid #586bff",
+                            backgroundColor: "#f8f9ff",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                            <h4 style={{ margin: 0, color: "#586bff", fontSize: "15px" }}>
+                              {ann.eventName}
+                            </h4>
+                            <span style={{ color: "#888", fontSize: "12px" }}>
+                              {new Date(ann.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, color: "#333", fontSize: "14px", lineHeight: "1.5" }}>
+                            {ann.message}
+                          </p>
+                          <Link
+                            to={`/events/${ann.eventId}`}
+                            style={{
+                              display: "inline-block",
+                              marginTop: "10px",
+                              color: "#586bff",
+                              fontSize: "13px",
+                              textDecoration: "none",
+                              fontWeight: "bold"
+                            }}
+                          >
+                            View Event →
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+
+                    {allAnnouncements.length > 3 && (
+                      <div style={{ textAlign: "center", marginTop: "20px" }}>
+                        <Link
+                          to="/announcements"
+                          style={{
+                            padding: "10px 25px",
+                            backgroundColor: "#586bff",
+                            color: "white",
+                            borderRadius: "8px",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                            fontSize: "14px"
+                          }}
+                        >
+                          View All Announcements ({allAnnouncements.length})
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
             {/* MY EVENTS SECTION */}
             <div style={{
               backgroundColor: "white",

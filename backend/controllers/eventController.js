@@ -787,6 +787,77 @@ export const cancelEvent = async (req, res) => {
             data: event
         });
     } catch (error) {
+
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Add an announcement to an event
+export const addAnnouncement = async (req, res) => {
+    const { eventId } = req.params;
+    const { message } = req.body;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    if (!message || message.trim() === "") {
+        return res.status(400).json({ success: false, message: "Message is required" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Verify organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can post announcements" });
+        }
+
+        // Normalize announcements to ensure they match schema
+        let currentAnnouncements = [];
+        if (Array.isArray(event.announcements)) {
+            currentAnnouncements = event.announcements;
+        } else if (typeof event.announcements === 'string' && event.announcements) {
+            currentAnnouncements = [event.announcements];
+        }
+
+        // Fix any malformed items in the array (e.g. partial migration strings)
+        const validAnnouncements = currentAnnouncements.map(ann => {
+            if (typeof ann === 'string') {
+                return { message: ann, sentAt: new Date() };
+            }
+            if (typeof ann === 'object' && ann && !ann.message) {
+                // If it's a legacy Mongoose string-in-array issue or corrupted object
+                // Try to find ANY string value or skip
+                // For now, allow Mongoose to cast or filter out
+                return null;
+            }
+            return ann;
+        }).filter(item => item !== null && (typeof item === 'object' && item.message));
+
+        event.announcements = validAnnouncements;
+
+        // Add new announcement
+        event.announcements.push({
+            message: message.trim(),
+            sentAt: new Date()
+        });
+
+        await event.save();
+
+        res.json({
+            success: true,
+            message: "Announcement posted successfully",
+            data: event.announcements
+        });
+    } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
