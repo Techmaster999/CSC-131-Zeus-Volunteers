@@ -69,7 +69,7 @@ function AdminEventReview() {
 
     if (loading) {
         return (
-            <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+            <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
                 <NavigationBar />
                 <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <p>Loading event details...</p>
@@ -81,7 +81,7 @@ function AdminEventReview() {
 
     if (!event) {
         return (
-            <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+            <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
                 <NavigationBar />
                 <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <p>Event not found</p>
@@ -99,7 +99,7 @@ function AdminEventReview() {
     const eventImage = event.imageUrl || rotatingImages[index];
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
             <NavigationBar />
 
             <main style={{ flex: 1, padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
