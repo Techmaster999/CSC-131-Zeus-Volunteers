@@ -3,6 +3,7 @@ import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
@@ -210,13 +211,14 @@ function EventBrowsingPage() {
                 style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               />
 
-              {/* Location Filter */}
-              <input
-                type="text"
-                placeholder="Location..."
+              {/* Location Filter with Google Places Autocomplete */}
+              <LocationAutocomplete
                 value={searchFilters.location}
-                onChange={(e) => setSearchFilters(prev => ({ ...prev, location: e.target.value }))}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                onChange={(locationData) => setSearchFilters(prev => ({
+                  ...prev,
+                  location: locationData.address || locationData
+                }))}
+                placeholder="Search by location..."
               />
 
               {/* Start Date */}
