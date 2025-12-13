@@ -1,14 +1,54 @@
 // src/pages/ContactPage.jsx
-import React from "react";
+import React, { useState } from "react";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
 
 import "../styles/contactPage.css";
 
 function ContactPage() {
+  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    setSuccess(false);
+    setError("");
+
+    if (!message.trim()) {
+      setError("Please enter a message before submitting.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5001/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send feedback");
+      }
+
+      setMessage("");
+      setSuccess(true);
+    } catch (err) {
+      setError("Something went wrong. Please try again later.");
+    }
+  };
+
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          backgroundColor: "#e8e8e8"
+        }}
+      >
         <NavigationBar />
 
         <main className="contact-page-content" style={{ flex: 1 }}>
@@ -60,10 +100,27 @@ function ContactPage() {
             {/* Form */}
             <div className="contact-form">
               <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Write your message, feedback, or review here..."
                 rows="6"
               />
-              <button type="button">Submit</button>
+
+              <button type="button" onClick={handleSubmit}>
+                Submit
+              </button>
+
+              {success && (
+                <p style={{ color: "green", textAlign: "center" }}>
+                  Thank you for your feedback. We appreciate it.
+                </p>
+              )}
+
+              {error && (
+                <p style={{ color: "red", textAlign: "center" }}>
+                  {error}
+                </p>
+              )}
             </div>
 
           </div>
