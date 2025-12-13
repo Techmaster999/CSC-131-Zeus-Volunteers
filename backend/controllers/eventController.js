@@ -3,8 +3,10 @@ import User from "../models/Accounts.model.js";
 import mongoose from "mongoose";
 import { isValidObjectId } from "mongoose";
 import UserEvent from "../models/User_Events.models.js";
+import { sendEventApprovedEmail, sendEventDeniedEmail } from "../services/emailService.js";
 // import Notification from "../models/Notification.js";
 // import SignUp from "../models/SignUp.js"; // file doesn't exist 
+
 
 
 // Get /events/:eventID/users
@@ -88,38 +90,43 @@ export const getEventUsersAgg = async (req, res) => {
     }
 };
 
-// Get user's registered events 
-export const getUserRegisteredEvents = async (req, res) => {
+// Get events created by the logged-in organizer (includes pending/denied)
+export const getOrganizerEvents = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
+        const user = await User.findById(userId);
 
-        const signups = await SignUp.find({
-            user: userId,
-            status: { $in: ['registered'] }
-        })
-            //        .populate('event')
-            .sort({ 'event.dateTime': 1 });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
 
-        const activeEvents = signups
-            .filter(s => s.event && s.event.status !== 'cancelled')
-            .map(s => ({
-                signUpId: s._id,
-                role: s.role,
-                status: s.status,
-                ...s.event.toObject()
-            }));
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        // Find events where organizer matches or organizerId matches
+        const events = await Event.find({
+            $or: [
+                { organizer: organizerName },
+                { organizerId: userId },
+                { createdBy: userId }
+            ]
+        }).sort({ createdAt: -1 });
 
         res.json({
             success: true,
-            data: activeEvents
+            count: events.length,
+            data: events
         });
+
     } catch (error) {
+        console.error('Error in getOrganizerEvents:', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: error.message
         });
     }
 };
+
+
 
 // Get user's participation history
 export const getUserHistory = async (req, res) => {
@@ -155,7 +162,7 @@ export const getUserHistory = async (req, res) => {
 
 // Attach a user to an event 
 export const addUserToEvent = async (req, res) => {
-    const { userId, eventId } = req.body;
+    const { userId, eventId, role, notes } = req.body;
 
     if (!isValidObjectId(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
@@ -163,6 +170,10 @@ export const addUserToEvent = async (req, res) => {
     if (!isValidObjectId(eventId)) {
         return res.status(400).json({ message: "Invalid event ID" });
     }
+
+    // Validate role if provided
+    const validRoles = ['Team Lead', 'Setup Crew', 'Registration', 'Cleanup', 'General Volunteer', 'Coordinator', 'Other'];
+    const volunteerRole = role && validRoles.includes(role) ? role : 'General Volunteer';
 
     const [userExists, eventExists] = await Promise.all([
         User.exists({ _id: userId }),
@@ -173,18 +184,22 @@ export const addUserToEvent = async (req, res) => {
     if (!eventExists) return res.status(404).json({ success: false, message: "Event not found" });
 
     try {
-        const link = await UserEvent.findOneAndUpdate(
-            { userId, eventId },
-            { $setOnInsert: { userId, eventId } },
-            { new: true, upsert: true }
-        ).lean();
-
-        const alreadyExists = await UserEvent.findOne({ userId, eventId });
-        if (alreadyExists && alreadyExists._id.toString() !== link._id.toString()) {
+        // Check if already registered
+        const existing = await UserEvent.findOne({ userId, eventId });
+        if (existing) {
             return res
                 .status(409)
                 .json({ success: false, message: "User is already registered for this event" });
         }
+
+        // Create new registration with role
+        const link = await UserEvent.create({
+            userId,
+            eventId,
+            role: volunteerRole,
+            status: 'registered',
+            notes: notes || ''
+        });
 
         return res.status(201).json({
             success: true,
@@ -198,8 +213,174 @@ export const addUserToEvent = async (req, res) => {
                 .status(409)
                 .json({ success: false, message: "User is already registered for this event" })
         }
+        return res.status(500).json({ success: false, message: err.message || "Server Error" });
     }
-    return res.status(500).json({ success: false, message: "Server Error" });
+};
+
+// Remove a user from an event (un-volunteer)
+export const removeUserFromEvent = async (req, res) => {
+    const { userId, eventId } = req.body;
+
+    if (!isValidObjectId(userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const result = await UserEvent.findOneAndDelete({ userId, eventId });
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: "User was not registered for this event"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User successfully unregistered from the event"
+        });
+    } catch (err) {
+        console.error("Error removing user from event:", err);
+        return res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// Update a volunteer's role for an event
+export const updateVolunteerRole = async (req, res) => {
+    const { eventId, volunteerId } = req.params;
+    const { role, status, notes } = req.body;
+
+    if (!isValidObjectId(eventId) || !isValidObjectId(volunteerId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid event ID or volunteer ID"
+        });
+    }
+
+    const validRoles = ['Team Lead', 'Setup Crew', 'Registration', 'Cleanup', 'General Volunteer', 'Coordinator', 'Other'];
+    const validStatuses = ['registered', 'confirmed', 'attended', 'no-show', 'cancelled'];
+
+    const updateData = {};
+    if (role && validRoles.includes(role)) updateData.role = role;
+    if (status && validStatuses.includes(status)) updateData.status = status;
+    if (notes !== undefined) updateData.notes = notes;
+
+    if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "No valid fields to update. Valid roles: " + validRoles.join(', ')
+        });
+    }
+
+    try {
+        const registration = await UserEvent.findOneAndUpdate(
+            { userId: volunteerId, eventId },
+            { $set: updateData },
+            { new: true }
+        ).populate('userId', 'firstName lastName email');
+
+        if (!registration) {
+            return res.status(404).json({
+                success: false,
+                message: "Volunteer registration not found"
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Volunteer role updated successfully",
+            data: registration
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message || "Server Error"
+        });
+    }
+};
+
+// Get all volunteers for an event with their roles
+export const getEventVolunteers = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid event ID"
+        });
+    }
+
+    try {
+        const volunteers = await UserEvent.find({ eventId })
+            .populate('userId', 'firstName lastName email phone role')
+            .sort({ role: 1, createdAt: 1 });
+
+        // Group by role for easy viewing
+        const byRole = volunteers.reduce((acc, v) => {
+            const role = v.role || 'General Volunteer';
+            if (!acc[role]) acc[role] = [];
+            acc[role].push({
+                _id: v._id,
+                volunteerId: v.userId?._id,
+                firstName: v.userId?.firstName,
+                lastName: v.userId?.lastName,
+                email: v.userId?.email,
+                phone: v.userId?.phone,
+                role: v.role,
+                status: v.status,
+                notes: v.notes,
+                registeredAt: v.createdAt
+            });
+            return acc;
+        }, {});
+
+        return res.json({
+            success: true,
+            count: volunteers.length,
+            byRole,
+            data: volunteers
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message || "Server Error"
+        });
+    }
+};
+
+// Check if user is registered for an event
+export const checkUserRegistration = async (req, res) => {
+    const { userId, eventId } = req.query;
+
+    console.log("checkUserRegistration called with userId:", userId, "eventId:", eventId);
+
+    if (!isValidObjectId(userId) || !isValidObjectId(eventId)) {
+        console.log("Invalid ObjectId detected");
+        return res.status(400).json({ success: false, message: "Invalid user or event ID" });
+    }
+
+    try {
+        // Convert string IDs to ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const eventObjectId = new mongoose.Types.ObjectId(eventId);
+
+        const registration = await UserEvent.findOne({
+            userId: userObjectId,
+            eventId: eventObjectId
+        });
+        console.log("Registration found:", registration);
+
+        return res.status(200).json({
+            success: true,
+            isRegistered: !!registration
+        });
+    } catch (err) {
+        console.error("Error checking registration:", err);
+        return res.status(500).json({ success: false, message: "Server Error", error: err.message });
+    }
 };
 
 // Approve or deny events 
@@ -227,6 +408,21 @@ export const reviewEvent = async (req, res) => {
         );
         if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Send email notification to organizer
+        // Note: Using organizer field as email for now
+        // In production, you'd fetch the actual organizer's email from User model
+        if (event.organizer) {
+            if (decision === "approved") {
+                await sendEventApprovedEmail(event, event.organizer, notes).catch(err => {
+                    console.error('Email notification failed (non-blocking):', err.message);
+                });
+            } else if (decision === "denied") {
+                await sendEventDeniedEmail(event, event.organizer, notes).catch(err => {
+                    console.error('Email notification failed (non-blocking):', err.message);
+                });
+            }
         }
 
         res.json({
@@ -270,11 +466,46 @@ export const getAllEvents = async (req, res) => {
 
 // ====== NEW FILTERING FUNCTIONS ======
 
-// Browse all approved upcoming events
+// Get events the user has signed up for
+export const getUserRegisteredEvents = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        console.log("Fetching registered events for user:", userId);
+
+        // Find all UserEvent records for this user and populate the event details
+        const registrations = await UserEvent.find({ userId })
+            .populate('eventId')
+            .lean();
+
+        console.log("Found registrations:", registrations.length);
+
+        // Extract the event details (filter out any null eventIds)
+        const events = registrations
+            .filter(reg => reg.eventId)
+            .map(reg => reg.eventId);
+
+        console.log("Returning events:", events.length);
+
+        res.json({
+            success: true,
+            data: events
+        });
+
+    } catch (error) {
+        console.error('Error in getUserRegisteredEvents:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Browse all approved upcoming events (excludes cancelled)
 export const getEvents = async (req, res) => {
     try {
         const events = await Event.find({
-            status: 'upcoming',
+            status: { $in: ['upcoming', 'ongoing'] },  // Only upcoming and ongoing, not cancelled or completed
             approvalStatus: 'approved'
         })
             //        .populate('createdBy', 'username organization email')
@@ -454,5 +685,304 @@ export const getCategories = async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+};
+
+// ===== EVENT LIFECYCLE MANAGEMENT =====
+
+// Start an event (organizer only)
+export const startEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can start this event" });
+        }
+
+        // Check if event can be started
+        if (event.status === 'ongoing') {
+            return res.status(400).json({ success: false, message: "Event is already in progress" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Event has already been completed" });
+        }
+
+        // Update status to ongoing
+        event.status = 'ongoing';
+        event.startedAt = new Date();
+        await event.save();
+
+        res.json({
+            success: true,
+            message: "Event started successfully",
+            data: event
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Cancel an event (organizer only)
+export const cancelEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can cancel this event" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Cannot cancel a completed event" });
+        }
+
+        if (event.status === 'cancelled') {
+            return res.status(400).json({ success: false, message: "Event is already cancelled" });
+        }
+
+        // Update status to cancelled
+        event.status = 'cancelled';
+        event.cancelledAt = new Date();
+        await event.save();
+
+        // Mark all registered volunteers as cancelled
+        await UserEvent.updateMany(
+            { eventId, status: { $in: ['registered', 'confirmed'] } },
+            { $set: { status: 'cancelled' } }
+        );
+
+        res.json({
+            success: true,
+            message: "Event cancelled successfully",
+            data: event
+        });
+    } catch (error) {
+
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Add an announcement to an event
+export const addAnnouncement = async (req, res) => {
+    const { eventId } = req.params;
+    const { message } = req.body;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    if (!message || message.trim() === "") {
+        return res.status(400).json({ success: false, message: "Message is required" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Verify organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can post announcements" });
+        }
+
+        // Normalize announcements to ensure they match schema
+        let currentAnnouncements = [];
+        if (Array.isArray(event.announcements)) {
+            currentAnnouncements = event.announcements;
+        } else if (typeof event.announcements === 'string' && event.announcements) {
+            currentAnnouncements = [event.announcements];
+        }
+
+        // Fix any malformed items in the array (e.g. partial migration strings)
+        const validAnnouncements = currentAnnouncements.map(ann => {
+            if (typeof ann === 'string') {
+                return { message: ann, sentAt: new Date() };
+            }
+            if (typeof ann === 'object' && ann && !ann.message) {
+                // If it's a legacy Mongoose string-in-array issue or corrupted object
+                // Try to find ANY string value or skip
+                // For now, allow Mongoose to cast or filter out
+                return null;
+            }
+            return ann;
+        }).filter(item => item !== null && (typeof item === 'object' && item.message));
+
+        event.announcements = validAnnouncements;
+
+        // Add new announcement
+        event.announcements.push({
+            message: message.trim(),
+            sentAt: new Date()
+        });
+
+        await event.save();
+
+        res.json({
+            success: true,
+            message: "Announcement posted successfully",
+            data: event.announcements
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// End an event (organizer only)
+export const endEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can end this event" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Event has already been completed" });
+        }
+
+        // Update status to completed
+        event.status = 'completed';
+        event.endedAt = new Date();
+        await event.save();
+
+        // Mark all registered volunteers who weren't marked as 'no-show' as 'attended' by default
+        // (only if they weren't already explicitly marked)
+        await UserEvent.updateMany(
+            { eventId, status: 'registered' },
+            { $set: { status: 'no-show' } }  // Default unmarked to no-show
+        );
+
+        res.json({
+            success: true,
+            message: "Event completed successfully",
+            data: event
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Mark volunteer attendance (organizer only)
+export const markAttendance = async (req, res) => {
+    const { eventId, volunteerId } = req.params;
+    const { attended } = req.body; // true = attended, false = no-show
+
+    if (!isValidObjectId(eventId) || !isValidObjectId(volunteerId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID or volunteer ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can mark attendance" });
+        }
+
+        // Find the volunteer's registration
+        const registration = await UserEvent.findOne({ eventId, userId: volunteerId });
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: "Volunteer not registered for this event" });
+        }
+
+        // Update attendance status
+        registration.status = attended ? 'attended' : 'no-show';
+        await registration.save();
+
+        res.json({
+            success: true,
+            message: `Volunteer marked as ${attended ? 'attended' : 'no-show'}`,
+            data: registration
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Get user's completed events (attended)
+export const getUserCompletedEvents = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Find all events user attended
+        const attendedEvents = await UserEvent.find({
+            userId,
+            status: 'attended'
+        }).populate({
+            path: 'eventId',
+            match: { status: 'completed' }
+        });
+
+        // Filter out null eventIds (events that don't match the completed status)
+        const completedEvents = attendedEvents
+            .filter(ue => ue.eventId !== null)
+            .map(ue => ue.eventId);
+
+        res.json({
+            success: true,
+            count: completedEvents.length,
+            data: completedEvents
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 };

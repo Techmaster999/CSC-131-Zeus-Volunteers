@@ -86,7 +86,7 @@ const EventSchema = new mongoose.Schema(
     approvalStatus: {
       type: String,
       enum: ["pending", "approved", "denied"],
-      default: "approved"  // Default to approved for existing events
+      default: "pending"  // Events require admin approval
     },
 
     // ===== VOLUNTEER MANAGEMENT =====
@@ -106,10 +106,10 @@ const EventSchema = new mongoose.Schema(
     },
 
     // ===== ADDITIONAL CONTENT =====
-    announcements: {
-      type: String,
-      default: "",
-    },
+    announcements: [{
+      message: { type: String, required: true },
+      sentAt: { type: Date, default: Date.now }
+    }],
 
     commitments: {
       type: String,

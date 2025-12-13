@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/EventCard.css";
 
-function EventCard({ event }) {
+function EventCard({ event, isRegistered = false }) {
   const {
     _id,
     eventName,
@@ -13,7 +13,6 @@ function EventCard({ event }) {
     imageUrl
   } = event;
 
-  // Predefined rotating images
   const rotatingImages = [
     "/img/clean1.jpg",
     "/img/clean2.jpg",
@@ -23,28 +22,40 @@ function EventCard({ event }) {
     "/img/clean6.jpg"
   ];
 
-  // Deterministically pick one image based on ID
   const index = Math.abs(_id.charCodeAt(0) % rotatingImages.length);
   const finalImage = imageUrl || rotatingImages[index];
 
   return (
-    <Link to={`/events/${_id}`} className="event-card">
+    <Link
+      to={`/events/${_id}`}
+      className="event-card"
+      style={{
+        opacity: isRegistered ? 0.9 : 1,
+        backgroundColor: isRegistered ? "#ffe6e6" : "white",
+        border: "2px solid " + (isRegistered ? "#ff4444" : "#ddd")
+      }}
+    >
+      {isRegistered && (
+        <div className="registered-badge">✓ Registered</div>
+      )}
+
       <img
         src={finalImage}
         alt={eventName}
         className="event-card-img"
       />
 
-      <h3>{eventName}</h3>
+      <div className="event-card-content">
+        <h3 className="event-card-title">{eventName}</h3>
 
-      <p><strong>Organizer:</strong> {organizer}</p>
+        <p><strong>Organizer:</strong> {organizer}</p>
+        <p><strong>Date:</strong> {new Date(date).toLocaleDateString()}</p>
+        <p><strong>Time:</strong> {time}</p>
 
-      <p><strong>Date:</strong> {new Date(date).toLocaleDateString()}</p>
-      <p><strong>Time:</strong> {time}</p>
-
-      <p className="details">
-        {details ? details.substring(0, 60) + "..." : "No details available"}
-      </p>
+        <p className="details">
+          {details ? details.substring(0, 60) + "..." : "No details available"}
+        </p>
+      </div>
     </Link>
   );
 }

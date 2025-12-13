@@ -12,6 +12,7 @@ import AdminLogin from "./pages/AdminLogin";
 // GENERAL AUTHENTICATED PAGES
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 // EVENTS
 import EventBrowsingPage from "./pages/EventBrowsingPage";
@@ -20,10 +21,12 @@ import EventDetailPage from "./pages/EventDetailPage";
 // DASHBOARDS
 import AdminDashboard from "./pages/AdminDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
-import VolunteerDashboard from "./pages/VolunteerDashboard";
 
 // ORGANIZER TOOLS
 import EventCreationPage from "./pages/organizer/EventCreationPage";
+
+// ADMIN TOOLS
+import AdminEventReview from "./pages/admin/AdminEventReview";
 
 // ACCESS CONTROL
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -71,19 +74,14 @@ function App() {
             }
           />
 
-
-          {/* ------------------------- */}
-          {/* VOLUNTEER DASHBOARD */}
-          {/* ------------------------- */}
           <Route
-            path="/volunteer"
+            path="/announcements"
             element={
-              <RoleProtectedRoute allowedRoles={["volunteer"]}>
-                <VolunteerDashboard />
-              </RoleProtectedRoute>
+              <ProtectedRoute>
+                <AnnouncementsPage />
+              </ProtectedRoute>
             }
           />
-
 
           {/* ------------------------- */}
           {/* ORGANIZER DASHBOARD + TOOLS */}
@@ -115,6 +113,15 @@ function App() {
             element={
               <RoleProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/events/:eventId/review"
+            element={
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <AdminEventReview />
               </RoleProtectedRoute>
             }
           />

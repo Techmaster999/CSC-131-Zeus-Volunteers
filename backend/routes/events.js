@@ -5,6 +5,9 @@ import Event from "../models/Events.model.js";
 import User from "../models/Accounts.model.js";
 import UserEvent from "../models/User_Events.models.js";
 
+// Import email service
+import { sendEventCreatedEmail } from "../services/emailService.js";
+
 // Import controller functions
 import {
     getEvents,
@@ -16,9 +19,20 @@ import {
     getEventUsers,
     getEventUsersAgg,
     addUserToEvent,
+    removeUserFromEvent,
+    checkUserRegistration,
     getUserRegisteredEvents,
     getUserHistory,
-    reviewEvent
+    reviewEvent,
+    getOrganizerEvents,
+    updateVolunteerRole,
+    getEventVolunteers,
+    startEvent,
+    endEvent,
+    cancelEvent,
+    addAnnouncement,
+    markAttendance,
+    getUserCompletedEvents
 } from "../controllers/eventController.js";
 
 // ===== PUBLIC ROUTES =====
@@ -29,14 +43,11 @@ router.get("/", getEvents);
 // Search with filters (query, category, location, dates, skills)
 router.get("/search", searchEvents);
 
-// Get all categories with counts
-router.get("/categories/list", getCategories);
+// Get all categories
+router.get("/categories", getCategories);
 
 // Get events by category
 router.get("/category/:category", getEventsByCategory);
-
-// Get single event by ID
-router.get("/:eventId", getEventById);
 
 // ===== VOLUNTEER ROUTES (Protected) =====
 
@@ -46,28 +57,68 @@ router.get("/my/registered", protect, getUserRegisteredEvents);
 // Get user's participation history
 router.get("/my/history", protect, getUserHistory);
 
+// Get organizer's created events (includes pending/denied)
+router.get("/my/created", protect, getOrganizerEvents);
+
+// Get user's completed events (attended)
+router.get("/my/completed", protect, getUserCompletedEvents);
+
+// Check if user is registered for event (MUST BE BEFORE /:id)
+router.get("/check-registration", protect, checkUserRegistration);
+
 // Sign up for event
 router.post("/signup", protect, addUserToEvent);
+
+// Un-volunteer from event
+router.delete("/signup", protect, removeUserFromEvent);
+
+// ===== ROUTES WITH :id PARAMETER (MUST BE AFTER SPECIFIC ROUTES) =====
+
+// Get single event by id
+router.get("/:eventId", getEventById);
+
+// Get all volunteers for an event (organizer/admin)
+router.get("/:eventId/volunteers", protect, getEventVolunteers);
+
+// Update a volunteer's role (organizer/admin)
+router.put("/:eventId/volunteers/:volunteerId", protect, updateVolunteerRole);
+
+// ===== EVENT LIFECYCLE ROUTES (organizer only) =====
+
+// Start an event
+router.put("/:eventId/start", protect, startEvent);
+
+// End an event
+router.put("/:eventId/end", protect, endEvent);
+
+// Cancel an event
+router.put("/:eventId/cancel", protect, cancelEvent);
+
+// Mark attendance for a volunteer
+router.put("/:eventId/attendance/:volunteerId", protect, markAttendance);
+
+// Post an announcement
+router.post("/:eventId/announcement", protect, addAnnouncement);
 
 // ===== ORGANIZER ROUTES =====
 
 // Create new event
 router.post("/", async (req, res) => {  // (with or without protect, organizer)
     try {
-        const { 
-            eventName, 
+        const {
+            eventName,
             title,
-            organizer, 
-            date, 
-            time, 
+            organizer,
+            date,
+            time,
             dateTime,
-            details, 
+            details,
             description,
             category,
             location,
             skills,
-            announcements = "", 
-            commitments = "", 
+            announcements = "",
+            commitments = "",
             imageUrl = "",
             maxVolunteers,
             duration
@@ -76,7 +127,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
         // Flexible field names
         const eventTitle = title || eventName;
         const eventDescription = description || details;
-        
+
         // ✅ FIXED VALIDATION:
         if (!eventTitle || !organizer || !eventDescription || !category || !location) {
             return res.status(400).json({
@@ -113,17 +164,26 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             category,
             location,
             skills: skills || [],
-            announcements: announcements || "",
+            announcements: announcements ? [{ message: announcements, sentAt: new Date() }] : [],
             commitments: commitments || "",
             eventPicture: imageUrl,
             imageUrl: imageUrl,
             maxVolunteers: maxVolunteers || 0,
             duration: duration || 2,
             status: 'upcoming',
-            approvalStatus: 'approved'
+            approvalStatus: 'pending'  // Events now require admin approval
         });
 
         await newEvent.save();
+
+        // Send email notification to organizer
+        // Note: Using organizer field as email for now
+        // In production, you'd fetch the actual organizer's email from User model
+        if (organizer) {
+            await sendEventCreatedEmail(newEvent, organizer).catch(err => {
+                console.error('Email notification failed (non-blocking):', err.message);
+            });
+        }
 
         res.status(201).json({
             success: true,
@@ -133,9 +193,9 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
 
     } catch (err) {
         console.error("Error creating event:", err);
-        res.status(500).json({ 
-            success: false, 
-            message: err.message 
+        res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 });

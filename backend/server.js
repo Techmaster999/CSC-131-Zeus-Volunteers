@@ -18,6 +18,14 @@ import { connectDB } from "./config/db.js";
 // Import route files
 import authRoutes from "./routes/auth.js";
 import eventRoutes from "./routes/events.js";
+import reminderRoutes from "./routes/reminders.js";
+import contactRoutes from "./routes/contact.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
+
+
+// Import cron for scheduled tasks
+import cron from "node-cron";
+import { processReminders } from "./services/reminderServices.js";
 
 // ----------------------------------------------------
 // CONNECT TO DATABASE
@@ -39,6 +47,10 @@ app.use(cors());
 // ----------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/reminders", reminderRoutes);
+app.use("/api/contact", contactRoutes);
+app.use(express.json());
+app.use("/api/feedback", feedbackRoutes);
 
 // ----------------------------------------------------
 // ROOT ROUTE (API INFO)
@@ -49,7 +61,9 @@ app.get("/", (req, res) => {
         status: "running",
         endpoints: {
             auth: "/api/auth",
-            events: "/api/events"
+            events: "/api/events",
+            reminders: "/api/reminders",
+            contact: "/api/contact"
         }
     });
 });
@@ -59,20 +73,57 @@ app.get("/", (req, res) => {
 // ----------------------------------------------------
 app.use((err, _req, res, _next) => {
     console.error("Unhandled error:", err);
-    res.status(500).json({ 
-        success: false, 
-        message: err.message || "Server Error" 
+    res.status(500).json({
+        success: false,
+        message: err.message || "Server Error"
     });
 });
 
 // ----------------------------------------------------
 // START SERVER
 // ----------------------------------------------------
-const PORT = process.env.PORT || 5001;
+// Clean the PORT value (remove any trailing backslashes or whitespace)
+const PORT = parseInt((process.env.PORT || '5001').replace(/[^\d]/g, '')) || 5001;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Backend API running at http://localhost:${PORT}`);
     console.log(`📡 API endpoints:`);
     console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
     console.log(`   - Events: http://localhost:${PORT}/api/events`);
+    console.log(`   - Reminders: http://localhost:${PORT}/api/reminders`);
+});
+
+// ----------------------------------------------------
+// CRON JOB: Process reminders every 15 minutes
+// ----------------------------------------------------
+cron.schedule('*/15 * * * *', async () => {
+    console.log('⏰ Running scheduled reminder check...');
+    await processReminders();
+});
+console.log('⏰ Reminder cron job scheduled (every 15 minutes)');
+
+// Handle server errors
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`💥 ERROR: Port ${PORT} is already in use!`);
+        console.error('Please stop the other process or use a different port.');
+        process.exit(1);
+    } else {
+        console.error('💥 SERVER ERROR:', error);
+        console.error('Stack:', error.stack);
+        process.exit(1);
+    }
+});
+
+// ----------------------------------------------------
+// PROCESS ERROR HANDLERS  
+// ----------------------------------------------------
+process.on('uncaughtException', (error) => {
+    console.error('💥 UNCAUGHT EXCEPTION:', error);
+    console.error('Stack:', error.stack);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 UNHANDLED REJECTION at:', promise);
+    console.error('Reason:', reason);
 });

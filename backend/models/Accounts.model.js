@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from "bcrypt";
 
 const UserAccountSchema = new mongoose.Schema({
-    firstName:{
+    firstName: {
         type: String,
         required: true
     },
@@ -25,7 +25,7 @@ const UserAccountSchema = new mongoose.Schema({
         required: true,
         select: false   // ✅ THIS FIXES LOGIN
     },
-    country:{
+    country: {
         type: String,
         required: true
     },
@@ -41,12 +41,36 @@ const UserAccountSchema = new mongoose.Schema({
         type: String,
         enum: ['volunteer', 'organizer', 'admin'],
         default: 'volunteer'
+    },
+    // Reminder preferences
+    reminderPreferences: {
+        emailNotifications: {
+            type: Boolean,
+            default: true
+        },
+        // Default reminder times: '1hour', '1day', '3days', '1week'
+        defaultReminders: [{
+            type: String,
+            enum: ['1hour', '3hours', '1day', '3days', '1week']
+        }]
+    },
+    phone: {
+        type: String
+    },
+    // Password reset fields
+    resetPasswordToken: {
+        type: String,
+        select: false
+    },
+    resetPasswordExpires: {
+        type: Date,
+        select: false
     }
 }, { timestamps: true });
 
 
 // Hash password before saving
-UserAccountSchema.pre('save', async function(next) {
+UserAccountSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
 
     const salt = await bcrypt.genSalt(10);
@@ -55,8 +79,8 @@ UserAccountSchema.pre('save', async function(next) {
 });
 
 // Compare plain password with hashed password
-UserAccountSchema.methods.matchPassword = async function(enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);  
+UserAccountSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
 };
 
 const User = mongoose.model('User', UserAccountSchema);

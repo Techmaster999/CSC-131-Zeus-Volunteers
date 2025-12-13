@@ -38,7 +38,7 @@ function NavigationBar() {
 
         {/* VOLUNTEER */}
         {role === "volunteer" && (
-          <Link to="/volunteer">My Dashboard</Link>
+          <Link to="/home">My Dashboard</Link>
         )}
 
         {/* ORGANIZER */}
@@ -52,7 +52,7 @@ function NavigationBar() {
 
         {/* ADMIN */}
         {role === "admin" && (
-           <Link to="/admin">Admin Dashboard</Link>
+          <Link to="/admin">Admin Dashboard</Link>
         )}
 
         {/* MOBILE AUTH BUTTONS */}
@@ -62,7 +62,7 @@ function NavigationBar() {
             <Link className="nav-btn blue mobile-only" to="/admin-login">
               Admin
             </Link>
-            
+
             <Link className="nav-btn blue mobile-only" to="/login">
               Login
             </Link>
@@ -85,10 +85,9 @@ function NavigationBar() {
                 2. Removed background color style
                 3. Kept margin-right so it doesn't touch the Login button
             */}
-            <Link 
-              to="/admin-login" 
-              className="nav-btn blue" 
-              style={{ marginRight: "15px" }} 
+            <Link
+              to="/admin-login"
+              className="nav-btn blue"
             >
               Admin
             </Link>
@@ -112,8 +111,8 @@ function NavigationBar() {
                 role === "organizer"
                   ? "/organizer"
                   : role === "admin"
-                  ? "/admin"
-                  : "/volunteer"
+                    ? "/admin"
+                    : "/home"
               }
               className="profile-circle"
             >

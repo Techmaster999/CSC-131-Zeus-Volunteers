@@ -1,6 +1,6 @@
-import React from "react";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
 
@@ -10,111 +10,358 @@ import "../styles/homepage-styleguide.css";
 
 function OrganizerDashboard() {
   const { user } = useAuth();
+  const [myEvents, setMyEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data (Same as HomePage but could be dynamic later)
-  const upcomingEvents = [
-    { title: "Community Cleanup", desc: "Cleanup Sacramento", date: "October 22, 2025" },
-    { title: "Operation Cleanup Espionage", desc: "Cleanup Rivals", date: "October 22, 2025" },
-    { title: "Library Book Reading", desc: "Cleanup Rivals", date: "October 20, 2025" },
-    { title: "Cleanup Espionage Planning", desc: "Cleanup Rivals", date: "October 19, 2025" },
-  ];
+  // Filter events into upcoming and completed (exclude cancelled from upcoming)
+  const upcomingEvents = myEvents.filter(e => e.status !== 'completed' && e.status !== 'cancelled');
+  const completedEvents = myEvents.filter(e => e.status === 'completed');
 
-  const history = [
-    { title: "Meet and Greet!", org: "Cleanup Sacramento", date: "October 12, 2025" },
-    { title: "Spying on Cleanup Sacramento", org: "Cleanup Rivals", date: "October 12, 2025" },
-    { title: "Charity Run", org: "Legitimate Laundering Co.", date: "October 3, 2025" },
-    { title: "Movie Night", org: "Cleanup Rivals", date: "October 1, 2025" },
-  ];
+  // Fetch organizer's events
+  useEffect(() => {
+    async function fetchMyEvents() {
+      try {
+        const token = localStorage.getItem("token");
 
-  // Red button style to override default primary-btn
+        // Use the organizer-specific endpoint
+        const res = await fetch("http://localhost:5001/api/events/my/created", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const json = await res.json();
+
+        console.log("My events response:", json);
+
+        if (json.success && json.data) {
+          setMyEvents(json.data);
+        }
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      fetchMyEvents();
+    }
+  }, [user]);
+
+  // Status badge colors
+  function getStatusStyle(status) {
+    switch (status) {
+      case "approved":
+        return { backgroundColor: "#d4edda", color: "#155724", border: "1px solid #c3e6cb" };
+      case "denied":
+        return { backgroundColor: "#f8d7da", color: "#721c24", border: "1px solid #f5c6cb" };
+      case "pending":
+      default:
+        return { backgroundColor: "#fff3cd", color: "#856404", border: "1px solid #ffeeba" };
+    }
+  }
+
   const redButtonStyle = {
-    backgroundColor: "red",
-    borderColor: "red",
+    backgroundColor: "#dc3545",
+    borderColor: "#dc3545",
     color: "white"
   };
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
+        <NavigationBar />
 
-        <main className="volunteer-dashboard-page page-container" style={{ flex: 1, width: "100%", margin: "0 auto" }}>
-          <div className="dashboard-layout">
+        <main style={{ flex: "1 0 auto", padding: "40px 20px", backgroundColor: "#e8e8e8" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
-            {/* SIDEBAR */}
-            <Sidebar />
+            {/* HEADER */}
+            <div style={{ marginBottom: "30px" }}>
+              <h1 style={{ fontSize: "32px", marginBottom: "10px" }}>Organizer Dashboard</h1>
+              <p style={{ color: "#666" }}>Welcome, {user?.firstName} {user?.lastName}</p>
+            </div>
 
-            {/* MAIN CONTENT */}
-            <section className="dashboard-main">
+            {/* PROFILE & QUICK ACTIONS */}
+            <div style={{ display: "flex", gap: "30px", flexWrap: "wrap", marginBottom: "40px" }}>
 
-              {/* PROFILE SECTION */}
-              <div className="dashboard-profile">
-                <div className="avatar-large">👤</div>
-
-                <div className="profile-info">
-                  <h2>{user?.firstName} {user?.lastName} ({user?.role})</h2>
-                  <p>Email: {user?.email}</p>
-                  <p>City: {user?.city}</p>
-                  <p>State: {user?.state}</p>
-                  <p>Status: <strong>Active Organizer</strong></p>
+              {/* Profile Card */}
+              <div style={{
+                backgroundColor: "white",
+                padding: "25px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+                flex: "1",
+                minWidth: "280px"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
+                  <div style={{
+                    width: "60px",
+                    height: "60px",
+                    borderRadius: "50%",
+                    backgroundColor: "#dc3545",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "24px",
+                    color: "white"
+                  }}>
+                    {user?.firstName?.charAt(0) || "O"}
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0 }}>{user?.firstName} {user?.lastName}</h3>
+                    <p style={{ margin: "5px 0 0 0", color: "#666" }}>{user?.email}</p>
+                  </div>
                 </div>
+                <p style={{ color: "#666", marginBottom: "5px" }}><strong>Role:</strong> Organizer</p>
+                <p style={{ color: "#666", marginBottom: "5px" }}><strong>Location:</strong> {user?.city}, {user?.state}</p>
+                <p style={{ color: "#666", marginBottom: "5px" }}><strong>Upcoming Events:</strong> {upcomingEvents.length}</p>
+                <p style={{ color: "#666" }}><strong>Completed Events:</strong> {completedEvents.length}</p>
               </div>
 
-              {/* TWO-PANEL GRID */}
-              <div className="dashboard-panels">
+              {/* Quick Actions */}
+              <div style={{
+                backgroundColor: "white",
+                padding: "25px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+                flex: "1",
+                minWidth: "280px"
+              }}>
+                <h3 style={{ marginTop: 0, marginBottom: "20px" }}>Quick Actions</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <Link
+                    to="/events/create"
+                    style={{
+                      ...redButtonStyle,
+                      padding: "12px 20px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    + Create New Event
+                  </Link>
+                  <Link
+                    to="/events"
+                    style={{
+                      padding: "12px 20px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      backgroundColor: "white",
+                      color: "#dc3545",
+                      border: "2px solid #dc3545"
+                    }}
+                  >
+                    Browse All Events
+                  </Link>
+                </div>
+              </div>
+            </div>
 
-                {/* LEFT PANEL - UPCOMING EVENTS */}
-                <div className="dashboard-panel">
-                  <h3>Upcoming Events</h3>
+            {/* MY EVENTS SECTION */}
+            <div style={{
+              backgroundColor: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>📋 My Upcoming Events</h2>
 
-                  {upcomingEvents.map((ev, i) => (
-                    <div key={i} className="event-row">
-                      <div>
-                        <h4>{ev.title}</h4>
-                        <p>{ev.desc}</p>
+              {loading ? (
+                <p style={{ color: "#666" }}>Loading your events...</p>
+              ) : upcomingEvents.length === 0 ? (
+                <div style={{
+                  textAlign: "center",
+                  padding: "40px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "8px"
+                }}>
+                  <p style={{ color: "#666", fontSize: "16px", marginBottom: "15px" }}>
+                    You haven't created any events yet.
+                  </p>
+                  <Link
+                    to="/events/create"
+                    style={{
+                      ...redButtonStyle,
+                      padding: "12px 30px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    Create Your First Event
+                  </Link>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  {upcomingEvents.map(event => (
+                    <div
+                      key={event._id}
+                      style={{
+                        padding: "20px",
+                        borderRadius: "10px",
+                        border: "1px solid #e0e0e0",
+                        backgroundColor: "#fefefe"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "15px" }}>
+
+                        {/* Event Info */}
+                        <div style={{ flex: 1, minWidth: "250px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "10px" }}>
+                            <h3 style={{ margin: 0, fontSize: "18px" }}>{event.eventName}</h3>
+                            <span style={{
+                              ...getStatusStyle(event.approvalStatus),
+                              padding: "4px 12px",
+                              borderRadius: "15px",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              textTransform: "uppercase"
+                            }}>
+                              {event.approvalStatus}
+                            </span>
+                          </div>
+                          <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
+                            <strong>Date:</strong> {new Date(event.date).toLocaleDateString()} at {event.time}
+                          </p>
+                          <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
+                            <strong>Location:</strong> {event.location}
+                          </p>
+                          <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
+                            <strong>Category:</strong> {event.category}
+                          </p>
+                        </div>
+
+                        {/* View Details Button */}
+                        <Link
+                          to={`/events/${event._id}`}
+                          style={{
+                            padding: "10px 20px",
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            borderRadius: "6px",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                            fontSize: "14px"
+                          }}
+                        >
+                          View Event
+                        </Link>
                       </div>
-                      <span className="event-date">{ev.date}</span>
+
+                      {/* Admin Review Notes */}
+                      {(event.reviewNotes || event.denialReason) && (
+                        <div style={{
+                          marginTop: "15px",
+                          padding: "15px",
+                          borderRadius: "8px",
+                          backgroundColor: event.approvalStatus === "denied" ? "#fff5f5" : "#f0fff4",
+                          borderLeft: `4px solid ${event.approvalStatus === "denied" ? "#dc3545" : "#28a745"}`
+                        }}>
+                          <p style={{
+                            margin: 0,
+                            fontWeight: "bold",
+                            fontSize: "13px",
+                            color: event.approvalStatus === "denied" ? "#dc3545" : "#28a745",
+                            marginBottom: "8px"
+                          }}>
+                            📝 Admin Notes:
+                          </p>
+                          <p style={{ margin: 0, color: "#444", fontSize: "14px" }}>
+                            {event.reviewNotes || event.denialReason}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Pending Message */}
+                      {event.approvalStatus === "pending" && (
+                        <div style={{
+                          marginTop: "15px",
+                          padding: "12px 15px",
+                          borderRadius: "8px",
+                          backgroundColor: "#fff8e1",
+                          borderLeft: "4px solid #FFC300"
+                        }}>
+                          <p style={{ margin: 0, color: "#856404", fontSize: "14px" }}>
+                            ⏳ This event is awaiting admin approval. You'll be notified once it's reviewed.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
-
-                  <button className="primary-btn" style={redButtonStyle}>View Calendar</button>
                 </div>
+              )}
+            </div>
 
-                {/* RIGHT PANEL - FEATURED EVENT */}
-                <div className="dashboard-panel">
-                  <img
-                    src="/img/clean1.jpg"
-                    alt="Event Preview"
-                    className="featured-img"
-                  />
+            {/* COMPLETED EVENTS SECTION */}
+            <div style={{
+              backgroundColor: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+              marginTop: "30px"
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>✅ Completed Events</h2>
 
-                  <h3>Community Clean Up</h3>
-                  <p>Org: Cleanup Sacramento</p>
-                  <p>Date: 10/25/2025 at 2:30 PM</p>
-                  <p>Volunteers: 100/250</p>
-
-                  <button className="primary-btn" style={redButtonStyle}>Event Details</button>
+              {completedEvents.length === 0 ? (
+                <div style={{
+                  textAlign: "center",
+                  padding: "30px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "8px"
+                }}>
+                  <p style={{ color: "#666", fontSize: "16px" }}>
+                    No completed events yet. Complete your events to see them here!
+                  </p>
                 </div>
-              </div>
-
-              {/* PARTICIPATION HISTORY (OR ORGANIZER ACTIONS) */}
-              <div className="dashboard-panel history-panel">
-                <h3>Recent Activity</h3>
-
-                {history.map((ev, i) => (
-                  <div key={i} className="event-row">
-                    <div>
-                      <h4>{ev.title}</h4>
-                      <p>{ev.org}</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  {completedEvents.map(event => (
+                    <div
+                      key={event._id}
+                      style={{
+                        padding: "15px 20px",
+                        borderRadius: "10px",
+                        border: "1px solid #28a745",
+                        backgroundColor: "#f0fff4",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "10px"
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: "0 0 5px 0", fontSize: "16px" }}>
+                          ✓ {event.eventName}
+                        </h4>
+                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>
+                          {new Date(event.date).toLocaleDateString()} • {event.location}
+                        </p>
+                      </div>
+                      <Link
+                        to={`/events/${event._id}`}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          borderRadius: "6px",
+                          textDecoration: "none",
+                          fontWeight: "bold",
+                          fontSize: "13px"
+                        }}
+                      >
+                        View
+                      </Link>
                     </div>
-                    <span className="event-date">{ev.date}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
 
-                <button className="primary-btn" style={redButtonStyle}>All Activity</button>
-              </div>
-
-            </section>
           </div>
         </main>
 
