@@ -534,8 +534,11 @@ export const searchEvents = async (req, res) => {
     try {
         const { query, category, location, startDate, endDate, skills } = req.query;
 
-        // ✅ START WITH EMPTY CRITERIA
-        let searchCriteria = {};
+        // ✅ START WITH BASE CRITERIA - only show approved, non-cancelled events
+        let searchCriteria = {
+            approvalStatus: 'approved',
+            status: { $ne: 'cancelled' }
+        };
 
         // Only add filters if they're provided
         if (query && query.trim()) {
