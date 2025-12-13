@@ -9,7 +9,8 @@ function LocationAutocomplete({
     onChange,
     placeholder = "Start typing an address...",
     required = false,
-    className = ''
+    className = '',
+    showSuccessMessage = true
 }) {
     const inputRef = useRef(null);
     const autocompleteRef = useRef(null);
@@ -132,7 +133,7 @@ function LocationAutocomplete({
                     autoComplete="off"
                 />
             </div>
-            {isLoaded && (
+            {isLoaded && showSuccessMessage && (
                 <small style={{ color: '#28a745', fontSize: '11px', marginTop: '4px', display: 'block' }}>
                     ✓ Location suggestions enabled
                 </small>

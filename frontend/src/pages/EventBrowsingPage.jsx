@@ -208,7 +208,7 @@ function EventBrowsingPage() {
                 placeholder="Search by keyword..."
                 value={searchFilters.query}
                 onChange={(e) => setSearchFilters(prev => ({ ...prev, query: e.target.value }))}
-                style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
               />
 
               {/* Location Filter with Google Places Autocomplete */}
@@ -219,6 +219,7 @@ function EventBrowsingPage() {
                   location: locationData.address || locationData
                 }))}
                 placeholder="Search by location..."
+                showSuccessMessage={false}
               />
 
               {/* Start Date */}
@@ -228,7 +229,7 @@ function EventBrowsingPage() {
                   type="date"
                   value={searchFilters.startDate}
                   onChange={(e) => setSearchFilters(prev => ({ ...prev, startDate: e.target.value }))}
-                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', width: "100%", boxSizing: "border-box", fontSize: '14px' }}
                   placeholder="Start Date"
                 />
               </div>
@@ -240,7 +241,7 @@ function EventBrowsingPage() {
                   type="date"
                   value={searchFilters.endDate}
                   onChange={(e) => setSearchFilters(prev => ({ ...prev, endDate: e.target.value }))}
-                  style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', width: "100%", boxSizing: "border-box", fontSize: '14px' }}
                   placeholder="End Date"
                 />
               </div>
