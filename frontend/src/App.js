@@ -20,7 +20,6 @@ import EventDetailPage from "./pages/EventDetailPage";
 // DASHBOARDS
 import AdminDashboard from "./pages/AdminDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
-import VolunteerDashboard from "./pages/VolunteerDashboard";
 
 // ORGANIZER TOOLS
 import EventCreationPage from "./pages/organizer/EventCreationPage";
@@ -71,19 +70,6 @@ function App() {
               <ProtectedRoute>
                 <CalendarPage />
               </ProtectedRoute>
-            }
-          />
-
-
-          {/* ------------------------- */}
-          {/* VOLUNTEER DASHBOARD */}
-          {/* ------------------------- */}
-          <Route
-            path="/volunteer"
-            element={
-              <RoleProtectedRoute allowedRoles={["volunteer"]}>
-                <VolunteerDashboard />
-              </RoleProtectedRoute>
             }
           />
 
