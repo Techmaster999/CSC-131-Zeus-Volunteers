@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 function Sidebar({ onFilterChange = () => { }, selectedFilters = {} }) {
   const [expanded, setExpanded] = useState({
     category: true,
-    skills: true,
-    distance: false  // Collapsed by default since it's not working yet
+    skills: true
   });
 
   const toggleSection = (section) => {
@@ -47,13 +46,6 @@ function Sidebar({ onFilterChange = () => { }, selectedFilters = {} }) {
     onFilterChange({
       ...selectedFilters,
       skills: newSkills
-    });
-  };
-
-  const handleDistanceChange = (distance) => {
-    onFilterChange({
-      ...selectedFilters,
-      distance: distance
     });
   };
 
@@ -133,35 +125,6 @@ function Sidebar({ onFilterChange = () => { }, selectedFilters = {} }) {
           </div>
         )}
       </div>
-
-      {/* DISTANCE SECTION - DISABLED FOR NOW */}
-      <div style={styles.section}>
-        <div
-          style={{ ...styles.sectionHeader, opacity: 0.5, cursor: 'not-allowed' }}
-        >
-          <span style={styles.arrow}>▶</span>
-          <span style={styles.sectionTitle}>Distance (Coming Soon)</span>
-        </div>
-
-        {/* Commented out until Google Maps API is integrated
-        {expanded.distance && (
-          <div style={styles.options}>
-            {[5, 10, 25, 50, 100].map(miles => (
-              <label key={miles} style={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="distance"
-                  checked={selectedFilters.distance === miles}
-                  onChange={() => handleDistanceChange(miles)}
-                  style={styles.radio}
-                />
-                <span style={styles.labelText}>{miles}+ miles</span>
-              </label>
-            ))}
-          </div>
-        )}
-        */}
-      </div>
     </aside>
   );
 }
@@ -169,82 +132,85 @@ function Sidebar({ onFilterChange = () => { }, selectedFilters = {} }) {
 const styles = {
   sidebar: {
     width: '250px',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    height: 'fit-content'
+    borderRadius: '12px', // Slightly more rounded
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)', // Cleaner shadow
+    height: 'fit-content',
+    border: '1px solid #eaeaea'
   },
   header: {
     marginBottom: '20px',
-    borderBottom: '2px solid #ddd',
-    paddingBottom: '10px'
+    borderBottom: '1px solid #eee',
+    paddingBottom: '15px'
   },
   title: {
-    margin: '0 0 10px 0',
-    fontSize: '20px',
-    fontWeight: 'bold'
+    margin: '0 0 15px 0',
+    fontSize: '18px',
+    fontWeight: '700',
+    color: '#333'
   },
   clearButton: {
     padding: '8px 12px',
     backgroundColor: '#ff6b6b',
     color: 'white',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    fontSize: '12px',
+    fontSize: '13px',
     width: '100%',
-    fontWeight: 'bold'
+    fontWeight: '600',
+    transition: 'background 0.2s'
   },
   section: {
     marginBottom: '20px',
-    borderBottom: '1px solid #eee',
-    paddingBottom: '10px'
+    borderBottom: '1px solid #f0f0f0',
+    paddingBottom: '15px'
   },
   sectionHeader: {
     display: 'flex',
     alignItems: 'center',
-    padding: '10px 0',
+    padding: '5px 0',
     cursor: 'pointer',
     userSelect: 'none'
   },
   arrow: {
-    marginRight: '8px',
-    fontSize: '12px',
-    color: '#666'
+    marginRight: '10px',
+    fontSize: '10px',
+    color: '#666',
+    width: '15px'
   },
   sectionTitle: {
-    fontWeight: 'bold',
-    fontSize: '16px'
+    fontWeight: '600',
+    fontSize: '15px',
+    color: '#444'
   },
   options: {
-    paddingLeft: '20px',
-    marginTop: '10px'
+    marginTop: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
   },
   checkboxLabel: {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '8px',
+    justifyContent: 'flex-start', // Force alignment to start
     cursor: 'pointer',
-    userSelect: 'none'
-  },
-  radioLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '8px',
-    cursor: 'pointer',
-    userSelect: 'none'
+    userSelect: 'none',
+    width: '100%',
+    padding: '2px 0'
   },
   checkbox: {
-    marginRight: '8px',
-    cursor: 'pointer'
-  },
-  radio: {
-    marginRight: '8px',
-    cursor: 'pointer'
+    marginRight: '10px',
+    cursor: 'pointer',
+    width: '18px',
+    height: '18px',
+    accentColor: '#4f46e5' // Match theme color
   },
   labelText: {
-    fontSize: '14px'
+    fontSize: '14px',
+    color: '#555',
+    lineHeight: '1.4'
   }
 };
 
