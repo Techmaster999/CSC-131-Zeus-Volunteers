@@ -38,7 +38,7 @@ function NavigationBar() {
 
         {/* VOLUNTEER */}
         {role === "volunteer" && (
-          <Link to="/volunteer">My Dashboard</Link>
+          <Link to="/home">My Dashboard</Link>
         )}
 
         {/* ORGANIZER */}
@@ -112,7 +112,7 @@ function NavigationBar() {
                   ? "/organizer"
                   : role === "admin"
                     ? "/admin"
-                    : "/volunteer"
+                    : "/home"
               }
               className="profile-circle"
             >
