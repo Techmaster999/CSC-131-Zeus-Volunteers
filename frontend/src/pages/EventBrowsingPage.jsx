@@ -216,7 +216,7 @@ function EventBrowsingPage() {
                 value={searchFilters.location}
                 onChange={(locationData) => setSearchFilters(prev => ({
                   ...prev,
-                  location: locationData.address || locationData
+                  location: locationData.location || locationData
                 }))}
                 placeholder="Search by location..."
                 showSuccessMessage={false}
