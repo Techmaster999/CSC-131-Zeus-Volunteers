@@ -365,11 +365,61 @@ export const sendEventReminderEmail = async (eventData, userEmail, userName, tim
     }
 };
 
+/**
+ * Send password reset email
+ */
+export const sendPasswordResetEmail = async (email, resetToken, userName) => {
+    if (!emailServiceReady || !transporter) {
+        console.log('📧 Email service not available - skipping password reset email');
+        return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+        // Use frontend URL for reset link
+        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+
+        const content = `
+            <h2>Password Reset Request 🔐</h2>
+            <p>Hi ${userName},</p>
+            <p>We received a request to reset your password for your Zeus Volunteers account.</p>
+            
+            <div style="background: #e8f4fd; padding: 20px; border-left: 4px solid #2196F3; margin: 20px 0; text-align: center;">
+                <p style="margin-bottom: 15px;"><strong>Click the button below to reset your password:</strong></p>
+                <a href="${resetUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Reset Password</a>
+            </div>
+            
+            <p><strong>⏰ This link expires in 1 hour.</strong></p>
+            
+            <p>If you didn't request this, you can safely ignore this email. Your password will remain unchanged.</p>
+            
+            <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <a href="${resetUrl}">${resetUrl}</a>
+            </p>
+        `;
+
+        const mailOptions = {
+            from: `"Zeus Volunteers" <${process.env.FROM_EMAIL || process.env.EMAIL_USER}>`,
+            to: email,
+            subject: `🔐 Password Reset Request - Zeus Volunteers`,
+            html: createEmailTemplate('Password Reset', content)
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('📧 Password reset email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('❌ Error sending password reset email:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 export default {
     sendEventCreatedEmail,
     sendEventApprovedEmail,
     sendEventDeniedEmail,
     sendVolunteerSignupConfirmation,
     sendOrganizerVolunteerNotification,
-    sendEventReminderEmail
+    sendEventReminderEmail,
+    sendPasswordResetEmail
 };
