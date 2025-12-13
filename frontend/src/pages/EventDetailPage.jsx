@@ -300,7 +300,7 @@ function EventDetailPage() {
 
   const eventAddress = event.location
   const encodedLocation = encodeURIComponent(eventAddress);
-  const GOOGLE_API_KEY = "AIzaSyDzGBPDdTCc9h_QgnSki4FU6GYz0VWEUsA";
+  const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
   const staticMapUrl =
     `https://maps.googleapis.com/maps/api/staticmap?` +
     `center=${encodedLocation}` + // Map center is the event location
