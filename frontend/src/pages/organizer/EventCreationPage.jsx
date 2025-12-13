@@ -27,9 +27,17 @@ function EventCreationPage() {
     duration: 2,
   });
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   function handleChange(e) {
     const { name, value } = e.target;
     setEventData({ ...eventData, [name]: value });
+  }
+
+  function handleFileChange(e) {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
   }
 
   async function handleSubmit(e) {
@@ -40,29 +48,34 @@ function EventCreationPage() {
     try {
       const token = localStorage.getItem("token");
 
-      const payload = {
-        eventName: eventData.eventName,
-        title: eventData.eventName,
-        organizer: user?.firstName + " " + user?.lastName || "Unknown Organizer",
-        organizerId: user?.id,
-        date: eventData.date,
-        time: eventData.time,
-        location: eventData.location,
-        category: eventData.category,
-        details: eventData.details,
-        announcements: eventData.announcements,
-        commitments: eventData.commitments,
-        maxVolunteers: parseInt(eventData.maxVolunteers) || 20,
-        duration: parseInt(eventData.duration) || 2,
-      };
+      // Use FormData for file upload
+      const formData = new FormData();
+      formData.append("eventName", eventData.eventName);
+      formData.append("title", eventData.eventName);
+      formData.append("organizer", user?.firstName + " " + user?.lastName || "Unknown Organizer");
+      formData.append("organizerId", user?.id);
+      formData.append("date", eventData.date);
+      formData.append("time", eventData.time);
+      formData.append("location", eventData.location);
+      formData.append("category", eventData.category);
+      formData.append("details", eventData.details);
+      formData.append("description", eventData.details); // fallback
+      formData.append("announcements", eventData.announcements);
+      formData.append("commitments", eventData.commitments);
+      formData.append("maxVolunteers", parseInt(eventData.maxVolunteers) || 20);
+      formData.append("duration", parseInt(eventData.duration) || 2);
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
 
       const res = await fetch("http://localhost:5001/api/events", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // Content-Type is set automatically by browser with boundary for FormData
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const json = await res.json();
@@ -75,13 +88,14 @@ function EventCreationPage() {
           date: "",
           time: "",
           location: "",
-          category: "Community Service",
+          category: "community service",
           details: "",
           announcements: "",
           commitments: "",
           maxVolunteers: 20,
           duration: 2,
         });
+        setSelectedFile(null);
         // Redirect after 2 seconds
         setTimeout(() => navigate("/organizer"), 2000);
       } else {
@@ -212,6 +226,20 @@ function EventCreationPage() {
                 min="1"
                 max="500"
               />
+            </div>
+
+            {/* Event Photo */}
+            <div className="form-group full-width">
+              <label>Event Photo (Optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ padding: "10px", border: "1px solid #ddd", borderRadius: "5px", width: "100%", backgroundColor: "white" }}
+              />
+              <p style={{ fontSize: "12px", color: "#666", marginTop: "5px" }}>
+                If no photo is selected, a default image relevant to the category will be used.
+              </p>
             </div>
 
             {/* Event Details */}

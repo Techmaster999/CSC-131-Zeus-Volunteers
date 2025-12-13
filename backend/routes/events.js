@@ -102,8 +102,60 @@ router.post("/:eventId/announcement", protect, addAnnouncement);
 
 // ===== ORGANIZER ROUTES =====
 
+// ===== MULTER CONFIGURATION =====
+import multer from 'multer';
+import path from 'path';
+
+// Configure storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        // Create unique filename: fieldname-timestamp.ext
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Init upload
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5000000 }, // 5MB limit
+    fileFilter: function (req, file, cb) {
+        checkFileType(file, cb);
+    }
+});
+
+// Check file type
+function checkFileType(file, cb) {
+    const filetypes = /jpeg|jpg|png|gif|webp/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Error: Images Only!'));
+    }
+}
+
+// ===== DEFAULT IMAGES MAP =====
+const DEFAULT_IMAGES = {
+    'community service': 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80',
+    'environmental': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80',
+    'education': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80',
+    'health': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80',
+    'cultural': 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80',
+    'other': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80'
+};
+
+// ... existing routes ...
+
+// ===== ORGANIZER ROUTES =====
+
 // Create new event
-router.post("/", async (req, res) => {  // (with or without protect, organizer)
+// NOTE: Now using multer middleware 'upload.single'
+router.post("/", upload.single('image'), async (req, res) => {
     try {
         const {
             eventName,
@@ -119,7 +171,6 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             skills,
             announcements = "",
             commitments = "",
-            imageUrl = "",
             maxVolunteers,
             duration
         } = req.body;
@@ -128,7 +179,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
         const eventTitle = title || eventName;
         const eventDescription = description || details;
 
-        // ✅ FIXED VALIDATION:
+        // Validation
         if (!eventTitle || !organizer || !eventDescription || !category || !location) {
             return res.status(400).json({
                 success: false,
@@ -136,7 +187,7 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             });
         }
 
-        // Build dateTime from date+time or use provided dateTime
+        // Build dateTime
         let finalDateTime;
         if (dateTime) {
             finalDateTime = new Date(dateTime);
@@ -149,6 +200,21 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
                 success: false,
                 message: "Either dateTime or date is required"
             });
+        }
+
+        // --- IMAGE LOGIC ---
+        let finalImageUrl = "";
+
+        if (req.file) {
+            // If file uploaded, use the local path served via static route
+            // Construct full URL so frontend can use it directly
+            const protocol = req.protocol;
+            const host = req.get('host');
+            finalImageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        } else {
+            // Apply default image based on category
+            const catKey = (category || 'other').toLowerCase();
+            finalImageUrl = DEFAULT_IMAGES[catKey] || DEFAULT_IMAGES['other'];
         }
 
         const newEvent = new Event({
@@ -166,19 +232,17 @@ router.post("/", async (req, res) => {  // (with or without protect, organizer)
             skills: skills || [],
             announcements: announcements ? [{ message: announcements, sentAt: new Date() }] : [],
             commitments: commitments || "",
-            eventPicture: imageUrl,
-            imageUrl: imageUrl,
+            // Save image URL
+            eventPicture: finalImageUrl,
+            imageUrl: finalImageUrl,
             maxVolunteers: maxVolunteers || 0,
             duration: duration || 2,
             status: 'upcoming',
-            approvalStatus: 'pending'  // Events now require admin approval
+            approvalStatus: 'pending'
         });
 
         await newEvent.save();
 
-        // Send email notification to organizer
-        // Note: Using organizer field as email for now
-        // In production, you'd fetch the actual organizer's email from User model
         if (organizer) {
             await sendEventCreatedEmail(newEvent, organizer).catch(err => {
                 console.error('Email notification failed (non-blocking):', err.message);
