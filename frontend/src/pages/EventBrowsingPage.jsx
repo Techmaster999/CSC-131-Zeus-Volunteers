@@ -203,24 +203,30 @@ function EventBrowsingPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
               {/* Keyword Search */}
-              <input
-                type="text"
-                placeholder="Search by keyword..."
-                value={searchFilters.query}
-                onChange={(e) => setSearchFilters(prev => ({ ...prev, query: e.target.value }))}
-                style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Keyword:</label>
+                <input
+                  type="text"
+                  placeholder="Search by keyword..."
+                  value={searchFilters.query}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, query: e.target.value }))}
+                  style={{ padding: '12px 16px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
 
               {/* Location Filter with Google Places Autocomplete */}
-              <LocationAutocomplete
-                value={searchFilters.location}
-                onChange={(locationData) => setSearchFilters(prev => ({
-                  ...prev,
-                  location: locationData.location || locationData
-                }))}
-                placeholder="Search by location..."
-                showSuccessMessage={false}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Location:</label>
+                <LocationAutocomplete
+                  value={searchFilters.location}
+                  onChange={(locationData) => setSearchFilters(prev => ({
+                    ...prev,
+                    location: locationData.location || locationData
+                  }))}
+                  placeholder="Search by location..."
+                  showSuccessMessage={false}
+                />
+              </div>
 
               {/* Start Date */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
