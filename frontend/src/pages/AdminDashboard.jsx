@@ -45,16 +45,7 @@ function AdminDashboard() {
     return event.imageUrl || rotatingImages[index];
   }
 
-  const quickActionStyle = {
-    backgroundColor: "#FFC300",
-    color: "black",
-    padding: "12px 24px",
-    borderRadius: "8px",
-    textDecoration: "none",
-    fontWeight: "bold",
-    display: "inline-block",
-    margin: "5px"
-  };
+
 
   return (
     <>
@@ -202,20 +193,7 @@ function AdminDashboard() {
               )}
             </div>
 
-            {/* QUICK ACTIONS */}
-            <div style={{
-              backgroundColor: "white",
-              padding: "25px",
-              borderRadius: "12px",
-              border: "1px solid #e0e0e0"
-            }}>
-              <h3 style={{ marginBottom: "20px" }}>Quick Actions</h3>
-              <div>
-                <Link to="/admin/users" style={quickActionStyle}>Manage Users</Link>
-                <Link to="/admin/events" style={quickActionStyle}>All Events</Link>
-                <Link to="/admin/reports" style={quickActionStyle}>View Reports</Link>
-              </div>
-            </div>
+
 
           </div>
         </div>

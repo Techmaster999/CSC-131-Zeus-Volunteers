@@ -301,7 +301,7 @@ function EventDetailPage() {
   const eventAddress = event.location
   const encodedLocation = encodeURIComponent(eventAddress);
   const GOOGLE_API_KEY = "AIzaSyDzGBPDdTCc9h_QgnSki4FU6GYz0VWEUsA";
-  const staticMapUrl = 
+  const staticMapUrl =
     `https://maps.googleapis.com/maps/api/staticmap?` +
     `center=${encodedLocation}` + // Map center is the event location
     `&zoom=12` +
@@ -311,9 +311,11 @@ function EventDetailPage() {
     `&markers=color:red|label:|${encodedLocation}` + // Add a red marker labeled 'E' at the same location
     `&key=${GOOGLE_API_KEY}`;
 
+  const isDenied = event.approvalStatus === 'denied';
+
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: isDenied ? "#ffe6e6" : "#e8e8e8" }}>
         <NavigationBar />
 
         <main className="event-detail-wrapper" style={{ flex: 1 }}>
@@ -351,16 +353,34 @@ function EventDetailPage() {
                   {event.status === 'ongoing' ? '🔴 Event In Progress' : event.status === 'completed' ? '✓ Completed' : event.status}
                 </span>
               )}
+
+              {/* Denied Badge */}
+              {isDenied && (
+                <span style={{
+                  padding: "6px 16px",
+                  borderRadius: "20px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  marginTop: "10px",
+                  marginLeft: "10px",
+                  display: "inline-block"
+                }}>
+                  ⛔ EVENT DENIED
+                </span>
+              )}
             </div>
           </div>
 
           {/* CONTENT */}
           <section className="content-section">
 
-          <div>
-            <img src={staticMapUrl}>
-            </img>
-          </div>
+            <div>
+              <img src={staticMapUrl}>
+              </img>
+            </div>
 
             <div className="info-card glass-card">
               <h2>About This Event</h2>
@@ -405,7 +425,8 @@ function EventDetailPage() {
 
                 {/* Start/End Buttons */}
                 <div style={{ display: "flex", gap: "15px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
-                  {event.status !== 'ongoing' && event.status !== 'completed' && event.status !== 'cancelled' && (
+                  {/* Hide Start button if denied OR pending (only approved events can start) */}
+                  {!isDenied && event.approvalStatus === 'approved' && event.status !== 'ongoing' && event.status !== 'completed' && event.status !== 'cancelled' && (
                     <button
                       onClick={handleStartEvent}
                       disabled={actionLoading}
@@ -557,8 +578,8 @@ function EventDetailPage() {
               }}>
                 <h2 style={{ marginTop: 0, marginBottom: "20px", color: "#586bff" }}>📢 Announcements</h2>
 
-                {/* Organizer Post Box */}
-                {isOrganizer && (
+                {/* Organizer Post Box - Hidden if denied */}
+                {isOrganizer && !isDenied && (
                   <div style={{ marginBottom: "25px", padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "10px", border: "1px solid #e9ecef" }}>
                     <h4 style={{ marginTop: 0, marginBottom: "10px" }}>Post New Announcement</h4>
                     <textarea
