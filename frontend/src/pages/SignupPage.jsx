@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
-
-/* ======== CSS IMPORTS ======== */
 import "../styles/signuppage-styleguide.css";
 import "../styles/signuppage-global.css";
 import "../styles/signuppage-style.css";
@@ -13,39 +11,26 @@ function SignupPage() {
   const { registerUser } = useAuth();
   const navigate = useNavigate();
 
-  /* ============================
-     FORM DATA — MATCHES BACKEND
-  ============================ */
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    userName: "", // 🔥 FIXED (backend requires userName)
+    userName: "",
     email: "",
     phone: "",
     password: "",
     country: "",
     state: "",
     city: "",
-    role: "volunteer",
+    role: "volunteer", // Default role
   });
 
-  /* ============================
-      DROPDOWN ARRAYS
-  ============================ */
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-
-  /* ============================
-      UI STATE
-  ============================ */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* ============================
-      LOAD ALL COUNTRIES
-  ============================ */
   useEffect(() => {
     async function loadCountries() {
       try {
@@ -59,19 +44,9 @@ function SignupPage() {
     loadCountries();
   }, []);
 
-  /* ============================
-      COUNTRY SELECTED → LOAD STATES
-  ============================ */
   async function handleCountryChange(e) {
     const selectedCountry = e.target.value;
-
-    setFormData({
-      ...formData,
-      country: selectedCountry,
-      state: "",
-      city: "",
-    });
-
+    setFormData({ ...formData, country: selectedCountry, state: "", city: "" });
     setStates([]);
     setCities([]);
 
@@ -83,7 +58,6 @@ function SignupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ country: selectedCountry }),
       });
-
       const data = await res.json();
       setStates(data.data?.states || []);
     } catch (err) {
@@ -91,35 +65,19 @@ function SignupPage() {
     }
   }
 
-  /* ============================
-      STATE SELECTED → LOAD CITIES
-  ============================ */
   async function handleStateChange(e) {
     const selectedState = e.target.value;
-
-    setFormData({
-      ...formData,
-      state: selectedState,
-      city: "",
-    });
-
+    setFormData({ ...formData, state: selectedState, city: "" });
     setCities([]);
 
     if (!selectedState || !formData.country) return;
 
     try {
-      const res = await fetch(
-        "https://countriesnow.space/api/v0.1/countries/state/cities",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            country: formData.country,
-            state: selectedState,
-          }),
-        }
-      );
-
+      const res = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: formData.country, state: selectedState }),
+      });
       const data = await res.json();
       setCities(data.data || []);
     } catch (err) {
@@ -127,23 +85,16 @@ function SignupPage() {
     }
   }
 
-  /* ============================
-      GENERIC FORM CHANGE
-  ============================ */
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  /* ============================
-      SUBMIT FORM
-  ============================ */
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
     setLoading(true);
 
-    // 🔥 Make sure all required fields have values
     if (!formData.country || !formData.state || !formData.city) {
       setError("Please select your country, state, and city.");
       setLoading(false);
@@ -163,191 +114,256 @@ function SignupPage() {
     } catch (err) {
       setError(err.message);
     }
-
     setLoading(false);
   }
 
-  /* ============================
-      RENDER
-  ============================ */
+  // Consistent Styles
+  const styles = {
+    wrapper: {
+      display: "flex",
+      flexDirection: "column",
+      minHeight: "100vh",
+      backgroundColor: "#f4f7f6"
+    },
+    mainContainer: {
+      flex: 1,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "40px 20px"
+    },
+    card: {
+      backgroundColor: "white",
+      padding: "40px",
+      borderRadius: "16px",
+      boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+      width: "100%",
+      maxWidth: "600px",
+    },
+    header: {
+      textAlign: "center",
+      marginBottom: "30px"
+    },
+    logo: {
+      width: "60px",
+      height: "60px",
+      marginBottom: "15px",
+      objectFit: "contain"
+    },
+    title: {
+      fontSize: "28px",
+      fontWeight: "700",
+      color: "#333",
+      marginBottom: "10px"
+    },
+    subtitle: {
+      color: "#666",
+      fontSize: "16px"
+    },
+    inputGroup: {
+      marginBottom: "20px"
+    },
+    label: {
+      display: "block",
+      marginBottom: "8px",
+      fontWeight: "600",
+      color: "#444",
+      fontSize: "14px"
+    },
+    input: {
+      width: "100%",
+      padding: "12px 16px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      fontSize: "16px",
+      transition: "border-color 0.2s"
+    },
+    select: {
+      width: "100%",
+      padding: "12px 16px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      fontSize: "16px",
+      backgroundColor: "white"
+    },
+    button: {
+      width: "100%",
+      padding: "14px",
+      backgroundColor: "#FFC300",
+      color: "#333",
+      border: "none",
+      borderRadius: "8px",
+      fontSize: "16px",
+      fontWeight: "700",
+      cursor: loading ? "not-allowed" : "pointer",
+      marginTop: "10px",
+      transition: "transform 0.1s, background-color 0.2s"
+    },
+    error: {
+      backgroundColor: "#fee2e2",
+      color: "#dc2626",
+      padding: "12px",
+      borderRadius: "8px",
+      marginBottom: "20px",
+      fontSize: "14px"
+    },
+    success: {
+      backgroundColor: "#d1fae5",
+      color: "#059669",
+      padding: "12px",
+      borderRadius: "8px",
+      marginBottom: "20px",
+      fontSize: "14px"
+    },
+    grid2: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "20px"
+    }
+  };
+
   return (
-    <>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#e8e8e8" }}>
-        <NavigationBar />
+    <div style={styles.wrapper}>
+      <NavigationBar />
 
-        <div className="signup-wrapper" style={{ flex: 1 }}>
-          <div className="signup-card">
-            <div className="signup-logo">
-              <img src="/img/logo.png" alt="Zeus Volunteers" />
-              <h2>Zeus Volunteers</h2>
-              <p className="signup-sub">Create an account to get started</p>
-            </div>
+      <div style={styles.mainContainer}>
+        <div style={styles.card}>
+          <div style={styles.header}>
+            <h2 style={styles.title}>Join Zeus Volunteers</h2>
+            <p style={styles.subtitle}>Create an account to start volunteering</p>
+          </div>
 
-            <form className="signup-form" onSubmit={handleSubmit}>
+          {error && <div style={styles.error}>{error}</div>}
+          {success && <div style={styles.success}>{success}</div>}
 
-              {/* First Name */}
-              <div className="input-group">
-                <label>First Name</label>
+          <form onSubmit={handleSubmit}>
+            <div style={styles.grid2}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>First Name</label>
                 <input
                   type="text"
                   name="firstName"
-                  placeholder="Enter first name"
+                  placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
                   required
+                  style={styles.input}
                 />
               </div>
-
-              {/* Last Name */}
-              <div className="input-group">
-                <label>Last Name</label>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Last Name</label>
                 <input
                   type="text"
                   name="lastName"
-                  placeholder="Enter last name"
+                  placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
                   required
+                  style={styles.input}
                 />
               </div>
+            </div>
 
-              {/* Email */}
-              <div className="input-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Username</label>
+              <input
+                type="text"
+                name="userName"
+                placeholder="Choose a username"
+                value={formData.userName}
+                onChange={handleChange}
+                required
+                style={styles.input}
+              />
+            </div>
 
-              {/* Phone */}
-              <div className="input-group">
-                <label>Phone</label>
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Phone number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Email Address</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                style={styles.input}
+              />
+            </div>
 
-              {/* Username (backend expects userName) */}
-              <div className="input-group">
-                <label>Username</label>
-                <input
-                  type="text"
-                  name="userName"
-                  placeholder="Create a username"
-                  value={formData.userName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Password</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Create a strong password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                style={styles.input}
+              />
+            </div>
 
-              {/* Password */}
-              <div className="input-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Phone Number (Optional)</label>
+              <input
+                type="text"
+                name="phone"
+                placeholder="+1 (555) 000-0000"
+                value={formData.phone}
+                onChange={handleChange}
+                style={styles.input}
+              />
+            </div>
 
-              {/* ROLE SELECTOR (Added for testing) */}
-              <div className="input-group">
-                <label>I want to join as a:</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-                >
-                  <option value="volunteer">Volunteer</option>
-                  <option value="organizer">Organizer</option>
-                  <option value="admin">Admin (Test)</option>
-                </select>
-              </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>I want to join as a:</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                style={styles.select}
+              >
+                <option value="volunteer">Volunteer</option>
+                <option value="organizer">Organizer</option>
+                {/* Admin role removed as per request */}
+              </select>
+            </div>
 
-              {/* COUNTRY */}
-              <div className="input-group">
-                <label>Country</label>
-                <select
-                  name="country"
-                  value={formData.country}
-                  onChange={handleCountryChange}
-                  required
-                >
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Location</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <select name="country" value={formData.country} onChange={handleCountryChange} required style={styles.select}>
                   <option value="">Select Country</option>
-                  {countries.map((c) => (
-                    <option key={c.country} value={c.country}>
-                      {c.country}
-                    </option>
-                  ))}
+                  {countries.map((c) => (<option key={c.country} value={c.country}>{c.country}</option>))}
                 </select>
+
+                <div style={styles.grid2}>
+                  <select name="state" value={formData.state} onChange={handleStateChange} required disabled={states.length === 0} style={styles.select}>
+                    <option value="">Select State</option>
+                    {states.map((s) => (<option key={s.name} value={s.name}>{s.name}</option>))}
+                  </select>
+
+                  <select name="city" value={formData.city} onChange={handleChange} required disabled={cities.length === 0} style={styles.select}>
+                    <option value="">Select City</option>
+                    {cities.map((city) => (<option key={city} value={city}>{city}</option>))}
+                  </select>
+                </div>
               </div>
+            </div>
 
-              {/* STATE */}
-              <div className="input-group">
-                <label>State/Province</label>
-                <select
-                  name="state"
-                  value={formData.state}
-                  onChange={handleStateChange}
-                  required
-                  disabled={states.length === 0}
-                >
-                  <option value="">Select State</option>
-                  {states.map((s) => (
-                    <option key={s.name} value={s.name}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <button type="submit" style={styles.button} disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
 
-              {/* CITY */}
-              <div className="input-group">
-                <label>City</label>
-                <select
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                  disabled={cities.length === 0}
-                >
-                  <option value="">Select City</option>
-                  {cities.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* STATUS MESSAGES */}
-              {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
-              {success && <p style={{ color: "green", marginTop: 10 }}>{success}</p>}
-
-              {/* BUTTON */}
-              <button className="signup-btn" type="submit" disabled={loading}>
-                {loading ? "Creating Account..." : "Create Account"}
-              </button>
-            </form>
-          </div>
+            <p style={{ textAlign: "center", marginTop: "20px", color: "#666" }}>
+              Already have an account? <Link to="/login" style={{ color: "#FFC300", fontWeight: "bold", textDecoration: "none" }}>Log in</Link>
+            </p>
+          </form>
         </div>
-
-        <Footer />
       </div>
-    </>
+
+      <Footer />
+    </div>
   );
 }
 
