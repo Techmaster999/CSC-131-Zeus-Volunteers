@@ -206,7 +206,7 @@ function EventBrowsingPage() {
                 type="text"
                 placeholder="Search by keyword..."
                 value={searchFilters.query}
-                onChange={(e) => setSearchFilters({ ...searchFilters, query: e.target.value })}
+                onChange={(e) => setSearchFilters(prev => ({ ...prev, query: e.target.value }))}
                 style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               />
 
@@ -215,7 +215,7 @@ function EventBrowsingPage() {
                 type="text"
                 placeholder="Location..."
                 value={searchFilters.location}
-                onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
+                onChange={(e) => setSearchFilters(prev => ({ ...prev, location: e.target.value }))}
                 style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
               />
 
@@ -225,7 +225,7 @@ function EventBrowsingPage() {
                 <input
                   type="date"
                   value={searchFilters.startDate}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, startDate: e.target.value })}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, startDate: e.target.value }))}
                   style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
                   placeholder="Start Date"
                 />
@@ -237,7 +237,7 @@ function EventBrowsingPage() {
                 <input
                   type="date"
                   value={searchFilters.endDate}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, endDate: e.target.value })}
+                  onChange={(e) => setSearchFilters(prev => ({ ...prev, endDate: e.target.value }))}
                   style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: "100%", boxSizing: "border-box" }}
                   placeholder="End Date"
                 />

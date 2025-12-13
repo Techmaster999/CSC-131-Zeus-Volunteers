@@ -83,7 +83,7 @@ function EventCreationPage() {
       const formData = new FormData();
       formData.append("eventName", eventData.eventName);
       formData.append("title", eventData.eventName);
-      formData.append("organizer", user?.firstName + " " + user?.lastName || "Unknown Organizer");
+      formData.append("organizer", user?.username || "Unknown Organizer");
       formData.append("organizerId", user?.id);
       formData.append("date", eventData.date);
       formData.append("time", eventData.time);
