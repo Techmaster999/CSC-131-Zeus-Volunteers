@@ -132,11 +132,13 @@ function EventBrowsingPage() {
       }
 
       console.log("🔍 Search params:", params.toString());
+      console.log("🔍 Location value being searched:", searchFilters.location);
 
       const res = await fetch(`${API_URL}/api/events/search?${params}`);
       const json = await res.json();
 
       console.log("📥 Search results:", json.count || json.data?.length);
+      console.log("📥 Events returned:", json.data?.map(e => ({ name: e.eventName, location: e.location })));
 
       if (json.success && Array.isArray(json.data)) {
         setEvents(json.data);
