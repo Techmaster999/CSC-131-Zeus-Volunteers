@@ -4,7 +4,7 @@ if (loginBtn) {
     const email = document.querySelector('input[type="email"]').value;
     const password = document.querySelector('input[type="password"]').value;
 
-    const res = await fetch("http://localhost:5001/api/auth/login", {
+    const res = await fetch("${https://csc-131-zeus-volunteers.onrender.com}/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -24,7 +24,7 @@ if (loginBtn) {
 // Navbar toggle (unchanged)
 const isLoggedIn = !!localStorage.getItem("token");
 document.getElementById("guest-links").style.display = isLoggedIn ? "none" : "inline";
-document.getElementById("user-links").style.display  = isLoggedIn ? "inline" : "none";
+document.getElementById("user-links").style.display = isLoggedIn ? "inline" : "none";
 
 const logoutBtn = document.getElementById("logout-button");
 if (logoutBtn) {

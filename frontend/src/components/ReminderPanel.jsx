@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import API_URL from "../config";
 
 const ReminderPanel = ({ events }) => {
     const { user } = useAuth();
@@ -21,7 +22,7 @@ const ReminderPanel = ({ events }) => {
 
     const fetchReminders = async () => {
         try {
-            const res = await fetch("http://localhost:5001/api/reminders", {
+            const res = await fetch(`${API_URL}/api/reminders`, {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             const data = await res.json();
@@ -35,7 +36,7 @@ const ReminderPanel = ({ events }) => {
 
     const fetchPreferences = async () => {
         try {
-            const res = await fetch("http://localhost:5001/api/reminders/preferences", {
+            const res = await fetch(`${API_URL}/api/reminders/preferences`, {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             const data = await res.json();
@@ -53,7 +54,7 @@ const ReminderPanel = ({ events }) => {
         const newVal = !preferences.emailNotifications;
         setPreferences({ ...preferences, emailNotifications: newVal });
         try {
-            await fetch("http://localhost:5001/api/reminders/preferences", {
+            await fetch(`${API_URL}/api/reminders/preferences`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -71,7 +72,7 @@ const ReminderPanel = ({ events }) => {
 
     const handleDeleteReminder = async (id) => {
         try {
-            const res = await fetch(`http://localhost:5001/api/reminders/${id}`, {
+            const res = await fetch(`${API_URL}/api/reminders/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${user.token}` },
             });

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load events from the backend
     async function loadEvents() {
         try {
-            const res = await fetch("http://localhost:5001/api/events");
+            const res = await fetch("${https://csc-131-zeus-volunteers.onrender.com}/api/events");
             const data = await res.json();
 
             // Convert backend date ISO format into YYYY-MM-DD

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+import API_URL from "../config";
 
 import "../styles/eventDetailPage.css";
 
@@ -44,7 +45,7 @@ function EventDetailPage() {
   useEffect(() => {
     async function fetchEvent() {
       try {
-        const res = await fetch(`http://localhost:5001/api/events/${id}`);
+        const res = await fetch(`${API_URL}/api/events/${id}`);
         const json = await res.json();
         setEvent(json.data || json);
       } catch (err) {
@@ -64,7 +65,7 @@ function EventDetailPage() {
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
-          `http://localhost:5001/api/events/check-registration?userId=${user.id}&eventId=${id}`,
+          `${API_URL}/api/events/check-registration?userId=${user.id}&eventId=${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -90,7 +91,7 @@ function EventDetailPage() {
 
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5001/api/events/${id}/volunteers`, {
+        const res = await fetch(`${API_URL}/api/events/${id}/volunteers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
@@ -123,7 +124,7 @@ function EventDetailPage() {
       const token = localStorage.getItem("token");
       const method = isRegistered ? "DELETE" : "POST";
 
-      const res = await fetch("http://localhost:5001/api/events/signup", {
+      const res = await fetch(`${API_URL}/api/events/signup`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -161,7 +162,7 @@ function EventDetailPage() {
     setActionLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5001/api/events/${id}/start`, {
+      const res = await fetch(`${API_URL}/api/events/${id}/start`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -186,7 +187,7 @@ function EventDetailPage() {
     setActionLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5001/api/events/${id}/end`, {
+      const res = await fetch(`${API_URL}/api/events/${id}/end`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -211,7 +212,7 @@ function EventDetailPage() {
     setActionLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5001/api/events/${id}/cancel`, {
+      const res = await fetch(`${API_URL}/api/events/${id}/cancel`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -240,7 +241,7 @@ function EventDetailPage() {
     setActionLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5001/api/events/${id}/announcement`, {
+      const res = await fetch(`${API_URL}/api/events/${id}/announcement`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -268,7 +269,7 @@ function EventDetailPage() {
   async function handleMarkAttendance(volunteerId, attended) {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5001/api/events/${id}/attendance/${volunteerId}`, {
+      const res = await fetch(`${API_URL}/api/events/${id}/attendance/${volunteerId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

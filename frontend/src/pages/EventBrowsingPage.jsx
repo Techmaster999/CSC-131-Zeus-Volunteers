@@ -3,6 +3,7 @@ import NavigationBar from "../components/NavigationBar";
 import Sidebar from "../components/Sidebar";
 import EventCard from "../components/EventCard";
 import Footer from "../components/Footer";
+import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
 import "../styles/globals.css";
@@ -42,7 +43,7 @@ function EventBrowsingPage() {
 
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/events/my/registered", {
+        const res = await fetch(`${API_URL}/api/events/my/registered`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -89,7 +90,7 @@ function EventBrowsingPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/events");
+      const res = await fetch(`${API_URL}/api/events`);
       const json = await res.json();
 
       console.log("📥 Loaded events:", json.count || json.data?.length);
@@ -131,7 +132,7 @@ function EventBrowsingPage() {
 
       console.log("🔍 Search params:", params.toString());
 
-      const res = await fetch(`http://localhost:5001/api/events/search?${params}`);
+      const res = await fetch(`${API_URL}/api/events/search?${params}`);
       const json = await res.json();
 
       console.log("📥 Search results:", json.count || json.data?.length);

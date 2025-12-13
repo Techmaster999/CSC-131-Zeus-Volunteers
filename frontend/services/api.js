@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api';
+const API_URL = '${https://csc-131-zeus-volunteers.onrender.com}/api';
 
 // Fetch all events
 export const fetchEvents = async () => {
@@ -17,13 +17,13 @@ export const searchEvents = async (filters) => {
   try {
     // Build query string from filters
     const params = new URLSearchParams();
-    
+
     if (filters.query) params.append('query', filters.query);
     if (filters.category && filters.category !== 'all') params.append('category', filters.category);
     if (filters.location) params.append('location', filters.location);
     if (filters.startDate) params.append('startDate', filters.startDate);
     if (filters.endDate) params.append('endDate', filters.endDate);
-    
+
     const response = await fetch(`${API_URL}/events/search?${params}`);
     const data = await response.json();
     return data;

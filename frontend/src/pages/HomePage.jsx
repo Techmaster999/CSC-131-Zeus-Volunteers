@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavigationBar from "../components/NavigationBar";
 import Footer from "../components/Footer";
+import API_URL from "../config";
 import { useAuth } from "../context/AuthContext";
 
 import "../styles/homepage-global.css";
@@ -19,7 +20,7 @@ function HomePage() {
     async function fetchMyEvents() {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/events/my/registered", {
+        const res = await fetch(`${API_URL}/api/events/my/registered`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -48,7 +49,7 @@ function HomePage() {
     async function fetchCompletedEvents() {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/events/my/completed", {
+        const res = await fetch(`${API_URL}/api/events/my/completed`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
