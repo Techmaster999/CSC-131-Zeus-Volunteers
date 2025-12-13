@@ -135,6 +135,9 @@ const AdminLogin = () => {
               <Link to="/contact" style={{ color: "#FFC300", textDecoration: 'none', fontSize: "14px", fontWeight: "600" }}>
                 Request Access Issue?
               </Link>
+              <Link to="/admin-signup" style={{ color: "#FFC300", textDecoration: 'none', fontSize: "14px", fontWeight: "600", marginTop: "10px" }}>
+                Register as Admin
+              </Link>
             </div>
           </form>
         </div>
