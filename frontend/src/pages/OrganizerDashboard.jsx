@@ -13,6 +13,10 @@ function OrganizerDashboard() {
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Filter events into upcoming and completed (exclude cancelled from upcoming)
+  const upcomingEvents = myEvents.filter(e => e.status !== 'completed' && e.status !== 'cancelled');
+  const completedEvents = myEvents.filter(e => e.status === 'completed');
+
   // Fetch organizer's events
   useEffect(() => {
     async function fetchMyEvents() {
@@ -110,7 +114,8 @@ function OrganizerDashboard() {
                 </div>
                 <p style={{ color: "#666", marginBottom: "5px" }}><strong>Role:</strong> Organizer</p>
                 <p style={{ color: "#666", marginBottom: "5px" }}><strong>Location:</strong> {user?.city}, {user?.state}</p>
-                <p style={{ color: "#666" }}><strong>Events Created:</strong> {myEvents.length}</p>
+                <p style={{ color: "#666", marginBottom: "5px" }}><strong>Upcoming Events:</strong> {upcomingEvents.length}</p>
+                <p style={{ color: "#666" }}><strong>Completed Events:</strong> {completedEvents.length}</p>
               </div>
 
               {/* Quick Actions */}
@@ -163,11 +168,11 @@ function OrganizerDashboard() {
               borderRadius: "12px",
               boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
             }}>
-              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>📋 My Events</h2>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>📋 My Upcoming Events</h2>
 
               {loading ? (
                 <p style={{ color: "#666" }}>Loading your events...</p>
-              ) : myEvents.length === 0 ? (
+              ) : upcomingEvents.length === 0 ? (
                 <div style={{
                   textAlign: "center",
                   padding: "40px",
@@ -192,7 +197,7 @@ function OrganizerDashboard() {
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  {myEvents.map(event => (
+                  {upcomingEvents.map(event => (
                     <div
                       key={event._id}
                       style={{
@@ -285,6 +290,72 @@ function OrganizerDashboard() {
                           </p>
                         </div>
                       )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* COMPLETED EVENTS SECTION */}
+            <div style={{
+              backgroundColor: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+              marginTop: "30px"
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>✅ Completed Events</h2>
+
+              {completedEvents.length === 0 ? (
+                <div style={{
+                  textAlign: "center",
+                  padding: "30px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "8px"
+                }}>
+                  <p style={{ color: "#666", fontSize: "16px" }}>
+                    No completed events yet. Complete your events to see them here!
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  {completedEvents.map(event => (
+                    <div
+                      key={event._id}
+                      style={{
+                        padding: "15px 20px",
+                        borderRadius: "10px",
+                        border: "1px solid #28a745",
+                        backgroundColor: "#f0fff4",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "10px"
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: "0 0 5px 0", fontSize: "16px" }}>
+                          ✓ {event.eventName}
+                        </h4>
+                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>
+                          {new Date(event.date).toLocaleDateString()} • {event.location}
+                        </p>
+                      </div>
+                      <Link
+                        to={`/events/${event._id}`}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          borderRadius: "6px",
+                          textDecoration: "none",
+                          fontWeight: "bold",
+                          fontSize: "13px"
+                        }}
+                      >
+                        View
+                      </Link>
                     </div>
                   ))}
                 </div>

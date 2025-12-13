@@ -501,11 +501,11 @@ export const getUserRegisteredEvents = async (req, res) => {
     }
 };
 
-// Browse all approved upcoming events
+// Browse all approved upcoming events (excludes cancelled)
 export const getEvents = async (req, res) => {
     try {
         const events = await Event.find({
-            status: 'upcoming',
+            status: { $in: ['upcoming', 'ongoing'] },  // Only upcoming and ongoing, not cancelled or completed
             approvalStatus: 'approved'
         })
             //        .populate('createdBy', 'username organization email')
@@ -685,5 +685,233 @@ export const getCategories = async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+};
+
+// ===== EVENT LIFECYCLE MANAGEMENT =====
+
+// Start an event (organizer only)
+export const startEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can start this event" });
+        }
+
+        // Check if event can be started
+        if (event.status === 'ongoing') {
+            return res.status(400).json({ success: false, message: "Event is already in progress" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Event has already been completed" });
+        }
+
+        // Update status to ongoing
+        event.status = 'ongoing';
+        event.startedAt = new Date();
+        await event.save();
+
+        res.json({
+            success: true,
+            message: "Event started successfully",
+            data: event
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Cancel an event (organizer only)
+export const cancelEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can cancel this event" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Cannot cancel a completed event" });
+        }
+
+        if (event.status === 'cancelled') {
+            return res.status(400).json({ success: false, message: "Event is already cancelled" });
+        }
+
+        // Update status to cancelled
+        event.status = 'cancelled';
+        event.cancelledAt = new Date();
+        await event.save();
+
+        // Mark all registered volunteers as cancelled
+        await UserEvent.updateMany(
+            { eventId, status: { $in: ['registered', 'confirmed'] } },
+            { $set: { status: 'cancelled' } }
+        );
+
+        res.json({
+            success: true,
+            message: "Event cancelled successfully",
+            data: event
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// End an event (organizer only)
+export const endEvent = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!isValidObjectId(eventId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can end this event" });
+        }
+
+        if (event.status === 'completed') {
+            return res.status(400).json({ success: false, message: "Event has already been completed" });
+        }
+
+        // Update status to completed
+        event.status = 'completed';
+        event.endedAt = new Date();
+        await event.save();
+
+        // Mark all registered volunteers who weren't marked as 'no-show' as 'attended' by default
+        // (only if they weren't already explicitly marked)
+        await UserEvent.updateMany(
+            { eventId, status: 'registered' },
+            { $set: { status: 'no-show' } }  // Default unmarked to no-show
+        );
+
+        res.json({
+            success: true,
+            message: "Event completed successfully",
+            data: event
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Mark volunteer attendance (organizer only)
+export const markAttendance = async (req, res) => {
+    const { eventId, volunteerId } = req.params;
+    const { attended } = req.body; // true = attended, false = no-show
+
+    if (!isValidObjectId(eventId) || !isValidObjectId(volunteerId)) {
+        return res.status(400).json({ success: false, message: "Invalid event ID or volunteer ID" });
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
+
+        // Check if user is the organizer
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+        const organizerName = `${user.firstName} ${user.lastName}`;
+
+        if (event.organizer !== organizerName && event.organizerId?.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Only the organizer can mark attendance" });
+        }
+
+        // Find the volunteer's registration
+        const registration = await UserEvent.findOne({ eventId, userId: volunteerId });
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: "Volunteer not registered for this event" });
+        }
+
+        // Update attendance status
+        registration.status = attended ? 'attended' : 'no-show';
+        await registration.save();
+
+        res.json({
+            success: true,
+            message: `Volunteer marked as ${attended ? 'attended' : 'no-show'}`,
+            data: registration
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Get user's completed events (attended)
+export const getUserCompletedEvents = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Find all events user attended
+        const attendedEvents = await UserEvent.find({
+            userId,
+            status: 'attended'
+        }).populate({
+            path: 'eventId',
+            match: { status: 'completed' }
+        });
+
+        // Filter out null eventIds (events that don't match the completed status)
+        const completedEvents = attendedEvents
+            .filter(ue => ue.eventId !== null)
+            .map(ue => ue.eventId);
+
+        res.json({
+            success: true,
+            count: completedEvents.length,
+            data: completedEvents
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 };

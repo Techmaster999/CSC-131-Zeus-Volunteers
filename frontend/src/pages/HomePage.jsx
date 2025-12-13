@@ -11,6 +11,7 @@ import "../styles/homepage-styleguide.css";
 function HomePage() {
   const { user } = useAuth();
   const [myEvents, setMyEvents] = useState([]);
+  const [completedEvents, setCompletedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch user's registered events
@@ -39,6 +40,31 @@ function HomePage() {
 
     if (user) {
       fetchMyEvents();
+    }
+  }, [user]);
+
+  // Fetch user's completed events
+  useEffect(() => {
+    async function fetchCompletedEvents() {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5001/api/events/my/completed", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const json = await res.json();
+
+        if (json.success && json.data) {
+          setCompletedEvents(json.data);
+        }
+      } catch (err) {
+        console.error("Error fetching completed events:", err);
+      }
+    }
+
+    if (user) {
+      fetchCompletedEvents();
     }
   }, [user]);
 
@@ -95,7 +121,8 @@ function HomePage() {
                 </div>
                 <p style={{ color: "#666", marginBottom: "5px" }}><strong>Role:</strong> Volunteer</p>
                 <p style={{ color: "#666", marginBottom: "5px" }}><strong>Location:</strong> {user?.city}, {user?.state}</p>
-                <p style={{ color: "#666" }}><strong>Events Joined:</strong> {myEvents.length}</p>
+                <p style={{ color: "#666", marginBottom: "5px" }}><strong>Upcoming Events:</strong> {myEvents.length}</p>
+                <p style={{ color: "#666" }}><strong>Completed Events:</strong> {completedEvents.length}</p>
               </div>
 
               {/* Quick Actions */}
@@ -221,6 +248,72 @@ function HomePage() {
                           View Details
                         </Link>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* COMPLETED EVENTS SECTION */}
+            <div style={{
+              backgroundColor: "white",
+              padding: "30px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+              marginTop: "30px"
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: "25px" }}>✅ Completed Events</h2>
+
+              {completedEvents.length === 0 ? (
+                <div style={{
+                  textAlign: "center",
+                  padding: "30px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "8px"
+                }}>
+                  <p style={{ color: "#666", fontSize: "16px" }}>
+                    No completed events yet. Attend events to build your volunteer history!
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  {completedEvents.map(event => (
+                    <div
+                      key={event._id}
+                      style={{
+                        padding: "15px 20px",
+                        borderRadius: "10px",
+                        border: "1px solid #28a745",
+                        backgroundColor: "#f0fff4",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "10px"
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: "0 0 5px 0", fontSize: "16px" }}>
+                          ✓ {event.eventName}
+                        </h4>
+                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>
+                          {new Date(event.date).toLocaleDateString()} • {event.organizer}
+                        </p>
+                      </div>
+                      <Link
+                        to={`/events/${event._id}`}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          borderRadius: "6px",
+                          textDecoration: "none",
+                          fontWeight: "bold",
+                          fontSize: "13px"
+                        }}
+                      >
+                        View
+                      </Link>
                     </div>
                   ))}
                 </div>
