@@ -89,8 +89,9 @@ function LocationAutocomplete({
         const newValue = e.target.value;
         setInputValue(newValue);
 
-        if (!newValue && onChange) {
-            onChange({ location: '', coordinates: null });
+        // Always call onChange so parent state is updated on every keystroke
+        if (onChange) {
+            onChange({ location: newValue, coordinates: null });
         }
     };
 
