@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/EventCard.css";
+import API_URL from "../config";
 
 function EventCard({ event, isRegistered = false }) {
   const {
@@ -23,7 +24,21 @@ function EventCard({ event, isRegistered = false }) {
   ];
 
   const index = Math.abs(_id.charCodeAt(0) % rotatingImages.length);
-  const finalImage = imageUrl || rotatingImages[index];
+
+  // Logic: 
+  // 1. If imageUrl starts with 'http', it's external (keep as is).
+  // 2. If imageUrl exists but is relative (e.g. /uploads/...), prepend API_URL.
+  // 3. Fallback to rotating static images (served from public folder).
+  let finalImage;
+  if (imageUrl) {
+    if (imageUrl.startsWith("http")) {
+      finalImage = imageUrl;
+    } else {
+      finalImage = `${API_URL}${imageUrl}`;
+    }
+  } else {
+    finalImage = rotatingImages[index];
+  }
 
   return (
     <Link
